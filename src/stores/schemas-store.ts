@@ -16,6 +16,7 @@ export const dbStore = defineStore('db', {
   },
 
   actions: {
+
     // toggleSidebar() {
     //   this.isSidebarMinimized = !this.isSidebarMinimized
     // },

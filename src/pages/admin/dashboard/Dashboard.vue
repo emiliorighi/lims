@@ -5,23 +5,29 @@
     <dashboard-info-block /> -->
 
     <div class="row align-center row-equal">
-      <div class="flex lg6 md6 sm6 xs6">
+      <div class="flex lg6 md6 sm12 xs12">
         <div class="row justify-space-between">
-          <div v-for="model in models" :key="model.name" class="flex lg6 md6 sm6 xs6">
+          <div v-for="model in models" :key="model.name" class="flex lg12 md12 sm12 xs12">
             <va-card  :color="model.color">
-              <va-card-title>{{ model.name }}</va-card-title>
-              <va-card-content>
-                <va-data-table :items="DB[model.db]"/>
-              </va-card-content>
-              <va-card-content>
-                <div class="row justify-space-between">
+              <va-card-title>
+                <div class="row justify-space-between align-center">
                   <div class="flex">
-                    {{ model.description }}
+                    {{ model.name }}
                   </div>
                   <div class="flex">
-                    <va-button>Create a new {{ model.name }}</va-button>
+                    <va-button size="small" :to="{name:model.db}">Create a new {{ model.name }}</va-button>
                   </div>
                 </div>
+              </va-card-title>
+              <va-card-content>
+                <va-data-table :items="DB[model.db]">
+                  <template #cell(metadata)="data">
+                    <va-button size="small" @click="showMetadata(data)" icon="search"/>
+                  </template>
+                  <template #cell(url)="data">
+                    <a :href="data.value" icon="search">{{ data.value }}</a>
+                  </template>
+                </va-data-table>
               </va-card-content>
             </va-card>
           </div>
@@ -29,13 +35,6 @@
       </div>
       <va-image :ratio="4/3"  class="flex lg6 md6 sm6 xs6" src="/model.svg"></va-image>
 
-      <div class="flex xs12 lg6">
-        <!-- <dashboard-tabs @submit="addAddressToMap" /> -->
-      </div>
-
-      <div class="flex xs12 lg6">
-        <!-- <DashboardMap ref="dashboardMap" /> -->
-      </div>
     </div>
   </div>
 </template>
@@ -48,12 +47,6 @@
   const DB = dbStore()
   
   const models = [
-    // {
-    //   name: 'Schema',
-    //   description: 'Metadata schema',
-    //   db:'schemas',
-    //   color: 'info'
-    // },
     {
       name: 'Experiment',
       description: 'Sequencing data',
@@ -79,6 +72,10 @@
       color: '#eeeeee'
     }, 
   ]
+
+  function showMetadata(data){
+    console.log(data.value)
+  }
 
 </script>
 

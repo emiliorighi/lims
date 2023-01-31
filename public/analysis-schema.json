@@ -19,6 +19,13 @@
             "required":true
         },
         {
+            "label": "Parameter 1",
+            "value": "parameter_1",
+            "description": "name of the assembly used",
+            "type": "string",
+            "required":true
+        },
+        {
             "label": "Other Info",
             "value": "other_info",
             "description": "extra information",

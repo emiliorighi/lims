@@ -16,19 +16,22 @@
                 </div>
             </va-card-content>
         </va-card>
-        <va-card key="2">
+        <va-card key="2" v-else>
             <va-card-title>
                 {{ selectedSchema.title }}
             </va-card-title>
-            <va-card-actions>
-                <va-button color="danger" @click="resetSchema()">Select another schema</va-button>
-            </va-card-actions>
             <va-card-content>
-                {{ selectedSchema.description }}
+                <div class="row align-center justify-space-between">
+                    <div class="flex">
+                        {{ selectedSchema.description }}
+                    </div>
+                    <div class="flex">
+                        <va-button color="warning" @click="resetSchema()">Select another schema</va-button>
+                    </div>
+                </div>
             </va-card-content>
             <va-card-content>
-                <va-form @validation="validation = $event" ref="form">
-                    <va-input v-model="newBioSample.name" label="BioSample name" :rules="[ value => Boolean(value) || 'Field is mandatory']"/>
+                <va-form @validation="$emit('onValidation',$event, metadata)" ref="form">
                     <va-input 
                         class="mt-3" v-for="(field,index) in selectedSchema.fields" 
                         :key="index" v-model="metadata[field.value]" 
@@ -49,21 +52,20 @@
 
     const selectedSchema = ref({})
 
-    const validation = ref(null)
-
     const SchemaStore = dbStore()
 
     const metadata = ref({})
-    const emits = defineEmits(['onSelected'])
+    const emits = defineEmits(['onValidation'])
 
     function useSchema(schema){
+        console.log(schema)
         schema.fields.forEach(field => {
             metadata.value[field.value] = null
         })
-        selectedSchema.value = schema
+        selectedSchema.value = {...schema}
     }
     function resetSchema(){
-        validation.value=null
+        emits('onValidation', null, metadata)
         selectedSchema.value = {}
     }
     function resetForm(){

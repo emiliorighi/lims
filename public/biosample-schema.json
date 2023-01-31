@@ -20,7 +20,7 @@
             "label": "Tissue",
             "value": "tissue",
             "description": "Tissue",
-            "required":false
+            "required":true
         },
         {
             "label": "Other Info",

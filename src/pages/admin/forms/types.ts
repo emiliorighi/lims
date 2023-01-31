@@ -17,19 +17,22 @@ export interface BioSample extends Taxon {
 
 export interface Experiment {
     title:string,
-    description:number,
+    description:string,
+    biosamples:string[]
+    files:File[]
     schemaId:string,
     metadata:object
 }
 export interface Analysis {
     title:string,
-    description:number,
+    description:string,
     schemaId:string,
+    experiment:string,
+    files:File[]
     metadata:object
 }
 export interface File {
     url:string,
-    type:number,
+    type:string,
     name:string,
-    metadata:object
 }
