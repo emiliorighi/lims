@@ -292,6 +292,11 @@
   },
   "menu": {
     "auth": "Auth",
+    "biosamples": "Create BioSample",
+    "files": "Create File",
+    "analysis": "Create Analysis",
+    "experiments": "Create Experiment",
+
     "rating": "Rating",
     "buttons": "Buttons",
     "charts": "Charts",

@@ -22,6 +22,25 @@ const routes: Array<RouteRecordRaw> = [
         path: 'dashboard',
         component: () => import('../pages/admin/dashboard/Dashboard.vue'),
       },
+      // {
+      //   name: 'biosamples',
+      //   path: 'biosamples',
+      //   component: () => import('../pages/admin/dashboard/BioSample.vue'),
+      // },      
+      // {
+      //   name: 'analysis',
+      //   path: 'analysis',
+      //   component: () => import('../pages/admin/dashboard/Analysis.vue'),
+      // },      
+      // {
+      //   name: 'experiments',
+      //   path: 'experiments',
+      //   component: () => import('../pages/admin/dashboard/Experiment.vue'),
+      // },      {
+      //   name: 'files',
+      //   path: 'files',
+      //   component: () => import('../pages/admin/dashboard/File.vue'),
+      // },
       {
         name: 'statistics',
         path: 'statistics',
@@ -51,20 +70,24 @@ const routes: Array<RouteRecordRaw> = [
         component: RouteViewComponent,
         children: [
           {
-            name: 'form-elements',
-            path: 'form-elements',
-            component: () => import('../pages/admin/forms/form-elements/FormElements.vue'),
-            meta: {
-              wikiLink: 'https://github.com/epicmaxco/vuestic-admin/wiki/inputs',
-            },
+            name: 'analysis',
+            path: 'analysis',
+            component: () => import('../pages/admin/forms/Analysis.vue'),
           },
           {
-            name: 'medium-editor',
-            path: 'medium-editor',
-            component: () => import('../pages/admin/forms/medium-editor/MediumEditor.vue'),
-            meta: {
-              wikiLink: 'https://github.com/epicmaxco/vuestic-admin/wiki/Medium-Editor',
-            },
+            name: 'biosamples',
+            path: 'biosamples',
+            component: () => import('../pages/admin/forms/BioSample.vue'),
+          },
+          {
+            name: 'experiments',
+            path: 'experiments',
+            component: () => import('../pages/admin/forms/Experiment.vue'),
+          },
+          {
+            name: 'files',
+            path: 'files',
+            component: () => import('../pages/admin/forms/File.vue'),
           },
         ],
       },

@@ -1,0 +1,40 @@
+{
+    "title": "Example Experiment Schema v1",
+    "description": "Example of experiment metadata",
+    "id":"experiments",
+    "version":1,
+    "fields": [
+        {
+            "label": "Experiment Name",
+            "value": "experiment_name",
+            "description": "Name of the experiment",
+            "type": "text",
+            "required":true
+        },
+        {
+            "label": "Instrument Platform",
+            "value": "instrument_platform",
+            "description": "Sequencing platform used",
+            "type": "select",
+            "fields": [
+                "ILLUMINA",
+                "PACBIO_SMRT",
+                "OXFORD_NANOPORE"
+            ],
+            "required":true
+        },
+        {
+            "label": "Timepoint",
+            "value": "timepoint",
+            "description": "Timepoint",
+            "required":true
+        },
+        {
+            "label": "Other Info",
+            "value": "other_info",
+            "description": "extra information",
+            "type":"textarea",
+            "required":false
+        }
+    ]
+}

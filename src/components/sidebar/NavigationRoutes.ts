@@ -45,12 +45,20 @@ export default {
       disabled: true,
       children: [
         {
-          name: 'form-elements',
-          displayName: 'menu.formElements',
+          name: 'biosamples',
+          displayName: 'menu.biosamples',
         },
         {
-          name: 'medium-editor',
-          displayName: 'menu.mediumEditor',
+          name: 'experiments',
+          displayName: 'menu.experiments',
+        },
+        {
+          name: 'analysis',
+          displayName: 'menu.analysis',
+        },
+        {
+          name: 'files',
+          displayName: 'menu.files',
         },
       ],
     },
