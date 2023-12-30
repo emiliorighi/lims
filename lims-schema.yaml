@@ -1,0 +1,336 @@
+openapi: 3.0.0
+
+info:
+  version: "3.1.2"
+  title: "LIMS API"
+  contact:
+    email: "emilio.righi@crg.eu"
+
+servers:
+  - url: https://ebp.biogenoma.cat/api
+    description: server containing all the data submitted to INSDC under the EBP umbrella
+  - url: https://dades.biogenoma.cat/api
+    description: server containing all the data generated under the CBP umbrella 
+
+tags:
+- name: "biosamples"
+- name: "experiments"
+- name: "analysis"
+
+
+paths:
+
+  /experiments:
+    get:
+      tags:
+        - "experiments"
+      summary: "Endpoint to retrieve a paginated list of experiments"
+      parameters:
+        - in: 'query'
+          name: 'filter'
+          schema:
+            type: 'string'
+        - in: 'query'
+          name: 'filter_option'
+          schema:
+            type: "string"
+            enum:
+            - "taxid"
+            - "scientific_name"
+            - "instrument_platform"
+            - "experiment_title"
+        - in: 'query'
+          name: 'start_date'
+          schema:
+            type: "string"
+        - in: 'query'
+          name: 'end_date'
+          schema:
+            type: "string"
+        - in: 'query'
+          name: 'sort_order'
+          schema:  
+            type: "string"
+            enum:
+            - "asc"
+            - "desc"
+        - in: 'query'
+          name: 'sort_column'
+          schema:
+            type: "string"
+            enum:
+            - "first_created"
+        - in: 'query'
+          name: 'center'
+          schema:
+            type: 'string'
+        - in: 'query'
+          name: 'offset'
+          schema:
+            type: 'number'
+            default: 0
+        - in: 'query'
+          name: 'limit'
+          schema:  
+            type: 'number'
+            default: 20
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/Experiment"
+                  total:
+                    type: "number"
+        "405":
+          description: "Invalid input"
+
+  /experiments/{id}:
+    get:
+      tags:
+        - "experiments"
+      parameters:
+        - in: 'path'
+          name: 'accession'
+          schema:
+            type: 'string'
+          required: true
+          
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Experiment"
+        "404":
+          description: "Read not found"
+                
+  /biosamples:
+    get:
+      tags:
+        - "biosamples"
+      summary: "Endpoint to retrieve a paginated list of biosamples"
+      parameters:
+        - in: 'query'
+          name: 'filter'
+          schema:
+            type: 'string'
+        - in: 'query'
+          name: 'filter_option'
+          schema:
+            type: "string"
+            enum:
+            - "taxid"
+            - "scientific_name"
+            - "gal"
+            - "habitat"
+            - "accession"
+        - in: 'query'
+          name: 'start_date'
+          schema:  
+            type: "string"
+        - in: 'query'
+          name: 'end_date'
+          schema:  
+            type: "string"
+        - in: "query"
+          name: "sort_column"
+          schema:
+            type: "string"
+            enum:
+              - "collection_date"
+        - in: 'query'
+          name: 'sort_order'
+          schema:  
+            type: "string"
+            enum:
+            - "asc"
+            - "desc"
+        - in: 'query'
+          name: 'offset'
+          schema:
+            type: 'number'
+            default: 0
+        - in: 'query'
+          name: 'limit'
+          schema:
+            type: 'number'
+            default: 20
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: "object"
+                properties:
+                  data:
+                    type: "array"
+                    items:
+                      $ref: "#/components/schemas/BioSample"
+                  total:
+                    type: "number"
+        "405":
+          description: "Invalid input"
+          
+  /biosamples/{id}:
+    get:
+      tags:
+        - "biosamples"
+      parameters:
+        - in: 'path'
+          name: 'accession'
+          schema:
+            type: 'string'
+          required: true
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BioSample"
+        "404":
+          description: "Read not found"
+
+  /biosamples/{id}/sub_samples:
+    get:
+      tags:
+        - "biosamples"
+      parameters:
+        - in: 'path'
+          name: 'accession'
+          schema:
+            type: 'string'
+          required: true
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/BioSample"
+        "404":
+          description: "Read not found"
+
+  /biosamples/{id}/experiments:
+    get:
+      tags:
+        - "biosamples"
+      parameters:
+        - in: 'path'
+          name: 'accession'
+          schema:
+            type: 'string'
+          required: true
+      responses:
+        "200":
+          description: "successful operation"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Experiment"
+        "404":
+          description: "Read not found"
+  
+components:
+  schemas:
+    Analysis:
+      type: "object"
+      description: "object containing the analysis"
+      properties:
+        id:
+          type: "string"  
+        experiment_id:
+          type: "string"
+        metadata:
+          type: "object"
+          description: "user defined metadata object schema"
+    
+    File:
+      type: "object"
+      description: "general file object"
+      properties:
+        id: 
+          type: "string"
+        location:
+          type: "object"
+          properties:
+            protocol:
+              type: "string"
+              enum:
+              - "FTP"
+              - "HTTP"
+              - "RL"
+            path: 
+              type: "string"
+            
+    Experiment:
+      type: "object"
+      description: "Raw or Mapped experiments"
+      properties:
+        id:
+          type: "string"
+        biosample_id:
+          type: "string"
+        metadata:
+          type: "object"
+          description: "user defined metadata object schema"
+
+    BioSample:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        metadata:
+          type: "object"
+          description: "user defined metadata object schema"
+
+    Researcher:
+      type: "object"
+      properties:
+        name: 
+          type: "string"
+        role:
+          type: "string"
+          enum:
+            - "researcher"
+            - "sample_manager"
+            - "experiment_manager"
+            - "data_manager"
+            - "admin"
+
+    MetadataSchema:
+      type: "object"
+      properties: 
+        name: 
+          type: "string"
+        path:
+          type: "string"
+        model: 
+          type: "string"
+          enum:
+            - "biosample"
+            - "experiment"
+
+    Project:
+      type: "object"
+      properties: 
+        name:
+          type: "string"
+        schemas: 
+          type: "array"
+          items:
+            $ref: "#/components/schemas/MetadataSchema"
+

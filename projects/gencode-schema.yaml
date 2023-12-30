@@ -1,0 +1,55 @@
+name: "Gencode"
+description: "Gencode data model"
+version: 1.0.0
+sample:
+  id_field: "sample_id"
+  fields:
+    sample_id:
+      label: "Unique identifier of the sample"
+      field_type:
+        name: "input"
+      required: true
+    sample_source:
+      label: "Sample extraction method"
+      field_type:
+        name: "select"
+        values: ["source1", source2]
+      required: true
+    taxid:
+      label: "Taxonomic identifier"
+      field_type:
+        name: "input"
+      required: true
+
+experiment:
+  id_field: "experiment_id"
+  target_model_field: "sample_id"
+  fields:
+    experiment_id:
+      field_type:
+        name: "input"
+      required: true
+    sample_id:
+      field_type:
+        name: "input"
+      required: true
+    experiment_group:
+      label: "Group of experiments"
+      field_type:
+        name: "select"
+        values: ["source1", source2]
+      required: true
+    extraction_method:
+      label: "Sample extraction method"
+      field_type:
+        name: "select"
+        values: ["source1", source2]
+      required: true
+    run_time:
+      label: "Run time"
+      field_type:
+        name: "range"
+        min: 0
+        max: 1000
+        unit: "hours"
+      required: true

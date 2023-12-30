@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+
+  DB_LIMS:
+    image: mongo:5.0.9
+    container_name: "${DB_HOST}"
+    env_file:
+      - .env
+    volumes:
+     - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+     - mongodb-data:${MONGODB_DATA_DIR}
+
+    ports:
+      - "27013:${DB_PORT}"
+
+  server:
+    build: ./server
+    container_name: "lims-server"
+    volumes:
+      - ./projects:/server/projects
+    restart: always
+    env_file:
+      - .env
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: "lims-client"
+    restart: always
+    volumes:
+      - node_modules:/client/node_modules
+    environment:
+      - API_PORT=${API_PORT}
+      - API_HOST=${API_HOST}
+    ports:
+        - "92:${API_PORT}"
+
+volumes:
+  mongodb-data:
+  node_modules:
