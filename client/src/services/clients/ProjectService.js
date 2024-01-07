@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const {base} = http
+const {base,auth} = http
 
 class ProjectService {
 

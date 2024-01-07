@@ -12,37 +12,33 @@ export type TPieChartData = ChartData<'pie'>
 
 export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDoughnutChartData | TPieChartData
 
-type  GeneralFilter<T> = {
+type GeneralFilter<T> = {
   [K in keyof T]?: T[K]
 }
 
-export type FieldMapper = {
-  input: Input
-  select: Select
-  range: Range
-}
 
 export type Filter = {
   label: string
   description?: string
-  field:{
-    name: 'input' | 'select' | 'range'
-    type: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range>
-  }
+  type: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range>
   key: string
   required: boolean
   value: string
 }
 
 export type Input = {
+  name: 'input'
   type: 'string' | 'number' | 'date'
 }
 
 export type Select = {
+  name: 'select'
   type: 'single' | 'multi'
-  choices: string[]}
+  choices: string[]
+}
 
 export type Range = {
+  name: 'range'
   min: string
   max: string
   unit: string

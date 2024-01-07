@@ -14,7 +14,7 @@ class ProjectsApi(Resource):
 
     def post(self):
 
-        # Project.drop_collection()
+        Project.drop_collection()
         schema = open('/server/projects/gencode-schema.yaml', 'r')
         project =yaml.load(schema, yaml.SafeLoader)
         project['version'] = str(project['version'])

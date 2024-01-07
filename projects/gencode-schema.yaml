@@ -8,17 +8,20 @@ sample:
       label: "Unique identifier of the sample"
       field_type:
         name: "input"
+        type: "string"
       required: true
     sample_source:
       label: "Sample extraction method"
       field_type:
         name: "select"
+        type: "single"
         values: ["source1", source2]
       required: true
     taxid:
       label: "Taxonomic identifier"
       field_type:
         name: "input"
+        type: "string"
       required: true
 
 experiment:

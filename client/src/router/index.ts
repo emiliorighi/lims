@@ -15,14 +15,20 @@ const routes: Array<RouteRecordRaw> = [
   //   component: () => import('../pages/project/Projects.vue'),
   // },
   {
-    name: 'admin',
-    path: '/admin',
+    name: 'home',
+    path: '/',
     component: AppLayout,
     children: [
       {
-        name: 'dashboard',
-        path: 'dashboard',
-        component: () => import('../pages/admin/dashboard/Dashboard.vue'),
+        name: 'projects',
+        path: 'projects',
+        component: () => import('../pages/project/Projects.vue'),
+      },
+      {
+        name: 'projects',
+        path: 'projects/:id',
+        props: true,
+        component: () => import('../pages/project/Project.vue'),
       },
       // {
       //   name: 'biosamples',

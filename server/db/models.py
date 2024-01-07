@@ -89,5 +89,5 @@ class User(db.Document):
     name=db.StringField(unique=True,required=True)
     password=db.StringField(required=True)
     role=db.EnumField(Roles, required=True)
-
+    projects = db.ListField(db.StringField())
 

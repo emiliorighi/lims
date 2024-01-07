@@ -1,4 +1,3 @@
-from .user import users_controller
 # from .sample import samples_controller
 # from .experiment import experiments_controller
 # from .stats import stats_controller
