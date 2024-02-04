@@ -8,6 +8,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import('../pages/project/Projects.vue'),
   },
   {
+    name: 'project-form',
+    path: '/projects/project-form',
+    component: () => import('../pages/project/ProjectForm.vue'),
+  },
+  {
     name: 'project',
     path: '/projects/:id',
     props: true,

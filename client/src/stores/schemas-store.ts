@@ -1,12 +1,19 @@
 import { defineStore } from 'pinia'
+import { SchemaForm } from '../data/types'
 
-const initSchema: Record<string, any> = {
-  project_id: '',
+const initSchema: SchemaForm = {
+  id: '',
   name: '',
   description: '',
   version: '',
-  experiment: [],
-  sample: [],
+  experiment:{
+    id_format:[],
+    fields:[]
+  },
+  sample: {
+    id_format:[],
+    fields:[]
+  },
 }
 
 const initSearchForm = {

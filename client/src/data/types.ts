@@ -16,34 +16,43 @@ type GeneralFilter<T> = {
   [K in keyof T]?: T[K]
 }
 
+export type ProjectModel = {
+  fields : Filter[],
+  id_format: string[]
+}
 
 export type Filter = {
   label: string
   description?: string
-  type: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range> | GeneralFilter<Boolean>
+  filter: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range>
   key: string
   required: boolean
-  value: string
+  value?: string
 }
 
 export type Input = {
-  type: 'string' | 'number' | 'date'
+  input_type: 'text' | 'number' | 'date'
   regex: undefined | ''
 }
 
 export type Select = {
-  type: 'select'
   multi: false
   choices: string[]
 }
 
 export type Range = {
-  type: 'range'
-  min: string
-  max: string
+  min: number
+  max: number
   unit: string
 }
-
+export interface SchemaForm {
+  id: string,
+  name: string,
+  version: string,
+  description?: string,
+  sample: ProjectModel
+  experiment: ProjectModel
+}
 export interface SearchForm {
   filter: string
   filter_option?: string

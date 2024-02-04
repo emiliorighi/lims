@@ -38,7 +38,7 @@
     "vue-chartjs": "^4.1.1",
     "vue-router": "^4.0.14",
     "vuestic-admin": "^0.0.1-security",
-    "vuestic-ui": "^1.8.5"
+    "vuestic-ui": "^1.8.8"
   },
   "devDependencies": {
     "@intlify/vite-plugin-vue-i18n": "^5.0.1",

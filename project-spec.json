@@ -94,10 +94,10 @@
     "type": "object",
     "properties": {
       "min": {
-        "type": "string"
+        "type": "number"
       },
       "max": {
-        "type": "string"
+        "type": "number"
       },
       "unit": {
         "type": "string"

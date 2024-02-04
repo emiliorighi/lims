@@ -34,12 +34,6 @@ experiment:
         input_type: "text"
       key: "username"
       required: true
-    - label: "Sample identifier"
-      description: "Details about the user"
-      filter:
-        input_type: "text"
-      key: "sample_id"
-      required: true
     - label: "Age"
       filter:
         input_type: "number"
@@ -55,7 +49,7 @@ experiment:
     - label: "Favorite Color"
       filter:
         multi: false
-        choice:
+        choices:
           - "Red"
           - "Green"
           - "Blue"
@@ -64,8 +58,8 @@ experiment:
 
     - label: "Height Range"
       filter:
-        min: "150"
-        max: "200"
+        min: 150
+        max: 200
         unit: "cm"
       key: "height"
       required: false

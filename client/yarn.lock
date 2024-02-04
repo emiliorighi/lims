@@ -214,26 +214,7 @@
     "source-map" "0.6.1"
     "yaml-eslint-parser" "^0.3.2"
 
-"@intlify/core-base@9.1.10":
-  "integrity" "sha512-So9CNUavB/IsZ+zBmk2Cv6McQp6vc2wbGi1S0XQmJ8Vz+UFcNn9MFXAe9gY67PreIHrbLsLxDD0cwo1qsxM1Nw=="
-  "resolved" "https://registry.npmjs.org/@intlify/core-base/-/core-base-9.1.10.tgz"
-  "version" "9.1.10"
-  dependencies:
-    "@intlify/devtools-if" "9.1.10"
-    "@intlify/message-compiler" "9.1.10"
-    "@intlify/message-resolver" "9.1.10"
-    "@intlify/runtime" "9.1.10"
-    "@intlify/shared" "9.1.10"
-    "@intlify/vue-devtools" "9.1.10"
-
-"@intlify/devtools-if@9.1.10":
-  "integrity" "sha512-SHaKoYu6sog3+Q8js1y3oXLywuogbH1sKuc7NSYkN3GElvXSBaMoCzW+we0ZSFqj/6c7vTNLg9nQ6rxhKqYwnQ=="
-  "resolved" "https://registry.npmjs.org/@intlify/devtools-if/-/devtools-if-9.1.10.tgz"
-  "version" "9.1.10"
-  dependencies:
-    "@intlify/shared" "9.1.10"
-
-"@intlify/message-compiler@9.1.10", "@intlify/message-compiler@next":
+"@intlify/message-compiler@next":
   "integrity" "sha512-+JiJpXff/XTb0EadYwdxOyRTB0hXNd4n1HaJ/a4yuV960uRmPXaklJsedW0LNdcptd/hYUZtCkI7Lc9J5C1gxg=="
   "resolved" "https://registry.npmjs.org/@intlify/message-compiler/-/message-compiler-9.1.10.tgz"
   "version" "9.1.10"
@@ -246,15 +227,6 @@
   "integrity" "sha512-5YixMG/M05m0cn9+gOzd4EZQTFRUu8RGhzxJbR1DWN21x/Z3bJ8QpDYj6hC4FwBj5uKsRfKpJQ3Xqg98KWoA+w=="
   "resolved" "https://registry.npmjs.org/@intlify/message-resolver/-/message-resolver-9.1.10.tgz"
   "version" "9.1.10"
-
-"@intlify/runtime@9.1.10":
-  "integrity" "sha512-7QsuByNzpe3Gfmhwq6hzgXcMPpxz8Zxb/XFI6s9lQdPLPe5Lgw4U1ovRPZTOs6Y2hwitR3j/HD8BJNGWpJnOFA=="
-  "resolved" "https://registry.npmjs.org/@intlify/runtime/-/runtime-9.1.10.tgz"
-  "version" "9.1.10"
-  dependencies:
-    "@intlify/message-compiler" "9.1.10"
-    "@intlify/message-resolver" "9.1.10"
-    "@intlify/shared" "9.1.10"
 
 "@intlify/shared@9.1.10", "@intlify/shared@next":
   "integrity" "sha512-Om54xJeo1Vw+K1+wHYyXngE8cAbrxZHpWjYzMR9wCkqbhGtRV5VLhVc214Ze2YatPrWlS2WSMOWXR8JktX/IgA=="
@@ -272,15 +244,6 @@
     "debug" "^4.3.1"
     "fast-glob" "^3.2.5"
     "source-map" "0.6.1"
-
-"@intlify/vue-devtools@9.1.10":
-  "integrity" "sha512-5l3qYARVbkWAkagLu1XbDUWRJSL8br1Dj60wgMaKB0+HswVsrR6LloYZTg7ozyvM621V6+zsmwzbQxbVQyrytQ=="
-  "resolved" "https://registry.npmjs.org/@intlify/vue-devtools/-/vue-devtools-9.1.10.tgz"
-  "version" "9.1.10"
-  dependencies:
-    "@intlify/message-resolver" "9.1.10"
-    "@intlify/runtime" "9.1.10"
-    "@intlify/shared" "9.1.10"
 
 "@nodelib/fs.scandir@2.1.5":
   "integrity" "sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g=="
@@ -804,7 +767,7 @@
     "@vue/compiler-dom" "3.2.37"
     "@vue/shared" "3.2.37"
 
-"@vue/devtools-api@^6.0.0", "@vue/devtools-api@^6.0.0-beta.7", "@vue/devtools-api@^6.1.4":
+"@vue/devtools-api@^6.0.0", "@vue/devtools-api@^6.1.4":
   "integrity" "sha512-IiA0SvDrJEgXvVxjNkHPFfDx6SXw0b/TUkqMcDZWNg9fnCAHbTpoo59YfJ9QLFkwa3raau5vSlRVzMSLDnfdtQ=="
   "resolved" "https://registry.npmjs.org/@vue/devtools-api/-/devtools-api-6.1.4.tgz"
   "version" "6.1.4"
@@ -898,11 +861,6 @@
   "resolved" "https://registry.npmjs.org/acorn-walk/-/acorn-walk-7.2.0.tgz"
   "version" "7.2.0"
 
-"acorn@^6.0.0 || ^7.0.0 || ^8.0.0", "acorn@^8.7.1":
-  "integrity" "sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w=="
-  "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.8.0.tgz"
-  "version" "8.8.0"
-
 "acorn@^7.0.0":
   "integrity" "sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A=="
   "resolved" "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
@@ -912,6 +870,11 @@
   "integrity" "sha512-nQyp0o1/mNdbTO1PO6kHkwSrmgZ0MT/jCCpNiwbUjGoRN4dlBhqJtoQuCnEOKzgTVwg0ZWiCoQy6SxMebQVh8A=="
   "resolved" "https://registry.npmjs.org/acorn/-/acorn-7.4.1.tgz"
   "version" "7.4.1"
+
+"acorn@^8.7.1":
+  "integrity" "sha512-QOxyigPVrpZ2GXT+PFyZTl6TtOFc5egxHIP9IlQ+RbupQuX4RkT/Bee4/kQuC02Xkzg84JcT7oLYtDIQxp+v7w=="
+  "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.8.0.tgz"
+  "version" "8.8.0"
 
 "adler-32@~1.3.0":
   "integrity" "sha512-ynZ4w/nUUv5rrsR8UUGoe1VC9hZj6V5hU9Qw1HlMDJGEJw5S7TfTErWTjMys6M7vr0YWcPqs3qAr4ss0nDfP+A=="
@@ -1117,7 +1080,7 @@
     "ast-types" "^0.7.0"
     "browser-resolve" "^1.8.1"
 
-"browserslist@^4.20.3", "browserslist@>= 4.21.0":
+"browserslist@^4.20.3":
   "integrity" "sha512-UQxE0DIhRB5z/zDz9iA03BOfxaN2+GQdBYH/2WrSIWEUrnpzTPJbhqt+umq6r3acaPRTW1FNTkrcp0PXgtFkvA=="
   "resolved" "https://registry.npmjs.org/browserslist/-/browserslist-4.21.0.tgz"
   "version" "4.21.0"
@@ -1199,7 +1162,7 @@
     "ansi-styles" "^4.1.0"
     "supports-color" "^7.1.0"
 
-"chart.js@^3.7.0", "chart.js@^3.8.0":
+"chart.js@^3.8.0":
   "integrity" "sha512-cr8xhrXjLIXVLOBZPkBZVF6NDeiVIrPLHcMhnON7UufudL+CNeRrD+wpYanswlm8NpudMdrt3CHoLMQMxJhHRg=="
   "resolved" "https://registry.npmjs.org/chart.js/-/chart.js-3.8.0.tgz"
   "version" "3.8.0"
@@ -1818,7 +1781,7 @@
   "resolved" "https://registry.npmjs.org/esbuild-linux-64/-/esbuild-linux-64-0.14.47.tgz"
   "version" "0.14.47"
 
-"esbuild@*", "esbuild@^0.14.27":
+"esbuild@^0.14.27":
   "integrity" "sha512-wI4ZiIfFxpkuxB8ju4MHrGwGLyp1+awEHAHVpx6w7a+1pmYIq8T9FGEVVwFo0iFierDoMj++Xq69GXWYn2EiwA=="
   "resolved" "https://registry.npmjs.org/esbuild/-/esbuild-0.14.47.tgz"
   "version" "0.14.47"
@@ -1889,7 +1852,7 @@
   dependencies:
     "prettier-linter-helpers" "^1.0.0"
 
-"eslint-plugin-vue@^8.0.1", "eslint-plugin-vue@^8.7.0":
+"eslint-plugin-vue@^8.7.0":
   "integrity" "sha512-28sbtm4l4cOzoO1LtzQPxfxhQABararUb1JtqusQqObJpWX2e/gmVyeYVfepizPFne0Q5cILkYGiBoV36L12Wg=="
   "resolved" "https://registry.npmjs.org/eslint-plugin-vue/-/eslint-plugin-vue-8.7.1.tgz"
   "version" "8.7.1"
@@ -1954,7 +1917,7 @@
   "resolved" "https://registry.npmjs.org/eslint-visitor-keys/-/eslint-visitor-keys-3.3.0.tgz"
   "version" "3.3.0"
 
-"eslint@*", "eslint@^6.0.0 || ^7.0.0 || ^8.0.0", "eslint@^6.2.0 || ^7.0.0 || ^8.0.0", "eslint@^8.13.0", "eslint@>= 7.28.0", "eslint@>=5", "eslint@>=6.0.0", "eslint@>=7.0.0", "eslint@>=7.28.0":
+"eslint@^8.13.0":
   "integrity" "sha512-As1EfFMVk7Xc6/CvhssHUjsAQSkpfXvUGMFC3ce8JDe6WvqCgRrLOBQbVpsBFr1X1V+RACOadnzVvcUS5ni2bA=="
   "resolved" "https://registry.npmjs.org/eslint/-/eslint-8.18.0.tgz"
   "version" "8.18.0"
@@ -2941,7 +2904,7 @@
   "resolved" "https://registry.npmjs.org/postcss-value-parser/-/postcss-value-parser-4.2.0.tgz"
   "version" "4.2.0"
 
-"postcss@^8.1.0", "postcss@^8.1.10", "postcss@^8.4.12", "postcss@^8.4.13":
+"postcss@^8.1.10", "postcss@^8.4.12", "postcss@^8.4.13":
   "integrity" "sha512-E398TUmfAYFPBSdzgeieK2Y1+1cpdxJx8yXbK/m57nRhKSmk1GB2tO4lbLBtlkfPQTDKfe4Xqv1ASWPpayPEig=="
   "resolved" "https://registry.npmjs.org/postcss/-/postcss-8.4.14.tgz"
   "version" "8.4.14"
@@ -2967,7 +2930,7 @@
   dependencies:
     "fast-diff" "^1.1.2"
 
-"prettier@^2.6.2", "prettier@>= 2.0.0", "prettier@>=2.0.0":
+"prettier@^2.6.2":
   "integrity" "sha512-ujppO+MkdPqoVINuDFDRLClm7D78qbDt0/NR+wp5FqEZOoTNAjPHWj17QRhu7geIHJfcNhRk1XVQmF8Bp3ye+g=="
   "resolved" "https://registry.npmjs.org/prettier/-/prettier-2.7.1.tgz"
   "version" "2.7.1"
@@ -3190,7 +3153,7 @@
   "resolved" "https://registry.npmjs.org/safer-buffer/-/safer-buffer-2.1.2.tgz"
   "version" "2.1.2"
 
-"sass@*", "sass@^1.53.0":
+"sass@^1.53.0":
   "integrity" "sha512-zb/oMirbKhUgRQ0/GFz8TSAwRq2IlR29vOUJZOx0l8sV+CkHUfHa4u5nqrG+1VceZp7Jfj59SVW9ogdhTvJDcQ=="
   "resolved" "https://registry.npmjs.org/sass/-/sass-1.53.0.tgz"
   "version" "1.53.0"
@@ -3541,7 +3504,7 @@
   "resolved" "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
   "version" "0.0.6"
 
-"typescript@*", "typescript@^4.5.4", "typescript@>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta", "typescript@>=4.4.4":
+"typescript@^4.5.4":
   "integrity" "sha512-C0WQT0gezHuw6AdY1M2jxUO83Rjf0HP7Sk1DtXj6j1EwkQNZrHAg2XPWlq62oqEhYvONq5pkC2Y9oPljWToLmQ=="
   "resolved" "https://registry.npmjs.org/typescript/-/typescript-4.7.4.tgz"
   "version" "4.7.4"
@@ -3592,7 +3555,7 @@
   "resolved" "https://registry.npmjs.org/v8-compile-cache/-/v8-compile-cache-2.3.0.tgz"
   "version" "2.3.0"
 
-"vite@^2.5.10", "vite@^2.9.0 || ^3.0.0", "vite@^2.9.15":
+"vite@^2.9.15":
   "integrity" "sha512-X+6q8KPyeuBvTQV8AVSnKDvXoBMnTx8zxh54sOwmmuOdxkjMmEJXH2UEchA+vTMps1xw9vL64uwJOWryULg7nA=="
   "resolved" "https://registry.npmjs.org/vite/-/vite-2.9.16.tgz"
   "version" "2.9.16"
@@ -3627,16 +3590,6 @@
     "lodash" "^4.17.21"
     "semver" "^7.3.5"
 
-"vue-i18n@*":
-  "integrity" "sha512-jpr7gV5KPk4n+sSPdpZT8Qx3XzTcNDWffRlHV/cT2NUyEf+sEgTTmLvnBAibjOFJ0zsUyZlVTAWH5DDnYep+1g=="
-  "resolved" "https://registry.npmjs.org/vue-i18n/-/vue-i18n-9.1.10.tgz"
-  "version" "9.1.10"
-  dependencies:
-    "@intlify/core-base" "9.1.10"
-    "@intlify/shared" "9.1.10"
-    "@intlify/vue-devtools" "9.1.10"
-    "@vue/devtools-api" "^6.0.0-beta.7"
-
 "vue-router@^4.0.0", "vue-router@^4.0.14":
   "integrity" "sha512-JcO7cb8QJLBWE+DfxGUL3xUDOae/8nhM1KVdnudadTAORbuxIC/xAydC5Zr/VLHUDQi1ppuTF5/rjBGzgzrJNA=="
   "resolved" "https://registry.npmjs.org/vue-router/-/vue-router-4.0.16.tgz"
@@ -3651,7 +3604,7 @@
   dependencies:
     "@volar/vue-typescript" "0.35.2"
 
-"vue@^2.6.14 || ^3.2.0", "vue@^3.0.0", "vue@^3.0.0-0 || ^2.6.0", "vue@^3.0.4", "vue@^3.2.0", "vue@^3.2.25", "vue@3.2.37":
+"vue@^3.2.25":
   "integrity" "sha512-bOKEZxrm8Eh+fveCqS1/NkG/n6aMidsI6hahas7pa0w/l7jkbssJVsRhVDs07IdDq7h9KHswZOgItnwJAgtVtQ=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-3.2.37.tgz"
   "version" "3.2.37"
@@ -3667,10 +3620,10 @@
   "resolved" "https://registry.npmjs.org/vuestic-admin/-/vuestic-admin-0.0.1-security.tgz"
   "version" "0.0.1-security"
 
-"vuestic-ui@^1.8.5":
-  "integrity" "sha512-rTcviYlTfQWca1AiCBXxCIL0nX/QAc7arzHr3JiJX+JDHLn8+chfgXUxB2fwKnwZnLk1B30wd//ySzfQ1uRe0g=="
-  "resolved" "https://registry.npmjs.org/vuestic-ui/-/vuestic-ui-1.8.7.tgz"
-  "version" "1.8.7"
+"vuestic-ui@^1.8.8":
+  "integrity" "sha512-av0icrfYgR6SLkXpaPlt99kza8GZuuOjbPlz3BHlfN31Cjs5JVaAXMcZddcuSDiQYOQ63zSiXOcSXHk9IT2Pow=="
+  "resolved" "https://registry.npmjs.org/vuestic-ui/-/vuestic-ui-1.8.8.tgz"
+  "version" "1.8.8"
   dependencies:
     "@floating-ui/vue" "^1.0.1"
     "@types/lodash" "^4.14.161"
