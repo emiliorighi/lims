@@ -1,58 +1,81 @@
-name: "Gencode"
-description: "Gencode data model"
+name: 124
+desiption: "Gencode data model"
 version: 1.0.0
 sample:
-  id_field: "sample_id"
-  fields:
-    sample_id:
-      label: "Unique identifier of the sample"
-      field_type:
-        name: "input"
-        type: "string"
+  - id_format:
+    - "id"
+    - "age"
+  - fields:
+    - label: "User Information"
+      description: "Details about the user"
+      filter:
+        input_type: "text"
+      key: "username"
       required: true
-    sample_source:
-      label: "Sample extraction method"
-      field_type:
-        name: "select"
-        type: "single"
-        values: ["source1", source2]
+    - label: "Sample identifier"
+      description: "Details about the user"
+      filter:
+        input_type: "text"
+      key: "id"
       required: true
-    taxid:
-      label: "Taxonomic identifier"
-      field_type:
-        name: "input"
-        type: "string"
+    - label: "Age"
+      filter:
+        input_type: "number"
+      key: "age"
+      required: false
+experiment:
+  - id_format: 
+    - "age"
+    - "username"
+  - fields:
+    - label: "User Information"
+      description: "Details about the user"
+      filter:
+        input_type: "text"
+      key: "username"
+      required: true
+    - label: "Sample identifier"
+      description: "Details about the user"
+      filter:
+        input_type: "text"
+      key: "sample_id"
+      required: true
+    - label: "Age"
+      filter:
+        input_type: "number"
+      key: "age"
+      required: false
+
+    - label: "Birth Date"
+      filter:
+        input_type: "date"
+      key: "birthdate"
       required: true
 
-experiment:
-  id_field: "experiment_id"
-  target_model_field: "sample_id"
-  fields:
-    experiment_id:
-      field_type:
-        name: "input"
-      required: true
-    sample_id:
-      field_type:
-        name: "input"
-      required: true
-    experiment_group:
-      label: "Group of experiments"
-      field_type:
-        name: "select"
-        values: ["source1", source2]
-      required: true
-    extraction_method:
-      label: "Sample extraction method"
-      field_type:
-        name: "select"
-        values: ["source1", source2]
-      required: true
-    run_time:
-      label: "Run time"
-      field_type:
-        name: "range"
-        min: 0
-        max: 1000
-        unit: "hours"
-      required: true
+    - label: "Favorite Color"
+      filter:
+        multi: false
+        choice:
+          - "Red"
+          - "Green"
+          - "Blue"
+      key: "favorite_color"
+      required: false
+
+    - label: "Height Range"
+      filter:
+        min: "150"
+        max: "200"
+        unit: "cm"
+      key: "height"
+      required: false
+
+    - label: "Hobbies"
+      filter:
+        multi: true
+        choices:
+          - "Reading"
+          - "Gaming"
+          - "Traveling"
+      key: "hobbies"
+      required: false

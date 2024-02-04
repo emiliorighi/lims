@@ -34,6 +34,24 @@ class Project(db.Document):
             ]
     }
 
+class ProjectDraft(db.Document):
+    project_id = db.StringField(required=True, unique=True)
+    name = db.StringField(required=True)
+    description = db.StringField()
+    version = db.StringField(required=True)
+    experiment = db.DictField()
+    sample = db.DictField()
+    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    user=db.StringField(required=True)
+    valid=db.BooleanField(default=False)
+    meta = {
+        'indexes': [
+            'name',
+            '$name',
+            ('name','-version')
+            ]
+    }
+
 class Experiment(db.Document):
     sample_id= db.StringField(required=True)
     id= db.StringField(unique=True,required=True)
@@ -84,6 +102,7 @@ class Sample(db.Document):
         ],
         'strict': False
     }
+
 
 class User(db.Document):
     name=db.StringField(unique=True,required=True)

@@ -36,6 +36,7 @@ onMounted(async () => {
 })
 
 function useProject(project: Record<string, any>) {
+    console.log(project)
     schemaStore.schema = { ...project }
     router.push({ name: 'project', params: { id: schemaStore.schema.project_id } })
 }

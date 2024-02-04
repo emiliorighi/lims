@@ -20,25 +20,25 @@ type GeneralFilter<T> = {
 export type Filter = {
   label: string
   description?: string
-  type: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range>
+  type: GeneralFilter<Input> | GeneralFilter<Select> | GeneralFilter<Range> | GeneralFilter<Boolean>
   key: string
   required: boolean
   value: string
 }
 
 export type Input = {
-  name: 'input'
   type: 'string' | 'number' | 'date'
+  regex: undefined | ''
 }
 
 export type Select = {
-  name: 'select'
-  type: 'single' | 'multi'
+  type: 'select'
+  multi: false
   choices: string[]
 }
 
 export type Range = {
-  name: 'range'
+  type: 'range'
   min: string
   max: string
   unit: string

@@ -18,7 +18,7 @@ class BioSampleApi(Resource):
         return Response(biosample_obj.to_json(),mimetype="application/json", status=200)
 
     @jwt_required()
-    def post(self,accession):
+    def post(self, accession):
         response = samples_service.create_biosample_from_accession(accession)
         return Response(json.dumps(response['message']), mimetype="application/json", status=response['status'])
 

@@ -2,7 +2,7 @@
   <div class="app-layout">
     <navbar />
     <div class="app-layout__content">
-      <!-- <div class="app-layout__sidebar-wrapper" :class="{ minimized: isSidebarMinimized }">
+      <div class="app-layout__sidebar-wrapper" :class="{ minimized: isSidebarMinimized }">
         <div v-if="isFullScreenSidebar" class="d-flex justify-end">
           <va-button class="px-4 py-4" icon="md_close" preset="plain" color="dark" @click="onCloseSidebarButtonClick" />
         </div>
@@ -12,10 +12,14 @@
           :minimized-width="sidebarMinimizedWidth"
           :animated="!isMobile"
         />
-      </div> -->
+      </div>
       <div class="app-layout__page">
-        <div class="layout fluid va-gutter-5">
-          <router-view />
+        <div id="scroll-container" class="layout fluid va-gutter-5">
+          <router-view v-slot="{ Component }">
+            <Transition name="fade">
+              <component :is="Component" />
+            </Transition>
+          </router-view>
         </div>
       </div>
     </div>
@@ -125,6 +129,11 @@
     &__page {
       flex-grow: 2;
       overflow-y: scroll;
+    }
+  }
+  .row-equal .flex {
+    .va-card {
+      height: 100%;
     }
   }
 </style>

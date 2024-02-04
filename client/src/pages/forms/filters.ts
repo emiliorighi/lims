@@ -11,10 +11,10 @@ export function useFilters(fields:Record<string,any>) {
       label : fields[f].label?fields[f].label:f ,
       required: fields[f].required,
       value: '',
-      type: fields[f].field_type,
+      type: {...fields[f].field_type},
       key: f
     }
-    if(f.description)filter.description = f.description
+    if(fields[f].description)filter.description = fields[f].description
     return filter
   })
 

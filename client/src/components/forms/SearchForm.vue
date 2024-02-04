@@ -3,10 +3,10 @@
     <va-card-content>
       <div class="row align-end">
         <div v-for="(filter, index) in filters" :key="index" class="flex lg3 md4 sm12 xs12">
-          <div v-if="filter.type.name === 'input'">
-            <va-input v-model="searchForm[filter.key]" :label="filter.label" />
+          <div v-if="filter.type === 'input'">
+            <va-input v-model="searchForm[filter.key]" type :label="filter.label" />
           </div>
-          <div v-else-if="filter.type.name === 'select'">
+          <div v-else-if="filter.type === 'select'">
             <va-select v-model="searchForm[filter.key]" :label="filter.label" :options="filter.type.choices" searchable />
           </div>
           <!-- <div v-else-if="filter.type === 'date'">

@@ -1,7 +1,10 @@
 <template>
-  <router-view />
+  <AppLayout/>
 </template>
+<script setup lang="ts">
+import AppLayout from './layouts/AppLayout.vue';
 
+</script>
 <style lang="scss">
   @import 'scss/main.scss';
 
@@ -11,7 +14,6 @@
     -moz-osx-font-smoothing: grayscale;
     color: #2c3e50;
   }
-
   body {
     margin: 0;
   }

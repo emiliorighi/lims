@@ -4,11 +4,10 @@
             <va-button @click="schemaStore.resetSchema()" round icon="close">{{
                 schemaStore.schema.id }}</va-button>
         </div> -->
-        <SearchForm :filters="filters" :search-form="sampleStore.sample.metadata"></SearchForm>
+        <SearchForm :filters="filters" :search-form="{}"></SearchForm>
     </div>
 </template>
 <script setup lang="ts">
-import SchemaSelector from '../../components/forms/SchemaSelector.vue'
 import { useSchemaStore } from '../../stores/schemas-store'
 import { useSampleStore } from '../../stores/sample-store'
 import SearchForm from '../../components/forms/SearchForm.vue'
@@ -16,9 +15,9 @@ import { ref } from 'vue'
 import { useFilters } from './filters'
 
 const samplePayload = ref<Record<string, any>>()
-const sampleStore = useSampleStore()
+const sample = useSampleStore().sample
 const schemaStore = useSchemaStore()
 
 const filters = useFilters(schemaStore.schema)
-
+console.log(filters)
 </script>

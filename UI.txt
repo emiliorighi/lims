@@ -1,0 +1,14 @@
+HOME
+    CREATE PROJECT
+    PROJECTS LIST --> DELETE PROJECT
+        PROJECT ID
+            SAMPLES
+            EXPERIMENTS
+            CREATE SAMPLE
+            CREATE EXPERIMENT
+            REPORT
+        
+    USERS
+        CRUD USERS
+    
+        

@@ -1,35 +1,32 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-
-import AppLayout from '../layouts/AppLayout.vue'
-
-import RouteViewComponent from '../layouts/RouterBypass.vue'
+// import RouterByPass from '../layouts/RouterByPass.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: '/:catchAll(.*)',
-    redirect: { name: 'dashboard' },
-  },
-  // {
-  //   name: 'projects',
-  //   path: '/projects',
-  //   component: () => import('../pages/project/Projects.vue'),
-  // },
-  {
-    name: 'home',
+    name: 'projects',
     path: '/',
-    component: AppLayout,
-    children: [
+    component: () => import('../pages/project/Projects.vue'),
+  },
+  {
+    name: 'project',
+    path: '/projects/:id',
+    props: true,
+    component: () => import('../layouts/RouterBypass.vue'),
+    children:[
       {
-        name: 'projects',
-        path: 'projects',
-        component: () => import('../pages/project/Projects.vue'),
-      },
-      {
-        name: 'projects',
-        path: 'projects/:id',
-        props: true,
+        path: '',
         component: () => import('../pages/project/Project.vue'),
       },
+      {
+        name: 'sample-form',
+        path: 'sample-form',
+        component: () => import('../pages/forms/Sample.vue')
+      }
+    ]
+  },
+
+
+
       // {
       //   name: 'biosamples',
       //   path: 'biosamples',
@@ -187,8 +184,6 @@ const routes: Array<RouteRecordRaw> = [
       //   ],
       // },
       // UIRoute,
-    ],
-  }
 ]
 
 const router = createRouter({

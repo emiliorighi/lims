@@ -5,8 +5,8 @@ const initSchema: Record<string, any> = {
   name: '',
   description: '',
   version: '',
-  experiment: {},
-  sample: {},
+  experiment: [],
+  sample: [],
 }
 
 const initSearchForm = {

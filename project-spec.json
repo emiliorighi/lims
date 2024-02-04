@@ -1,0 +1,149 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "description": {
+      "type": "string"
+    },
+    "version": {
+      "type": "string"
+    },
+    "sample": {
+      "$ref": "#/definitions/model"
+    },
+    "experiment": {
+      "$ref": "#/definitions/model"
+    }
+  },
+  "required": [
+    "name",
+    "description",
+    "version",
+    "sample",
+    "experiment"
+  ],
+  "definitions": {
+    "model": {
+      "type": "object",
+      "properties": {
+        "fields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/filter"
+          }
+        },
+        "id_format": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required": [
+      "fields",
+      "id_format"
+    ]
+  },
+  "input": {
+    "type": "object",
+    "properties": {
+      "input_type": {
+        "type": "string",
+        "enum": [
+          "text",
+          "number",
+          "date"
+        ]
+      },
+      "regex": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "default": null
+      }
+    },
+    "required": [
+      "input_type"
+    ],
+    "additionalProperties": false
+  },
+  "select": {
+    "type": "object",
+    "properties": {
+      "multi": {
+        "type": "boolean"
+      },
+      "choices": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": [
+      "multi",
+      "choices"
+    ],
+    "additionalProperties": false
+  },
+  "range": {
+    "type": "object",
+    "properties": {
+      "min": {
+        "type": "string"
+      },
+      "max": {
+        "type": "string"
+      },
+      "unit": {
+        "type": "string"
+      }
+    },
+    "required": [
+      "min",
+      "max",
+      "unit"
+    ],
+    "additionalProperties": false
+  },
+  "filter": {
+    "type": "object",
+    "properties": {
+      "label": {
+        "type": "string"
+      },
+      "description": {
+        "type": "string"
+      },
+      "key": {
+        "type": "string"
+      },
+      "required": {
+        "type": "boolean"
+      },
+      "filter": {
+        "oneOf": [
+          {
+            "$ref": "#/definitions/input"
+          },
+          {
+            "$ref": "#/definitions/select"
+          },
+          {
+            "$ref": "#/definitions/range"
+          }
+        ]
+      }
+    },
+    "required": [
+      "filter",
+      "label",
+      "key",
+      "required"
+    ]
+  }
+}
