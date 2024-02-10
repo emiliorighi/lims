@@ -1,21 +1,15 @@
-from db.models import BioSample,Assembly,Experiment,Organism,SampleCoordinates
+from db.models import Sample,Project
 from errors import NotFound
-from ..utils import ena_client
-from ..organism import organisms_service
-from ..sample_location import sample_locations_service
 from datetime import datetime
 from mongoengine.queryset.visitor import Q
-import os
-
-PROJECTS = [p.strip() for p in os.getenv('PROJECTS').split(',') if p] if os.getenv('PROJECTS') else None
 
 
-def get_biosamples(offset=0,limit=20,
-                    filter=None, filter_option="scientific_name",
+def get_samples(offset=0,limit=20,
+                    filter=None,
                     start_date=None, end_date=datetime.utcnow,
                     sort_column=None, sort_order=None):
     if filter:
-        filter_query = get_filter(filter,filter_option)
+        projects= Sample.objects((Q(name__icontains=filter) | Q(name__iexact=filter))).exclude('id','created')
     else:
         filter_query = None
     if start_date:
@@ -23,19 +17,85 @@ def get_biosamples(offset=0,limit=20,
     else:
         date_query = None
     if filter_query and date_query:
-        biosamples = BioSample.objects(filter_query & date_query).exclude('id','created')
+        samples = BioSample.objects(filter_query & date_query).exclude('id','created')
     elif filter_query:
-        biosamples = BioSample.objects(filter_query).exclude('id','created')
+        samples = BioSample.objects(filter_query).exclude('id','created')
     elif date_query:
-        biosamples = BioSample.objects(date_query).exclude('id','created')
+        samples = BioSample.objects(date_query).exclude('id','created')
     else:
-        biosamples = BioSample.objects().exclude('id','created')
+        samples = BioSample.objects().exclude('id','created')
     if sort_column:
         if sort_column == 'collection_date':
             sort_column = 'metadata.collection_date'
         sort = '-'+sort_column if sort_order == 'desc' else sort_column
-        biosamples = biosamples.order_by(sort)
-    return biosamples.count(), biosamples[int(offset):int(offset)+int(limit)]
+        samples = samples.order_by(sort)
+    return samples.count(), samples[int(offset):int(offset)+int(limit)]
+
+
+def get_samples(project_id, offset=0,limit=20,
+                    filter=None,filter_field=None,
+                    start_date=None, end_date=datetime.utcnow,
+                    sort_column=None, sort_order=None):
+    project = Project.objects(project_id=project_id).first()
+    if not project:
+        raise NotFound
+    samples = Sample.objects(project=project_id)
+    filter_query = None
+    if filter_field and filter:
+        key = f"{filter_query}__icontains"
+        query = dict()
+        query[key]=filter
+        filter_query = (Q(query))
+    date_query = None
+    if start_date:
+        date_query = (Q(created__gte=start_date) & Q(created__lte=end_date))
+    if filter_query and date_query:
+        samples = samples.filter(filter_query & date_query)
+    elif filter_query:
+        samples = samples.filter(filter_query)
+    elif date_query:
+        samples = samples.filter(date_query)
+    samples = samples.exclude('id', 'created')
+    if sort_column:
+        sort = '-'+sort_column if sort_order == 'desc' else sort_column
+        samples = samples.order_by(sort)
+    return samples.count(), samples[int(offset):int(offset)+int(limit)]
+
+def get_sample(id):
+    samples = Sample.objects(sample_id=id).exclude('id','created')
+    if not samples.first():
+        raise NotFound
+    return samples.as_pymongo()[0]
+    
+
+def create_sample(project_id, data):
+    project = Project.objects(project_id=project_id).first()
+    if not project:
+        raise NotFound
+    samples = Sample.objects(project=project_id)
+    required_fields = [f for f in project.sample['fields'] if f['required']]
+    id_fields = project.sample['id_fields']
+    sample_id = [attr for attr in data.keys() if attr in id_fields].join('_')
+    if sample_id:
+        sample = samples.filter(sample_id=sample_id).first()
+    # VALIDATION STEPS:
+    # 1) VALIDATE ID
+    # 2) VALIDATE REQUIRED FIELDS
+    # 3) VALIDATE FIELDS
+    # 4) SAVE DOCUMENT
+def update_sample(id,data):
+    sample = Sample.objects(sample_id=id)
+    if not sample.first():
+        raise NotFound
+    sample.update(**data)
+    return f"Sample {id} successfully updated", 201
+
+def delete_sample(id):
+    sample = Sample.objects(sample_id=id).first()
+    if not sample:
+        raise NotFound
+    sample.delete()
+    return f"Sample {id} successfully deleted",201
 
 def get_filter(filter, option):
     if option == 'taxid':
@@ -53,7 +113,7 @@ def create_related_biosample(accession):
     biosample_obj = BioSample.objects(accession=accession).first()
     if biosample_obj:
         return biosample_obj
-    biosample_response = ena_client.get_sample_from_biosamples(accession)
+    biosample_response = ena_client.get_sample_from_samples(accession)
     if not biosample_response:
         return
     biosample_obj = create_biosample_from_ebi_data(biosample_response)
@@ -66,7 +126,7 @@ def create_biosample_from_accession(accession):
         resp_obj['message'] = f"{accession} already exists"
         resp_obj['status'] = 400
         return resp_obj
-    biosample_response = ena_client.get_sample_from_biosamples(accession)
+    biosample_response = ena_client.get_sample_from_samples(accession)
     if not biosample_response:
         resp_obj['message'] = f"{accession} not found in INSDC"
         resp_obj['status'] = 400
@@ -93,7 +153,7 @@ def create_biosample_from_ncbi_data(accession, ncbi_response, organism):
     new_biosample = BioSample(metadata=extra_metadata,**required_metadata).save()
     sample_locations_service.save_coordinates(new_biosample)
     sample_locations_service.update_countries_from_biosample(new_biosample)
-    organism.modify(add_to_set__biosamples=new_biosample.accession)
+    organism.modify(add_to_set__samples=new_biosample.accession)
     organism.save()
     return new_biosample
 
@@ -119,10 +179,10 @@ def create_biosample_from_ebi_data(sample):
         if father_biosample:
             print(f'father sample {father_biosample.accession} created')
             father_biosample.modify(add_to_set__sub_samples=new_biosample.accession)
-            organism.modify(add_to_set__biosamples=sample_derived_from)
+            organism.modify(add_to_set__samples=sample_derived_from)
     else:
         print(f'appending sample {new_biosample.accession} to {organism.scientific_name}')
-        organism.modify(add_to_set__biosamples=new_biosample.accession)
+        organism.modify(add_to_set__samples=new_biosample.accession)
         organism.save()
     return new_biosample
     
@@ -135,7 +195,7 @@ def delete_biosample(accession):
     Experiment.objects(metadata__sample_accession=biosample_to_delete.accession).delete()
     SampleCoordinates.objects(sample_accession=accession).delete()
     organism = Organism.objects(taxid=biosample_to_delete.taxid).first()
-    organism.modify(pull__biosamples=biosample_to_delete.accession)
+    organism.modify(pull__samples=biosample_to_delete.accession)
     organism.save()
     biosample_to_delete.delete()
     return accession
@@ -146,9 +206,9 @@ def parse_sample_metadata(metadata):
         sample_metadata[k] = metadata[k][0]['text']
     return sample_metadata
 
-def map_samples_by_relationship(biosamples):
+def map_samples_by_relationship(samples):
     samples_derived_from = {}
-    for biosample in biosamples:
+    for biosample in samples:
         if biosample.metadata and 'sample derived from' in biosample.metadata.keys():
             parent_accession = biosample.metadata['sample derived from']
             if not parent_accession in samples_derived_from.keys():

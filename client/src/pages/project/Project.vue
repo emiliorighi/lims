@@ -1,8 +1,26 @@
 <template>
     <div>
+        <h1 class="va-h1">
+            {{ schemaStore.schema.project_id }}
+        </h1>
+        <p> <b>Name:</b> {{ schemaStore.schema.name }}</p>
+        <p> <b>Version:</b> {{ schemaStore.schema.version }}</p>
+        <p v-if="schemaStore.schema.description"> <b>Description:</b> {{ schemaStore.schema.description }}</p>
+        <va-divider />
+        <va-tabs grow v-model="tab">
+            <template #tabs>
+                <va-tab v-for="t in ['Sample', 'Experiment']" :key="t" :name="t">
+                    {{ t }}
+                </va-tab>
+            </template>
+        </va-tabs>
+        <va-card>
+            <va-data-table>
+                
+            </va-data-table>
+        </va-card>
         <div class="row justify-center">
             <div class="flex">
-                {{ project.name }}
             </div>
         </div>
         <div class="row justify-space-between">
@@ -66,19 +84,22 @@
     </div> -->
 </template>
 <script setup lang="ts">
-import { onMounted } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useSchemaStore } from '../../stores/schemas-store';
 import { useRouter } from 'vue-router';
 import ProjectService from '../../services/clients/ProjectService';
 
 const schemaStore = useSchemaStore()
 const router = useRouter()
-const project = schemaStore.schema
 const props = defineProps<{
     id: string
 }>()
 
-onMounted(async () => {
-    if (!project.project_id) schemaStore.schema = await ProjectService.getProject(props.id)
+const tab = ref('Sample')
+
+watchEffect(async () => {
+    const { data } = await ProjectService.getProject(props.id)
+    schemaStore.schema = { ...data }
 })
+
 </script>

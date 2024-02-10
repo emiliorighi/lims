@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { SchemaForm } from '../data/types'
 
 const initSchema: SchemaForm = {
-  id: '',
+  project_id: '',
   name: '',
   description: '',
   version: '',

@@ -7,7 +7,6 @@ ROLES:
     - EXPERIMENT-MANAGER: CRUD EXPERIMENT
     - PROJECTS-MANAGAER: CRUD SAMPLE, CRUD EXPERIMENT, ADD-USER TO PROJECT, CR PROJECT
     - ADMIN: CRUD ALL
-
 """
 
 class Roles(Enum):
@@ -16,8 +15,6 @@ class Roles(Enum):
     EXPERIMENT_MANAGER = 'experiment_manager'
     PROJECTS_MANAGER = 'project_manager'
     ADMIN = 'admin'
-
-
 
 # class AccessRights(Enum):
 #     READ

@@ -42,7 +42,6 @@ class ProjectDraft(db.Document):
     experiment = db.DictField()
     sample = db.DictField()
     created = db.DateTimeField(default=datetime.datetime.utcnow)
-    user=db.StringField(required=True)
     valid=db.BooleanField(default=False)
     meta = {
         'indexes': [
@@ -54,8 +53,8 @@ class ProjectDraft(db.Document):
 
 class Experiment(db.Document):
     sample_id= db.StringField(required=True)
-    id= db.StringField(unique=True,required=True)
-    user=db.StringField(required=True)
+    experiment_id= db.StringField(unique=True,required=True)
+    # user=db.StringField(required=True)
     created = db.DateTimeField(default=datetime.datetime.utcnow)
     project=db.StringField(required=True)
     metadata=db.DictField()
@@ -88,10 +87,10 @@ class Analysis(db.Document):
 
 class Sample(db.Document):
     created = db.DateTimeField(default=datetime.datetime.utcnow)
-    id = db.StringField(required=True,unique=True)
+    sample_id = db.StringField(required=True,unique=True)
     taxid = db.StringField()
     scientific_name = db.StringField()
-    user=db.StringField(required=True)
+    # user=db.StringField(required=True)
     project=db.StringField(required=True)
     metadata=db.DictField()
     meta = {

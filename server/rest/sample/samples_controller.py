@@ -7,8 +7,23 @@ from errors import NotFound
 from flask_jwt_extended import jwt_required
 
 
-FIELDS_TO_EXCLUDE = ['id','created','last_check']
+class SamplesApi(Resource):
+    def get(self, project_id):
+        return
+        
+    def post(self, project_id):
+        return
 
+class SampleApi(Resource):
+    def get(self, project_id, sample_id):
+        return
+    
+    def put(self, project_id,sample_id):
+
+        return
+    def delete(self, project_id, sample_id):
+
+        return
 
 class BioSampleApi(Resource):
     def get(self, accession):

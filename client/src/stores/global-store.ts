@@ -1,10 +1,13 @@
 import { defineStore } from 'pinia'
+import { useToast } from 'vuestic-ui'
+const { init } = useToast()
 
 export const useGlobalStore = defineStore('global', {
   state: () => {
     return {
-      isSidebarMinimized: false,
-      userName: 'Vasili S',
+      isSidebarMinimized: true,
+      userName: 'User',
+      toast: init
     }
   },
 

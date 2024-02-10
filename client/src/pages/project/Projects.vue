@@ -1,7 +1,7 @@
 <template>
     <div class="row justify-end">
         <div class="flex">
-            <va-button>create project</va-button>
+            <va-button :to="{name:'project-form'}">create project</va-button>
         </div>
     </div>
     <va-divider />
@@ -10,8 +10,8 @@
             <va-card>
                 <va-data-table :items="projects" :columns="['name', 'description', 'version', 'action']">
                     <template #cell(action)="{ rowData }">
-                        <va-button @click="useProject(rowData)">
-                            Select schema
+                        <va-button size="small" :to="{name:'project', params:{id:rowData.project_id}}">
+                            Select
                         </va-button>
                     </template>
                 </va-data-table>
@@ -35,10 +35,10 @@ onMounted(async () => {
     projects.value = data.data
 })
 
-function useProject(project: Record<string, any>) {
-    console.log(project)
-    schemaStore.schema = { ...project }
-    router.push({ name: 'project', params: { id: schemaStore.schema.project_id } })
-}
+// function useProject(project: Record<string, any>) {
+//     console.log(project)
+//     schemaStore.schema = { ...project }
+//     router.push({ name: 'project', params: { id: schemaStore.schema.project_id } })
+// }
 
 </script>

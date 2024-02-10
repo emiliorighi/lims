@@ -15,11 +15,12 @@ export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDo
 type GeneralFilter<T> = {
   [K in keyof T]?: T[K]
 }
-
+export type FieldType = "input" | "select" | "range";
 export type ProjectModel = {
   fields : Filter[],
   id_format: string[]
 }
+export const fieldTypes = ['input','select','range']
 
 export type Filter = {
   label: string
@@ -46,7 +47,7 @@ export type Range = {
   unit: string
 }
 export interface SchemaForm {
-  id: string,
+  project_id: string,
   name: string,
   version: string,
   description?: string,
