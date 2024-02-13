@@ -1,16 +1,15 @@
 import { defineStore } from 'pinia'
+import { SampleModel } from '../data/types'
 
-const initSample: Record<string, any> = {
-  id: '',
-  user: '',
-  project: '',
-  version: '',
+const defaultSample: SampleModel = {
+  sample_id: '',
   metadata: {}
 }
 
 const initSearchForm = {
-  filter: '',
-  sort_order: ''
+  filters: {} as Record<string,any>,
+  sort_column: '',
+  sort_order: 'asc' as 'asc' | 'desc'
 }
 
 const initPagination = {
@@ -18,10 +17,11 @@ const initPagination = {
   limit: 10,
 }
 
-export const useSampleStore = defineStore('schema', {
+export const useSampleStore = defineStore('sample', {
   state: () => {
     return {
-      sample: { ...initSample },
+      sample: null as SampleModel | null,
+      isUpdate: false,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }
@@ -31,11 +31,14 @@ export const useSampleStore = defineStore('schema', {
     resetSeachForm() {
       this.searchForm = { ...initSearchForm }
     },
+    initSample(){
+      this.sample = {...defaultSample}
+    },
     resetPagination() {
       this.pagination = { ...initPagination }
     },
     resetSample() {
-      this.sample = { ...initSample }
+      this.sample = null
     }
   },
 })

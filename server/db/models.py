@@ -28,6 +28,7 @@ class Project(db.Document):
     created = db.DateTimeField(default=datetime.datetime.utcnow)
     meta = {
         'indexes': [
+            'project_id',
             'name',
             '$name',
             ('name','-version')
@@ -45,10 +46,10 @@ class ProjectDraft(db.Document):
     valid=db.BooleanField(default=False)
     meta = {
         'indexes': [
+            'project_id',
             'name',
-            '$name',
-            ('name','-version')
-            ]
+            'version'
+        ]
     }
 
 class Experiment(db.Document):
@@ -59,7 +60,7 @@ class Experiment(db.Document):
     project=db.StringField(required=True)
     metadata=db.DictField()
     meta = {
-        'indexes': ['id']
+        'indexes': ['experiment_id','sample_id']
     }
 
 class File(db.Document):
@@ -87,7 +88,7 @@ class Analysis(db.Document):
 
 class Sample(db.Document):
     created = db.DateTimeField(default=datetime.datetime.utcnow)
-    sample_id = db.StringField(required=True,unique=True)
+    sample_id = db.StringField(required=True)
     taxid = db.StringField()
     scientific_name = db.StringField()
     # user=db.StringField(required=True)
@@ -95,13 +96,13 @@ class Sample(db.Document):
     metadata=db.DictField()
     meta = {
         'indexes': [
-            'id',
-            'taxid',
-            'scientific_name'
+            'project',
+            'sample_id',
+            ('project','sample_id')
+
         ],
         'strict': False
     }
-
 
 class User(db.Document):
     name=db.StringField(unique=True,required=True)

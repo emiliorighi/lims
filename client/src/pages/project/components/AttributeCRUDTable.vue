@@ -19,7 +19,7 @@
             <VaButton preset="plain" icon="delete" color="danger" class="ml-3" @click="deleteAttribute(rowIndex)" />
         </template>
     </VaDataTable>
-    <AttributeFormModal :model="model" />
+    <AttributeFormModal  :model="model" />
 </template>
 <script setup lang="ts">
 import { useProjectStore } from '../../../stores/project-store'

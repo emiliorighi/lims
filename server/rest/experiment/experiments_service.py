@@ -1,120 +1,119 @@
-from db.models import BioSample, Experiment, Organism
+from db.models import Sample,Project,Experiment
 from errors import NotFound
-from ..sample import samples_service
-from ..organism import organisms_service
-from ..utils import ena_client
-from mongoengine.queryset.visitor import Q
 from datetime import datetime
+from mongoengine.queryset.visitor import Q
+from ..utils import utils
 
-def get_reads(offset=0,limit=20,
-                filter=None, filter_option="scientific_name",
-                start_date=None, end_date=datetime.utcnow,
-                sort_column=None,sort_order=None, center=None):
-    query = dict()
-    if center:
-        query['metadata__center_name'] = center
-    filter_query = None
-    if filter:
-        filter_query = get_filter(filter,filter_option)
-    date_query = None        
-    if start_date:
-        date_query = (Q(metadata__first_created__gte=start_date) & Q(metadata__first_created__lte=end_date))
-    if filter_query and date_query:
-        reads = Experiment.objects(filter_query & date_query, **query).exclude('id','created')
-    elif filter_query:
-        reads = Experiment.objects(filter_query,**query).exclude('id','created')
-    elif date_query:
-        reads = Experiment.objects(date_query,**query).exclude('id','created')
-    else:
-        reads = Experiment.objects(**query).exclude('id','created')
-    if sort_column and sort_column == "first_created":
-        sort_column = 'metadata.first_created'
-        sort = '-'+sort_column if sort_order == 'desc' else sort_column
-        reads = reads.order_by(sort)
-    return reads.count(), reads[int(offset):int(offset)+int(limit)]
-
-def get_filter(filter, option):
-    if option == 'taxid':
-        return (Q(taxid__iexact=filter) | Q(taxid__icontains=filter))
-    elif option == 'instrument_platform':
-        return (Q(instrument_platform__iexact=filter) | Q(instrument_platform__icontains=filter))
-    elif option == 'experiment_title':
-        return (Q(metadata__experiment_title__icontains=filter))
-    else:
-        return (Q(metadata__scientific_name__iexact=filter) | Q(metadata__scientific_name__icontains=filter))
-
-def create_read_from_experiment_accession(accession):
-    response = ena_client.get_reads(accession)
-    saved_accessions = list()
-    resp_obj = dict()
-    if not response:
-        resp_obj['message'] = f"{accession} not found in INSDC"
-        resp_obj['status'] = 400
-        return resp_obj
-    for exp in response:
-        if Experiment.objects(experiment_accession=exp['experiment_accession']).first():
-            resp_obj['message'] = f"{accession} already exists"
-            resp_obj['status'] = 400
-            return resp_obj
-        exp_metadata = dict()
-        other_attributes = dict()
-        for k in exp.keys():
-            if k == 'tax_id':
-                other_attributes['taxid'] = exp[k]
-            elif k in ['instrument_model','instrument_platform','experiment_accession']:
-                other_attributes[k] = exp[k]
-            else:
-                exp_metadata[k] = exp[k]
-        organism_obj = organisms_service.get_or_create_organism(other_attributes['taxid'])
-        if not organism_obj:
-            resp_obj['message'] = f"organism with taxid: {other_attributes['taxid']} not found"
-            resp_obj['status'] = 400
-            return resp_obj
-        if 'sample_accession' in exp_metadata.keys():
-            samples_service.create_related_biosample(exp_metadata['sample_accession'])
-        exp_obj = Experiment(metadata=exp_metadata, **other_attributes).save()
-        organism_obj.modify(add_to_set__experiments=exp_obj.experiment_accession)
-        organism_obj.save()
-        ##create data here
-        saved_accessions.append(exp_obj.experiment_accession)
-    if saved_accessions:
-        resp_obj['message'] = saved_accessions
-        resp_obj['status'] = 201
-        return resp_obj
-    resp_obj['message'] = 'Unhandled error'
-    resp_obj['status'] = 500
-    return resp_obj
-
-def delete_experiment(accession):
-    experiment_to_delete = Experiment.objects(experiment_accession=accession).first()
-    if not experiment_to_delete:
+def get_experiments(project_id, sample_id=None, offset=0,limit=20,
+                    filter=None,filter_field=None,
+                    start_date=None, end_date=datetime.utcnow,
+                    sort_column=None, sort_order=None):
+    query=dict()
+    if not Project.objects(project_id=project_id).first():
         raise NotFound
-    biosample = BioSample.objects(accession=experiment_to_delete.metadata['sample_accession']).first()
-    biosample.modify(pull__experiments=experiment_to_delete.experiment_accession)
-    organism = Organism.objects(taxid=biosample.taxid).first()
-    organism.modify(pull__experiments=experiment_to_delete.experiment_accession)
-    organism.save()
-    experiment_to_delete.delete()
-    return accession
+    query['project'] = project_id
+
+    if sample_id:
+        if not Sample.objects(project=project_id, sample_id=sample_id).first():
+            raise NotFound
+        query['sample_id'] = sample_id
+    experiments = Experiment.objects(**query)
+    filter_query = None
+    if filter_field and filter:
+        key = f"{filter_query}__icontains"
+        query = dict()
+        query[key]=filter
+        filter_query = (Q(query))
+    date_query = None
+    if start_date:
+        date_query = (Q(created__gte=start_date) & Q(created__lte=end_date))
+    if filter_query and date_query:
+        experiments = experiments.filter(filter_query & date_query)
+    elif filter_query:
+        experiments = experiments.filter(filter_query)
+    elif date_query:
+        experiments = experiments.filter(date_query)
+    experiments = experiments.exclude('id', 'created')
+    if sort_column:
+        sort = '-'+sort_column if sort_order == 'desc' else sort_column
+        experiments = experiments.order_by(sort)
+    return experiments.count(), experiments[int(offset):int(offset)+int(limit)]
+
+def get_experiment(project_id, experiment_id):
+    experiments = Sample.objects(project=project_id,experiment_id=experiment_id).exclude('id','created')
+    if not experiments.first():
+        raise NotFound
+    return experiments.as_pymongo()[0]
+
+def create_experiment(project_id, sample_id, data):
+    project = Project.objects(project_id=project_id).first()
+    
+    if not project:
+        raise NotFound
+    
+    # Fetch experiments for the project
+    experiments = Experiment.objects(project=project.project_id)
+    
+    # Get required fields and id fields from project definition
+    id_fields = project.experiment.get('id_fields', [])
+
+    # Generate sample ID based on id fields
+    experiment_id = '_'.join(str(data.get(attr)) for attr in id_fields)
+    
+    # Check if sample ID could be generated
+    if not experiment_id:
+        return ["Unable to generate ID with specified fields"], 400
+    
+    # Check if the sample already exists
+    if experiments.filter(experiment_id_id=experiment_id).first():
+        return [f"Sample {experiment_id} already exists!"], 400
+
+    # Check for missing required fields
+    required_fields = [f['key'] for f in project.sample['fields'] if f.get('required')]
+    missing_fields = [req_field for req_field in required_fields if req_field not in data or not data.get(req_field)]
+    if missing_fields:
+        return [f"{', '.join(missing_fields)} is/are mandatory"], 400
+    
+    evaluation_errors = utils.evaluate_fields(project, data)
+    if evaluation_errors:
+        return evaluation_errors, 400
+
+    new_experiment = Experiment(
+        project=project_id,
+        sample_id=sample_id,
+        experiment_id=experiment_id,
+        metadata=data
+    ).save()
+
+    return [f"Experiment {experiment_id} of {project_id} correctly saved!"], 201  # Return the created sample with 201 Created status
 
 
-def create_reads_from_biosample_accession(accession):
-    response = ena_client.get_reads(accession)
-    saved_accessions = list()
-    if not response:
-        print(f'Reads for {accession} not found')
-        return
-    for exp in response:
-        exp_metadata = dict()
-        other_attributes = dict()
-        for k in exp.keys():
-            if k == 'tax_id':
-                other_attributes['taxid'] = exp[k]
-            elif k in ['instrument_model','instrument_platform','experiment_accession']:
-                other_attributes[k] = exp[k]
-            else:
-                exp_metadata[k] = exp[k]
-        exp_obj = Experiment(metadata=exp_metadata, **other_attributes).save()
-        ##create data here
-        saved_accessions.append(exp_obj.experiment_accession)
-    return saved_accessions
+def update_experiment(project_id,experiment_id,data):
+    project = Project.objects(project_id=project_id).first()
+    if not project:
+        raise NotFound
+    experiment = Experiment.objects(project_id=project_id,experiment_id=experiment_id)
+    if not experiment.first():
+        raise NotFound
+       # Get required fields and id fields from project definition
+    id_fields = project.sample.get('id_fields', [])
+    # Generate sample ID based on id fields
+    new_experiment_id = '_'.join(str(data.get(attr)) for attr in id_fields)
+    if experiment_id != new_experiment_id:
+        message = f"Experiment {experiment_id} has changed into {new_experiment_id}, the value of the fields {','.join(id_fields)} can't be changed"
+        return [message], 400
+    evaluation_errors = utils.evaluate_fields(project, experiment.metadata)
+    if evaluation_errors:
+        return evaluation_errors, 400
+    experiment.update(metadata=data)
+    return [f"Experiment {experiment_id} successfully updated"], 201
+
+def delete_experiment(project_id, experiment_id):
+    project = Project.objects(project_id=project_id).first()
+    if not project:
+        raise NotFound
+    experiment = Experiment.objects(project_id=project_id,experiment_id=experiment_id)
+    if not experiment.first():
+        raise NotFound
+    experiment.delete()
+    return[ f"Sample {id} successfully deleted"],201

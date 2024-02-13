@@ -7,6 +7,7 @@ from .project import projects_controller
 from .experiment import experiments_controller
 from .sample import samples_controller
 from .draft_project import draft_projects_controller
+
 def initialize_routes(api):
 
 	##ADMIN
@@ -18,7 +19,8 @@ def initialize_routes(api):
 
 	api.add_resource(samples_controller.SamplesApi, '/api/projects/<project_id>/samples')
 	api.add_resource(samples_controller.SampleApi, '/api/projects/<project_id>/samples/<sample_id>')
-	
+	api.add_resource(experiments_controller.ExperimentsBySampleApi, '/api/projects/<project_id>/samples/<sample_id>/experiments')
+
 	api.add_resource(experiments_controller.ExperimentsApi, '/api/projects/<project_id>/experiments')
 	api.add_resource(experiments_controller.ExperimentApi, '/api/projects/<project_id>/experiments/<experiment_id>')
 

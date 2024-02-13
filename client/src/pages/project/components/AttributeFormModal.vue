@@ -1,10 +1,10 @@
 <template>
-    <VaModal class="modal-crud" :model-value="!!attributeStore.attribute" @ok="submitAttribute" @cancel="resetAttribute">
+    <VaModal class="modal-crud" :model-value="!!attributeStore.attribute" @ok="submitAttribute" @cancel="resetAttribute()">
         <template #header>
             <h2 class="va-h2"> Editing attribute</h2>
         </template>
         <VaForm ref="attributeForm">
-            <div v-if="attributeStore.attribute !== null" class="row">
+            <div v-if="attributeStore.attribute" class="row">
                 <div class="flex sm12 xs12">
                     <VaInput label="Attribute key" :rules="[(v: string) => project[model].fields.findIndex(it => it.key === v) === -1 || project[model].fields.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
                     (v: string) => v.length > 0 || 'Key is required!']" v-model="attributeStore.attribute.key" />
@@ -35,11 +35,6 @@
                                     <VaSelect class="mt-2" label="Is field multiple choice" v-model="select.multi"
                                         :options="[true, false]" />
                                     <div class="row justify-center">
-                                        <div class="flex">
-                                            <VaButton class="mt-2" size="small" @click="select.choices.push('')" icon="add">
-                                                New choice
-                                            </VaButton>
-                                        </div>
                                         <div v-for="(choice, index) in select.choices" class="flex lg12 md12 sm12 xs12"
                                             :key="index">
                                             <VaInput :label="`Choice number: ${index}`" class="mt-2"
@@ -52,15 +47,20 @@
                                                 </template>
                                             </VaInput>
                                         </div>
+                                        <div class="flex">
+                                            <VaButton class="mt-2" size="small" @click="select.choices.push('')" icon="add">
+                                                New choice
+                                            </VaButton>
+                                        </div>
                                     </div>
                                 </VaCardContent>
                                 <VaCardContent v-else>
-                                    <VaInput class="mt-2"
-                                        :rules="[(v: number) => v < range.max || 'min must be greater than max']"
-                                        type="number" label="min" v-model="range.min"></VaInput>
-                                    <VaInput class="mt-2"
-                                        :rules="[(v: number) => v > range.min || 'max must be greater than min']"
-                                        type="number" label="max" v-model="range.max"></VaInput>
+                                    <VaCounter class="mt-2" manual-input
+                                        :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v < range.max || 'min must be greater than max']"
+                                        type="number" label="min" v-model="range.min" />
+                                    <VaCounter class="mt-2" manual-input
+                                        :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v > range.min || 'max must be greater than min']"
+                                        type="number" label="max" v-model="range.max" />
                                     <VaInput class="mt-2" :rules="[(v: string) => v.length > 0 || 'unit is mandatory']"
                                         v-model="range.unit" label="unit"></VaInput>
                                 </VaCardContent>
@@ -88,19 +88,26 @@ const props = defineProps<{
     model: 'sample' | 'experiment'
 }>()
 
+const numberRule = (v: any) => typeof v === 'number' && !isNaN(v)
+
 watch(() => attributeStore.attribute, (newValue) => {
+    console.log(newValue)
     if (newValue) {
         const filterKeys = Object.keys(newValue.filter)
         if (filterKeys.includes('input_type')) {
             input.value = { ...newValue.filter as Input }
+            fType.value = 'input'
         }
         else if (filterKeys.includes('choices')) {
             select.value = { ...newValue.filter as Select }
+            fType.value = 'select'
         }
         else {
             range.value = { ...newValue.filter as Range }
+            fType.value = 'range'
         }
     }
+    // resetForms()
 })
 
 const fType = ref('input')
@@ -126,12 +133,14 @@ const range = ref<Range>({ ...initRange })
 function resetForms() {
     input.value = { ...initInput }
     select.value = { ...initSelect }
+    select.value.choices = [...['', ' ']]
     range.value = { ...initRange }
 }
 
 function submitAttribute() {
-    const {attribute, attributeId, reset} = attributeStore
-    if (validate() && attribute !== null) {
+    const { attribute, attributeId } = attributeStore
+    if (!validate()) return
+    if (attribute) {
         if (fType.value === 'input') {
             attribute.filter = { ...input.value }
         } else if (fType.value === 'select') {
@@ -148,19 +157,21 @@ function submitAttribute() {
         } else {
             project[props.model].fields.push({ ...attribute as Filter })
         }
-        reset()
-        resetForms()
+        resetAttribute()
     }
 }
 function resetAttribute() {
-    attributeStore.reset()
     resetForms()
+    attributeStore.reset()
 }
 
 </script>
 <style lang="scss" scoped>
 .modal-crud {
     .VaInput {
+        display: block;
+    }
+    .va-input-wrapper{
         display: block;
     }
 }

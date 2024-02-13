@@ -32,6 +32,6 @@ class ProjectsApi(Resource):
     # def get(self):
 
 class ProjectApi(Resource):
-    def get(self, id):
-        project = projects_service.get_project(id)
-        return Response(project.to_json(), mimetype="application/json", status=200)
+    def get(self, project_id):
+        project = projects_service.get_project(project_id)
+        return Response(json.dumps(project), mimetype="application/json", status=200)

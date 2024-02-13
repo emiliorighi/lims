@@ -9,7 +9,7 @@ model = Project
 JSON_SCHEMA_PATH='/server/project-spec.json'
 
 def get_project(id):
-    return utils.return_document_by_id(model, dict(project_id=id))
+    return utils.return_document_by_id(model, dict(project_id=id), ('id','created'))
 
 def get_projects(offset=0,limit=20,
                 filter=None,sort_order=None):

@@ -16,12 +16,12 @@ class DraftProjectsApi(Resource):
         return Response(json.dumps(message), mimetype="application/json", status=status)
     
 class DraftProjectApi(Resource):
-    def get(self,id):
-        project = draft_projects_service.get_draft_project(id)
+    def get(self,project_id):
+        project = draft_projects_service.get_draft_project(project_id)
         print(project)
         return Response(json.dumps(project), mimetype="application/json", status=200)
 
-    def put(self,id):
+    def put(self,project_id):
         data = request.json if request.is_json else request.form
-        message,status = draft_projects_service.update_draft_project(id,data)
+        message,status = draft_projects_service.update_draft_project(project_id,data)
         return Response(json.dumps(message), mimetype="application/json", status=status)

@@ -6,7 +6,7 @@ from ..utils import utils
 model = ProjectDraft
 
 def get_draft_project(id):
-    return utils.return_document_by_id(model, dict(project_id=id))
+    return utils.return_document_by_id(model, dict(project_id=id), fields_to_exclude=['id','created','valid'])
 
 def create_draft_project(data):
     for req_field in ['project_id', 'name','version']:

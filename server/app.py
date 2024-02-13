@@ -3,10 +3,8 @@ from flask_cors import CORS
 from config import BaseConfig
 from rest import initialize_api
 from flask_jwt_extended import JWTManager
-from tendo.singleton import SingleInstance
 from flask_mongoengine import MongoEngine
 
-import os
 
 
 app = Flask(__name__)
@@ -21,6 +19,7 @@ app.config["JWT_COOKIE_SAMESITE"] = "None"
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 
 db = MongoEngine()
+
 app.logger.info("Initializing MongoDB")
 db.init_app(app)
 
@@ -29,6 +28,8 @@ initialize_api(app)
 CORS(app)
 
 jwt = JWTManager(app)
+
+# Project.drop_collection()
 
 # username = os.getenv('DB_USER')
 # password = os.getenv('DB_PASS')
