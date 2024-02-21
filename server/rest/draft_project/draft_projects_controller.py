@@ -11,7 +11,6 @@ class DraftProjectsApi(Resource):
     
     def post(self):
         data = request.json if request.is_json else request.form
-        print(data.keys())
         message,status = draft_projects_service.create_draft_project(data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
     

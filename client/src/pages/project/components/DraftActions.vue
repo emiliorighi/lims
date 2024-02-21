@@ -15,11 +15,12 @@ import { ref } from 'vue';
 const isLoading = ref(false)
 const projectStore = useProjectStore()
 const { toast } = useGlobalStore()
-
 async function saveDraft() {
     isLoading.value = true
     await checkDraftProjectExists(projectStore.project.project_id)
-    if (projectStore.existingDraftProject === null) await createDraftProject()
+    if (projectStore.existingDraftProject === null){
+        await createDraftProject()
+    } 
     isLoading.value = false
 }
 
@@ -46,6 +47,7 @@ async function createDraftProject() {
 
     }
 }
+
 
 
 </script>

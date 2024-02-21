@@ -6,11 +6,11 @@
         <VaForm ref="attributeForm">
             <div v-if="attributeStore.attribute" class="row">
                 <div class="flex sm12 xs12">
-                    <VaInput label="Attribute key" :rules="[(v: string) => project[model].fields.findIndex(it => it.key === v) === -1 || project[model].fields.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
+                    <VaInput label="Attribute key" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.key === v) === -1 || attributeStore.attributes.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
                     (v: string) => v.length > 0 || 'Key is required!']" v-model="attributeStore.attribute.key" />
                 </div>
                 <div class="flex sm12 xs12">
-                    <VaInput class="mt-2" :rules="[(v: string) => project[model].fields.findIndex(it => it.label === v) === -1 || project[model].fields.findIndex(it => it.label === v) === attributeStore.attributeId || 'label must be unique',
+                    <VaInput class="mt-2" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.label === v) === -1 || attributeStore.attributes.findIndex(it => it.label === v) === attributeStore.attributeId || 'label must be unique',
                     (v: string) => v.length > 0 || 'Label is required!']" v-model="attributeStore.attribute.label"
                         label="Attribute label" />
                 </div>
@@ -84,30 +84,27 @@ const { validate } = useForm('attributeForm')
 const attributeStore = useAttributeStore()
 const { project } = useProjectStore()
 
-const props = defineProps<{
-    model: 'sample' | 'experiment'
-}>()
-
 const numberRule = (v: any) => typeof v === 'number' && !isNaN(v)
 
 watch(() => attributeStore.attribute, (newValue) => {
-    console.log(newValue)
-    if (newValue) {
-        const filterKeys = Object.keys(newValue.filter)
-        if (filterKeys.includes('input_type')) {
-            input.value = { ...newValue.filter as Input }
-            fType.value = 'input'
-        }
-        else if (filterKeys.includes('choices')) {
-            select.value = { ...newValue.filter as Select }
-            fType.value = 'select'
-        }
-        else {
-            range.value = { ...newValue.filter as Range }
-            fType.value = 'range'
-        }
+    if (!newValue) return
+
+    const filterKeys = Object.keys(newValue.filter)
+    if (filterKeys.includes('input_type')) {
+        input.value = { ...newValue.filter as Input }
+        fType.value = 'input'
     }
-    // resetForms()
+    else if (filterKeys.includes('choices')) {
+        const newSelect = newValue.filter as Select
+        select.value = { ...newSelect }
+        select.value.choices = [...newSelect.choices]
+        fType.value = 'select'
+    }
+    else {
+        range.value = { ...newValue.filter as Range }
+        fType.value = 'range'
+    }
+
 })
 
 const fType = ref('input')
@@ -133,7 +130,7 @@ const range = ref<Range>({ ...initRange })
 function resetForms() {
     input.value = { ...initInput }
     select.value = { ...initSelect }
-    select.value.choices = [...['', ' ']]
+    select.value.choices = [...['', '']]
     range.value = { ...initRange }
 }
 
@@ -149,13 +146,13 @@ function submitAttribute() {
             attribute.filter = { ...range.value }
         }
         if (attributeId !== null) {
-            project[props.model].fields = [
-                ...project[props.model].fields.slice(0, attributeId),
+            attributeStore.attributes = [
+                ...attributeStore.attributes.slice(0, attributeId),
                 { ...attribute },
-                ...project[props.model].fields.slice(attributeId + 1),
+                ...attributeStore.attributes.slice(attributeId + 1),
             ];
         } else {
-            project[props.model].fields.push({ ...attribute as Filter })
+            attributeStore.attributes.push({ ...attribute as Filter })
         }
         resetAttribute()
     }
@@ -171,7 +168,8 @@ function resetAttribute() {
     .VaInput {
         display: block;
     }
-    .va-input-wrapper{
+
+    .va-input-wrapper {
         display: block;
     }
 }

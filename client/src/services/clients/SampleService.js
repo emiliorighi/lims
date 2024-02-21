@@ -19,6 +19,9 @@ class SampleService {
     deleteSample(projectId, sampleId) {
         return base.delete(`/projects/${projectId}/samples/${sampleId}`)
     }
+    uploadSampleTSV(projectId, data){
+        return base.post(`/projects/${projectId}/samples/upload`, data)
+    }
 }
 
 export default new SampleService();

@@ -27,6 +27,7 @@ export type SampleModel = {
 
 export type ExperimentModel = {
   experiment_id:string,
+  sample_id:string,
   metadata:Record<string,any>
 }
 export const fieldTypes = ['input','select','range']
@@ -38,6 +39,7 @@ export type Filter = {
   key: string
   required: boolean
   value?: string
+  model?:'sample'|'experiment'
 }
 
 export type Input = {
@@ -54,6 +56,11 @@ export type Range = {
   min: number
   max: number
   unit: string
+}
+export interface ModelSearchForm {
+  filters: Record<string,any>
+  sort_column: string,
+  sort_order: 'asc' | 'desc'
 }
 export interface SchemaForm {
   project_id: string,

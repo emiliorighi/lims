@@ -16,7 +16,8 @@ export const useAttributeStore = defineStore('attribute', {
     state: () => {
         return {
             attribute: null as Filter | null,
-            attributeId: null as number | null
+            attributeId: null as number | null,
+            attributes: [] as Filter[]
         }
     },
     actions: {

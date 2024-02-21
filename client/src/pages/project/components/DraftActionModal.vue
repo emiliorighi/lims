@@ -5,8 +5,10 @@
             <h3 class="va-h3" v-if="projectStore.existingDraftProject !== null">{{
                 projectStore.existingDraftProject.project_id }} already exists!</h3>
         </template>
-
-        <VaCardBlock v-if="projectStore.existingDraftProject" horizontal>
+        <VaCardBlock v-if="projectStore.existingDraftProject && deepEqual(projectStore.project, projectStore.existingDraftProject)">
+            The draft project is up to date!
+        </VaCardBlock>
+        <VaCardBlock v-else-if="projectStore.existingDraftProject" horizontal>
             <VaCardBlock class="flex-auto">
                 <VaButton color="info" @click="updateDraftProject" icon-right="chevron_right"> Overwrite Existing Draft
                 </VaButton>
@@ -43,6 +45,31 @@ async function updateDraftProject() {
     }
 }
 
+function deepEqual(currentProject: Record<string, any>, incomingProject: Record<string, any>) {
+    // Check if both arguments are objects
+    if (typeof currentProject !== 'object' || typeof incomingProject !== 'object' || currentProject === null || incomingProject === null) {
+        return currentProject === incomingProject; // Check for strict equality if not objects
+    }
+
+    // Get the keys of both objects
+    var keys1 = Object.keys(currentProject);
+    var keys2 = Object.keys(incomingProject);
+
+    // Check if the number of keys is the same
+    if (keys1.length !== keys2.length) {
+        return false;
+    }
+
+    // Check if all keys in currentProject exist in incomingProject and have the same value (recursively)
+    for (var key of keys1) {
+        if (!keys2.includes(key) || !deepEqual(currentProject[key], incomingProject[key])) {
+            return false;
+        }
+    }
+
+    // If all checks pass, the objects are considered equal
+    return true;
+}
 
 
 </script>

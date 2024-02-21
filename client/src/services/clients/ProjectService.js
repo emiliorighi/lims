@@ -13,6 +13,9 @@ class ProjectService {
   createProject(data) {
     return base.post('/projects', data)
   }
+  inferAttributesProject(data){
+    return base.post('/projects/wrangling', data)
+  }
   getDraftProjects(params) {
     return base.get('/draft_projects', { params: params })
   }
@@ -25,8 +28,6 @@ class ProjectService {
   updateDraftProject(id, data){
     return base.put(`/draft_projects/${id}`, data)
   }
-
-
 }
 
 export default new ProjectService();

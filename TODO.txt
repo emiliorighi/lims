@@ -1,0 +1,39 @@
+Manage project names as a fixed list, where only the version can change..
+
+How to manage users?
+    --> Admin CRUD
+    
+    --> Project Manager
+        --> CRUD project_name in assigned project
+        --> CRUD us
+
+
+    --> Researcher
+
+    --> 
+        
+
+development todo:
+
+    --> tsv import logic
+        --> samples
+        --> expeiments
+        --> project from tsv
+            --> upload tsv
+            --> return mapped attributes
+            --> submit project
+    --> samples service
+    --> experiment service
+    --> user service
+
+
+THURSDAY DEMO:
+    - PROJECT CREATION
+        - INFER ATTRIBUTES FROM TSV(OPTIONAL)
+        - CREATE FIELDS
+    - PROJECT LIST/DETAILS
+    - SAMPLE CREATION
+    - SAMPLE LIST/DETAILS
+    - EXPERIMENT CREATION
+    - EXPERIMENT LIST/DETAILS
+    - TSV IMPORT?

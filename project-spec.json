@@ -21,8 +21,7 @@
     "name",
     "description",
     "version",
-    "sample",
-    "experiment"
+    "sample"
   ],
   "definitions": {
     "model": {

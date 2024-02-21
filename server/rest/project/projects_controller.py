@@ -31,6 +31,13 @@ class ProjectsApi(Resource):
         return Response(json.dumps(messages), mimetype="application/json", status=status)
     # def get(self):
 
+
+##returns the list of mapped attributes
+class TsvUploadApi(Resource):
+    def post(self):
+        attributes = projects_service.map_attributes_from_tsv(request.files.get('tsv'))
+        return Response(json.dumps(attributes), mimetype="application/json", status=200)
+
 class ProjectApi(Resource):
     def get(self, project_id):
         project = projects_service.get_project(project_id)

@@ -1,19 +1,20 @@
 <template>
-    <VaCard stripe :stripe-color="isModelIdValid ? 'success' : 'danger'">
-        <VaCardContent v-if="isModelIdValid">
+    <VaCard stripe :stripe-color="modelId.length > 0 ? 'success' : 'danger'">
+        <VaCardContent v-if="modelId.length > 0">
             Selected keys (click to unselect):
             <VaChip v-for="item in projectStore.project[model].id_format" :key="item" class="ml-2"
                 @click="unselectIdKey(item)">
                 {{ item }}
             </VaChip>
-            <p> Id format preview: <b>{{ projectStore.project[model].id_format.join('_') }}</b>
+            <p class="mt-4"> Id format preview: <b>{{ projectStore.project[model].id_format.join('_') }}</b>
             </p>
         </VaCardContent>
         <VaCardContent v-else>
-            <p>1. Select at leas one attribute key that will be used as the id of {{ model }}</p>
-            <p v-if="projectStore.project[model].fields.length === 0">2. Create at least one attribute</p>
+            <p>1. Select at least one attribute key that will be used as the id of {{ model }}! </p>
         </VaCardContent>
         <VaCardContent>
+            IMPORTANT: The attributes used as id
+                will be stored as required!
         </VaCardContent>
     </VaCard>
 </template>
@@ -24,8 +25,8 @@ import { useProjectStore } from '../../../stores/project-store';
 const props = defineProps<{
     model: 'sample' | 'experiment'
 }>()
-const isModelIdValid = computed(() => {
-    return projectStore.project[props.model].id_format.length > 0
+const modelId = computed(() => {
+    return projectStore.project[props.model].id_format
 })
 const projectStore = useProjectStore()
 
@@ -34,4 +35,5 @@ function unselectIdKey(item: string) {
         (selectedItem) => selectedItem !== item
     )]
 }
+
 </script>

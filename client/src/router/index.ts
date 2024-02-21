@@ -48,11 +48,12 @@ const routes: Array<RouteRecordRaw> = [
               {
                 name: 'experiments',
                 path: '',
+                props: true,
                 component: () => import('../pages/experiment/Experiments.vue'),
               },
               {
                 name: 'experiment',
-                path: ':id',
+                path: ':experimentId',
                 props: true,
                 component: () => import('../pages/experiment/Experiment.vue')
               },
