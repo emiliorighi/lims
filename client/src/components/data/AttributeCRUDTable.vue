@@ -1,5 +1,5 @@
 <template>
-    <VaDataTable class="table-crud" v-model="project[model].id_format" :items="project[model].fields" :columns="columns"
+    <VaDataTable v-model="currentProject[model].id_format" :items="currentProject[model].fields" :columns="columns"
         striped selectable select-mode="multiple" items-track-by="key">
         <template #cell(type)="{ rowData }">
             <va-chip color="info">{{ getFieldType(rowData) }}</va-chip>
@@ -7,15 +7,14 @@
     </VaDataTable>
 </template>
 <script setup lang="ts">
-import { useProjectStore } from '../../../stores/project-store'
-import { Filter } from '../../../data/types'
-import AttributeFormModal from './AttributeFormModal.vue'
+import { useProjectStore } from '../../stores/project-store'
+import { Filter } from '../../data/types'
 
 const props = defineProps<{
     model: 'sample' | 'experiment'
 }>()
 
-const { project } = useProjectStore()
+const { currentProject } = useProjectStore()
 
 const columns = [
     { key: "key", sortable: true },
@@ -32,18 +31,3 @@ function getFieldType(item: Filter): 'input' | 'select' | 'range' {
     return 'range'
 }
 </script>
-<style lang="scss" scoped>
-.table-crud {
-    --va-form-element-default-width: 0;
-
-    .VaInput {
-        display: block;
-    }
-
-    &__slot {
-        th {
-            vertical-align: middle;
-        }
-    }
-}
-</style>

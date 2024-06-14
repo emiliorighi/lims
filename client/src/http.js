@@ -1,6 +1,7 @@
 import axios from 'axios'
 
 const baseURL = import.meta.env.VITE_BASE_PATH? import.meta.env.VITE_BASE_PATH + 'api' : '/api'
+
 const base = axios.create({
   baseURL: baseURL,
   headers: {
@@ -8,6 +9,12 @@ const base = axios.create({
   },
 })
 
+const yaml = axios.create({
+  baseURL: baseURL,
+  headers: {
+    'Content-type': 'application/x-yaml',
+  }
+})
 const submitInstance = axios.create({
   baseURL: baseURL,
   headers: {
@@ -33,4 +40,5 @@ export default {
   base: base,
   ena: ena,
   ncbi: ncbi,
+  yaml:yaml
 }

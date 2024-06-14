@@ -1,41 +1,45 @@
 <template>
-    <VaModal size="large" @cancel="projectStore.existingDraftProject = null" close-button
-        :model-value="!!projectStore.existingDraftProject" hide-default-actions overlay-opacity="0.2">
-        <template #header>
-            <h3 class="va-h3" v-if="projectStore.existingDraftProject !== null">{{
-                projectStore.existingDraftProject.project_id }} already exists!</h3>
-        </template>
-        <VaCardBlock v-if="projectStore.existingDraftProject && deepEqual(projectStore.project, projectStore.existingDraftProject)">
-            The draft project is up to date!
-        </VaCardBlock>
-        <VaCardBlock v-else-if="projectStore.existingDraftProject" horizontal>
-            <VaCardBlock class="flex-auto">
-                <VaButton color="info" @click="updateDraftProject" icon-right="chevron_right"> Overwrite Existing Draft
-                </VaButton>
-                <ProjectOverviewCard :metadata="projectStore.project" />
+    <div>
+        <VaModal size="large" @cancel="projectStore.incomingProject = null" close-button
+            :model-value="!!projectStore.incomingProject" hide-default-actions overlay-opacity="0.2">
+            <template #header>
+                <h3 class="va-h3" v-if="projectStore.incomingProject !== null">{{
+                projectStore.incomingProject.project_id }} already exists!</h3>
+            </template>
+            <VaCardBlock
+                v-if="projectStore.incomingProject && deepEqual(projectStore.currentProject, projectStore.incomingProject)">
+                The draft project is up to date!
             </VaCardBlock>
-            <VaDivider vertical />
-            <VaCardBlock class="flex-auto">
-                <VaButton color="warning" @click="projectStore.overwriteProject" icon="chevron_left"> Overwrite
-                    Current Draft </VaButton>
-                <ProjectOverviewCard :metadata="projectStore.existingDraftProject" />
+            <VaCardBlock v-else-if="projectStore.incomingProject" horizontal>
+                <VaCardBlock class="flex-auto">
+                    <VaButton color="info" @click="updateDraftProject" icon-right="chevron_right"> Overwrite Existing
+                        Draft
+                    </VaButton>
+                    <ProjectOverviewCard :metadata="projectStore.currentProject" />
+                </VaCardBlock>
+                <VaDivider vertical />
+                <VaCardBlock class="flex-auto">
+                    <VaButton color="warning" @click="projectStore.overwriteProject" icon="chevron_left"> Overwrite
+                        Current Draft </VaButton>
+                    <ProjectOverviewCard :metadata="projectStore.incomingProject" />
+                </VaCardBlock>
             </VaCardBlock>
-        </VaCardBlock>
-    </VaModal>
+        </VaModal>
+    </div>
 </template>
 <script setup lang="ts">
 import { useProjectStore } from '../../../stores/project-store'
 import { useGlobalStore } from '../../../stores/global-store'
 import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
-import ProjectOverviewCard from './ProjectOverviewCard.vue';
+import ProjectOverviewCard from '../../../components/project/ProjectOverviewCard.vue';
 
 const projectStore = useProjectStore()
 const { toast } = useGlobalStore()
 
 async function updateDraftProject() {
     try {
-        const { project_id, ...projectData } = projectStore.project
+        const { project_id, ...projectData } = projectStore.currentProject
         const { data } = await ProjectService.updateDraftProject(project_id, projectData)
         toast({ color: "success", message: data.message, title: 'Draft project updated', duration: 1500 })
         projectStore.resetDraftProject()

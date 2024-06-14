@@ -1,5 +1,8 @@
 import { defineStore } from 'pinia'
 import { SchemaForm } from '../data/types'
+import { useToast } from 'vuestic-ui/web-components'
+
+const { init } = useToast()
 
 const initProject: SchemaForm = {
   project_id: '',
@@ -21,31 +24,40 @@ export const useProjectStore = defineStore('project', {
   state: () => {
     return {
       responseMessage: '',
-      project: { ...initProject }, // the one holding the values from the form
-      existingDraftProject: null as SchemaForm | null //the draft one from the database with same project_id
+      currentProject: { ...initProject }, // the one holding the values from the form
+      incomingProject: null as SchemaForm | null, //the draft one from the database with same project_id
+      projectExists: false,
+      draftProjectExists: false,
+      confirmOverwrite: false
     }
   },
 
   actions: {
     overwriteProject() {
-      if (this.existingDraftProject) {
-        this.project = { ...this.existingDraftProject }
-        this.resetDraftProject()
+      if (this.incomingProject) {
+        
+        if(this.incomingProject.valid){
+          const {valid, ...projectData} = this.incomingProject
+          this.currentProject = { ...projectData }
+        }else{
+          this.currentProject = { ...this.incomingProject }
+        }
+        init({ message: `Project ${this.currentProject.project_id} uploaded`, color: 'success' })
       }
     },
+    switchConfirm(){
+      this.confirmOverwrite = !this.confirmOverwrite
+    },
     // overWriteDraftProject() {
-    //   if (this.existingDraftProject) {
-    //     this.existingDraftProject = { ...this.project }
+    //   if (this.incomingProject) {
+    //     this.incomingProject = { ...this.project }
     //   }
     // },
-    resetSchema() {
-      this.project = { ...initProject }
-    },
     resetProject() {
-      this.project = { ...initProject }
+      this.currentProject = { ...initProject }
     },
     resetDraftProject() {
-      this.existingDraftProject = null
+      this.incomingProject = null
     }
   },
 })

@@ -21,6 +21,7 @@ export const useSampleStore = defineStore('sample', {
   state: () => {
     return {
       sample: null as SampleModel | null,
+      showForm:false,
       isUpdate: false,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },

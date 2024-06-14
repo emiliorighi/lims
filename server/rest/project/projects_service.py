@@ -8,7 +8,6 @@ import csv
 from io import StringIO
 
 JSON_SCHEMA_PATH='/server/project-spec.json'
-PERCENTAGE_TRESHOLD=50
 
 def get_project(project_id):
     projects = utils.get_documents_by_query(Project, dict(project_id=project_id), ('id','created'))
@@ -55,6 +54,25 @@ def create_project(data):
     project_to_save.save()
     return [f"Project {project_to_save.project_id} correctly saved"], 201
 
+def validate_project(data, format='json'):
+
+    content = data
+    if format == 'yaml':
+        try:
+            content = yaml.safe_load(data)
+        except yaml.YAMLError as e:
+            return {'error': 'Failed to parse YAML', 'details': str(e)}, 400
+    errors = jsonschema_validation(content)
+    for m in ['sample','experiment']:
+        model = content.get(m)
+        if model:
+            errors.extend(validate_model(model))
+    if errors:
+        return errors, 400
+    else:
+        return [f"Project {content.get('project_id')} is valid!"], 200
+    
+
 def validate_model(model):
     errors = []
     for id_field in model.get('id_format'):
@@ -63,7 +81,6 @@ def validate_model(model):
     return errors
 
 def jsonschema_validation(project):
-    print(project)
     errors_collection = []
     with open(JSON_SCHEMA_PATH, 'r') as file:
         data = json.load(file)        
@@ -74,23 +91,48 @@ def jsonschema_validation(project):
     return errors_collection
 
 ## guess attribute types from tsv
-def map_attributes_from_tsv(tsv):
-    data = StringIO(tsv.read().decode('utf-8'))
-    tsvreader = csv.DictReader(data, delimiter='\t')
-    mapped_values = dict()
+def map_attributes_from_tsv(tsv, data):
+    treshold = int(data.get('treshold', 25))
+    tsv_data = StringIO(tsv.read().decode('utf-8'))
+    tsvreader = csv.DictReader(tsv_data, delimiter='\t')
+    
+    mapped_values = {}
+    multi_select_candidates = {}
     total_rows = 0
+
     for row in tsvreader:
         total_rows += 1
-        for k, v in row.items():
-            mapped_values.setdefault(k, set()).add(v)
+        for key, value in row.items():
+            if value:
+                if key not in mapped_values:
+                    mapped_values[key] = set()
+                if ',' in value:
+                    multi_select_candidates[key] = set()
+                    values = [v.strip() for v in value.split(',') if v.strip()]
+                    mapped_values[key].update(values)
+                    multi_select_candidates[key].update(values)
+                else:
+                    mapped_values[key].add(value)
 
     attributes = []
+    
     for attr_key, opts in mapped_values.items():
         options = list(opts)
-        filter = dict()
-        if len(options) < total_rows * (PERCENTAGE_TRESHOLD / 100):
+        num_unique_values= len(options)
+        filter = {}
+
+        if num_unique_values < total_rows * (treshold / 100):
             filter['choices'] = options
             filter['multi'] = False
+        elif num_unique_values <= 10:  # Fewer than or equal to 10 unique values
+            filter['choices'] = options
+            filter['multi'] = False
+        elif attr_key in multi_select_candidates:  # Check if there are any multi-select candidates
+            multi_select_options = list(multi_select_candidates[attr_key])
+            multi_select_unique_values = len(multi_select_options)
+            if multi_select_unique_values <= 10 or multi_select_unique_values < total_rows * (treshold / 100):
+                filter['choices'] = multi_select_options
+                filter['multi'] = True
         else:
             if all(utils.validate_date(option) for option in options if option):
                 filter['input_type'] = 'date'
@@ -98,7 +140,13 @@ def map_attributes_from_tsv(tsv):
                 filter['input_type'] = 'number'
             else:
                 filter['input_type'] = 'text'
-        
-        attribute = dict(key=attr_key, label=attr_key, required=False, filter=filter)
+
+        attribute = {
+            'key': attr_key,
+            'label': attr_key,
+            'required': False,
+            'filter': filter
+        }
         attributes.append(attribute)
+
     return attributes

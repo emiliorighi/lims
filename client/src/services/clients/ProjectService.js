@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const { base, auth } = http
+const { base, yaml } = http
 
 class ProjectService {
 
@@ -12,6 +12,12 @@ class ProjectService {
   }
   createProject(data) {
     return base.post('/projects', data)
+  }
+  validateYAMLProject(data) {
+    return yaml.post('/projects/validate', data)
+  }
+  validateJSONProject(data) {
+    return base.post('/projects/validate', data)
   }
   inferAttributesProject(data){
     return base.post('/projects/wrangling', data)

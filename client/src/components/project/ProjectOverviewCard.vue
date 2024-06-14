@@ -1,5 +1,5 @@
 <template>
-    <va-card>
+    <va-card square outlined>
         <va-tree-view expand-all :nodes="nodes">
             <template #content="node">
                 <div class="flex items-center">
@@ -16,7 +16,7 @@
 </template>
 <script setup lang="ts">
 import { TreeNode } from 'vuestic-ui/web-components';
-import { SchemaForm } from '../../../data/types';
+import { SchemaForm } from '../../data/types';
 
 const props = defineProps<{
     metadata: SchemaForm

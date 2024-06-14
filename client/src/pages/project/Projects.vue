@@ -1,24 +1,30 @@
 <template>
-    <div class="row justify-end">
-        <div class="flex">
-            <va-button :to="{name:'project-form'}">create project</va-button>
+    <div>
+        <div class="row align-end justify-space-between">
+            <div class="flex">
+                <h1 class="va-h1">Projects</h1>
+                <p style="margin-bottom: 6px" class="va-text-secondary">List of projects</p>
+            </div>
+            <div class="flex">
+                <VaButton :to="{ name: 'project-form' }" color="success">Create new
+                    project
+                </VaButton>
+            </div>
         </div>
-    </div>
-    <va-divider />
-    <div class="row">
-        <div class="flex lg12 md12 sm12 xs12">
-            <va-card>
-                <va-data-table :items="projects" :columns="['name', 'description', 'version', 'action']">
-                    <template #cell(action)="{ rowData }">
-                        <va-button size="small" @click="useProject(rowData)">
-                            Select
-                        </va-button>
-                    </template>
-                </va-data-table>
-            </va-card>
+        <VaDivider style="margin-top: 0;" />
+        <div class="row">
+            <div class="flex">
+                <b>Total:</b> {{ projects.length }}
+            </div>
         </div>
+        <va-data-table :items="projects" :columns="['name', 'description', 'version', 'action']">
+            <template #cell(action)="{ rowData }">
+                <va-chip size="small" @click="useProject(rowData as SchemaForm)">
+                    View details
+                </va-chip>
+            </template>
+        </va-data-table>
     </div>
-    <router-view></router-view>
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
@@ -39,7 +45,7 @@ onMounted(async () => {
 
 function useProject(project: SchemaForm) {
     schemaStore.schema = { ...project }
-    router.push({ path: `/projects/${project.project_id}`, params: { id: project.project_id } })
+    router.push({ name: 'project', params: { projectId: project.project_id } })
 }
 
 </script>

@@ -31,10 +31,9 @@ def create_draft_project(data):
 
 def update_draft_project(project_id, data):
     projects_to_update = utils.get_documents_by_query(ProjectDraft, dict(project_id=project_id))
-    if not project_to_update.first():
+    if not projects_to_update.first():
         raise NotFound(description=f"Draft Projects: {project_id} not found!")
-    project_to_update = ProjectDraft.objects(project_id=project_id)
-    projects_to_update.update(**data)
+    projects_to_update.update_one(**data)
     message = f"Draft project {project_id} correctly updated"
     return [message], 201
 

@@ -17,11 +17,12 @@ class SamplesApi(Resource):
 
 class SampleApi(Resource):
     def get(self, project_id, sample_id):
-        sample = samples_service.get_sample(project_id,sample_id).as_pymongo()[0]
-        return Response(json.dumps(sample), mimetype="application/json", status=200)
+        sample = samples_service.get_sample(project_id,sample_id)
+        return Response(sample.to_json(), mimetype="application/json", status=200)
     
     def put(self, project_id,sample_id):
         data = request.json if request.is_json else request.form
+        print(data)
         messages, status = samples_service.update_sample(project_id,sample_id,data)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
     

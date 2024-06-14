@@ -10,7 +10,10 @@ def initialize_routes(api):
 	# api.add_resource(users_controller.LogoutApi, '/api/logout')
 
 	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
+
 	api.add_resource(projects_controller.TsvUploadApi, '/api/projects/wrangling')
+
+	api.add_resource(projects_controller.ValidateProjectApi, '/api/projects/validate')
 
 	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
 

@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from .enums import Roles
 import mongoengine as db
 
@@ -25,7 +25,7 @@ class Project(db.Document):
     version = db.StringField(required=True)
     experiment = db.DictField(required=True)
     sample = db.DictField(required=True)
-    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    created = db.DateTimeField(default=datetime.utcnow)
     meta = {
         'indexes': [
             'project_id',
@@ -42,7 +42,7 @@ class ProjectDraft(db.Document):
     version = db.StringField(required=True)
     experiment = db.DictField()
     sample = db.DictField()
-    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    created = db.DateTimeField(default=datetime.utcnow)
     valid=db.BooleanField(default=False)
     meta = {
         'indexes': [
@@ -56,8 +56,9 @@ class Experiment(db.Document):
     sample_id= db.StringField(required=True)
     experiment_id= db.StringField(unique=True,required=True)
     # user=db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    created = db.DateTimeField(default=datetime.now())
     project=db.StringField(required=True)
+    files=db.ListField(db.StringField)
     metadata=db.DictField()
     meta = {
         'indexes': ['experiment_id','sample_id']
@@ -67,6 +68,7 @@ class File(db.Document):
     id=db.StringField(unique=True,required=True)
     related_object=db.StringField(required=True)
     path=db.StringField(required=True,unique=True)
+    created = db.DateTimeField(default=datetime.now())
     metadata=db.DictField()
     meta = {
         'indexes': ['id']
@@ -75,9 +77,10 @@ class File(db.Document):
 class Analysis(db.Document):
     id = db.StringField(required=True,unique=True)
     experiment = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    created = db.DateTimeField(default=datetime.utcnow)
     user=db.StringField(required=True)
     project=db.StringField(required=True)
+    files=db.ListField(db.StringField)
     metadata=db.DictField()
     meta = {
         'indexes': [
@@ -87,13 +90,13 @@ class Analysis(db.Document):
     }
 
 class Sample(db.Document):
-    created = db.DateTimeField(default=datetime.datetime.utcnow)
+    created = db.DateTimeField(default=datetime.utcnow)
     sample_id = db.StringField(required=True)
     taxid = db.StringField()
     scientific_name = db.StringField()
-    # user=db.StringField(required=True)
     project=db.StringField(required=True)
     metadata=db.DictField()
+    files=db.ListField(db.StringField)
     meta = {
         'indexes': [
             'project',
@@ -109,4 +112,6 @@ class User(db.Document):
     password=db.StringField(required=True)
     role=db.EnumField(Roles, required=True)
     projects = db.ListField(db.StringField())
+    created = db.DateTimeField(default=datetime.now())
+
 

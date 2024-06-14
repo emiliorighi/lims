@@ -5,6 +5,7 @@ from db.models import Sample,Project
 # from errors import NotFound
 from ..utils import utils
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
+from mongoengine.queryset.visitor import Q
 
 def get_samples(project_id, offset=0, 
                 limit=20, sort_column=None,
@@ -12,7 +13,7 @@ def get_samples(project_id, offset=0,
     project = utils.get_documents_by_query(Project, dict(project_id=project_id))
     if not project.first():
         raise NotFound(f"Project: {project_id} not found!")
-    samples = utils.get_documents_by_query(Sample,dict(project=project_id))
+    samples = utils.get_documents_by_query(Sample, dict(project=project_id))
     if filters:
         query=dict()
         for key in filters:
@@ -27,11 +28,16 @@ def get_samples(project_id, offset=0,
         samples = samples.order_by(sort)
     return samples.count(), samples[int(offset):int(offset)+int(limit)]
 
+def create_filter(key, value):
+    contains_k = f"metadata__{key}__icontains"
+    exact_k = f"metadata__{key}__iexact"
+    return Q(contains_k=value) | Q(exact_k=value)
+
 def get_sample(project_id, sample_id):
     query=dict(project=project_id,sample_id=sample_id)
-    samples = utils.get_documents_by_query(Sample,query,('id','created'))
-    if samples.first():
-        return samples.as_pymongo()[0]
+    sample = Sample.objects(**query).exclude('id','created').first()
+    if sample:
+        return sample
     raise NotFound(description=f"Sample: {sample_id} not found")
 
 def create_sample_id(id_fields, data):
@@ -57,24 +63,30 @@ def create_sample(project_id, data):
     samples = utils.get_documents_by_query(Sample,samples_query)    
 
     if samples.first():
-        return Conflict(description=f"Sample: {sample_id} already exists!")
+        raise Conflict(description=f"Sample: {sample_id} already exists!")
     
     # Check for missing required fields
     required_fields = [f['key'] for f in project.sample['fields'] if f.get('required')]
     missing_fields = [req_field for req_field in required_fields if req_field not in data or not data.get(req_field)]
     if missing_fields:
-        return BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
+        raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
     
     evaluation_errors = utils.evaluate_fields(project, data)
     if evaluation_errors:
-        return BadRequest(description=f"{'; '.join(evaluation_errors)}")
-    new_sample = Sample(
-        project=project_id,
-        sample_id=sample_id,
-        metadata=data
-    ).save()
+        raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
+    
+    try: 
+        Sample(
+            project=project_id,
+            sample_id=sample_id,
+            metadata=data
+        ).save()
 
-    return [f"Sample {sample_id} of {project_id} correctly saved!"], 201  # Return the created sample with 201 Created status
+    except Exception as e:
+        raise BadRequest(description=e)
+
+
+    return f"Sample {sample_id} of {project_id} correctly saved!", 201  # Return the created sample with 201 Created status
 
 
 def update_sample(project_id,sample_id,data):
@@ -83,7 +95,7 @@ def update_sample(project_id,sample_id,data):
     if not project:
         raise NotFound(descritpion=f"Project: {project_id} not Found")
     query['sample_id'] = sample_id
-    sample = utils.get_documents_by_query(Sample,query)   
+    sample = utils.get_documents_by_query(Sample,dict(project=project_id))   
     if not sample.first():
         raise NotFound
     
@@ -104,12 +116,12 @@ def delete_sample(project_id, sample_id):
     query=dict(project_id=project_id)
     project = utils.get_documents_by_query(Project,query).first()
     if not project:
-        raise NotFound(descritpion=f"Project: {project_id} not Found")
-    samples = utils.get_documents_by_query(Sample,query,('id','created'))
-    if not samples.first():
+        raise NotFound(description=f"Project: {project_id} not Found")
+    sample_to_delete = Sample.objects(project=project_id,sample_id=sample_id).first()
+    if not sample_to_delete:
         raise NotFound(description=f"Sample: {sample_id} not found")
-    samples.first().delete()
-    return[ f"Sample {id} successfully deleted"],201
+    sample_to_delete.delete()
+    return f"Sample {sample_id} successfully deleted", 201
 
 # def download_samples(samples):
 

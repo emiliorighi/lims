@@ -3,7 +3,7 @@
         <template #headerAppend>
             <tr class="table-crud__slot">
                 <th v-for="c in columns" class="p-1">
-                    <VaButton block v-if="c === 'actions'" :round="false" @click="$emit('newClicked')"
+                    <VaButton block v-if="c === 'actions'"   @click="$emit('newClicked')"
                         icon="add">
                         New Item</VaButton>
                 </th>

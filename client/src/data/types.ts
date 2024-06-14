@@ -12,14 +12,8 @@ export type TPieChartData = ChartData<'pie'>
 
 export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDoughnutChartData | TPieChartData
 
-type GeneralFilter<T> = {
-  [K in keyof T]: T[K]
-}
 export type FieldType = "input" | "select" | "range";
-export type ProjectModel = {
-  fields : Filter[],
-  id_format: string[]
-}
+
 export type SampleModel = {
   sample_id:string,
   metadata:Record<string,any>
@@ -31,16 +25,6 @@ export type ExperimentModel = {
   metadata:Record<string,any>
 }
 export const fieldTypes = ['input','select','range']
-
-export type Filter = {
-  label: string
-  description?: string
-  filter: Input | Select | Range
-  key: string
-  required: boolean
-  value?: string
-  model?:'sample'|'experiment'
-}
 
 export type Input = {
   input_type: 'text' | 'number' | 'date'
@@ -67,9 +51,26 @@ export interface SchemaForm {
   name: string,
   version: string,
   description?: string,
-  sample: ProjectModel
-  experiment: ProjectModel
+  sample: ProjectModel,
+  experiment: ProjectModel,
+  valid?: boolean
 }
+
+export type ProjectModel = {
+  fields : Filter[],
+  id_format: string[]
+}
+
+export type Filter = {
+  label: string
+  description?: string
+  filter: Input | Select | Range
+  key: string
+  required: boolean
+  value?: string
+  model?:'sample'|'experiment'
+}
+
 export interface SearchForm {
   filter: string
   filter_option?: string
