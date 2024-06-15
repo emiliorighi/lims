@@ -1,19 +1,19 @@
 <template>
     <div v-if="metadata">
         <div v-for="field in fields" :key="field.key" class="row">
-            <div v-if="isInputField(field.filter)" class="flex lg6 md6">
+            <div v-if="isInputField(field.filter)" class="flex lg12 md12 sm12 xs12">
                 <VaInput @update:modelValue="(v: any) => emits('updateField', [field.key, v])"
                     :messages="[field.description]" :label="field.label" v-model="metadata[field.key]"
                     :rules="[requiredFieldRule(field.label, field.required)]" />
             </div>
-            <div v-else-if="isSelectField(field.filter)" class="flex lg6 md6">
+            <div v-else-if="isSelectField(field.filter)" class="flex lg12 md12 sm12 xs12">
                 <VaSelect @update:modelValue="(v: any) => emits('updateField', [field.key, v])"
                     :messages="[field.description]" :label="field.label" v-model="metadata[field.key]"
                     :multiple="field.filter.multi" :options="field.filter.choices"
                     :rules="[requiredSelectRule(field.label, field.required)]" />
             </div>
 
-            <div v-else-if="isRangeField(field.filter)" class="flex lg6 md6">
+            <div v-else-if="isRangeField(field.filter)" class="flex lg12 md12 sm12 xs12">
                 <VaSlider @update:modelValue="(v: any) => emits('updateField', [field.key, v])" class="mt-4"
                     :label="field.label" :max="field.filter.max" :min="field.filter.min" v-model="metadata[field.key]"
                     track-label-visible>
@@ -23,9 +23,8 @@
                         </VaChip>
                     </template>
                 </VaSlider>
-                <VaInput style="display: none;" class="mt-4"
-                    :rules="[requiredNumberFieldRule(field.label, field.required)]" :messages="[field.description]"
-                    readonly v-model="metadata[field.key]" />
+                <VaInput class="mt-2" :rules="[requiredNumberFieldRule(field.label, field.required)]"
+                    :messages="[field.description]" readonly v-model="metadata[field.key]" />
             </div>
         </div>
     </div>
@@ -39,19 +38,22 @@ const props = defineProps<{
     existingMetadata?: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]][];
 }>()
 
-const metadata = ref<Record<string, any>>({})
+const metadata = ref<Record<string, any> | null>(null)
 
 
-const requiredFieldRule = (label: string, required = true) => (v: any) => !required || !!v || `${label} is required`;
-const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (Array.isArray(v) && v.length > 0) || (!!v) || `${label} is required`;
-const requiredNumberFieldRule = (label: string, required = true) => (v: any) => !required || !isNaN(v) || `${label} must be a number`;
+const requiredFieldRule = (label: string, required = true) => (v: any) => !required || (!!v) || `${label} is required`;
+const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (Array.isArray(v) && v.length > 0) || `${label} is required`;
+const requiredNumberFieldRule = (label: string, required = true) => (v: any) => !required || (!isNaN(v) || (!!v)) || `${label} must be a number`;
 
 
 const emits = defineEmits(['updateField'])
 
 onMounted(() => {
+    metadata.value = null
     if (props.existingMetadata && props.existingMetadata.length) {
         metadata.value = { ...Object.fromEntries(props.existingMetadata) }
+    } else {
+        metadata.value = {}
     }
 })
 

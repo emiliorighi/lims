@@ -7,7 +7,8 @@ const defaultSample: SampleModel = {
 }
 
 const initSearchForm: ModelSearchForm = {
-  filters: {},
+  filter:'',
+  query: {},
   sort_column: '',
   sort_order: 'asc'
 }
@@ -22,6 +23,7 @@ export const useSampleStore = defineStore('sample', {
     return {
       sample: {...defaultSample},
       showForm:false,
+      formValid:false,
       update:false,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },

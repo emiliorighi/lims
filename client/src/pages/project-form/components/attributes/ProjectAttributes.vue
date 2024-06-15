@@ -34,11 +34,11 @@
                 </VaCardActions>
             </VaCard>
             <va-input class="flex lg4 md4 sm12 xs12" placeholder="Type a name of at least 3 characters (required)"
-                :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters']"
+                :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters', !projectStore.projectExists || 'Project Id already exists!']"
                 label="name (required)" v-model="projectStore.currentProject.name" />
             <va-input class="flex lg4 md4 sm12 xs12" placeholder="example: 1.0.0 or 1.2 (required)"
                 label="version (required)" v-model="projectStore.currentProject.version"
-                :rules="[(v: string) => v.length > 0 || 'version is mandatory']" />
+                :rules="[(v: string) => v.length > 0 || 'version is mandatory', !projectStore.projectExists || 'Project Id already exists!']" />
             <va-input class="flex lg4 md4 sm12 xs12" label="Project Identifier" placeholder="Type a name and a version"
                 :loading="isIdValidationLoading" readonly v-model="mergedId"
                 :rules="[!projectStore.projectExists || 'Project Id already exists!']"></va-input>

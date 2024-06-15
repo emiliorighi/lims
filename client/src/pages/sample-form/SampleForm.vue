@@ -3,44 +3,36 @@
         <Header :title="title" :description="description"></Header>
         <VaDivider style="margin-top: 0;" />
         <VaInnerLoading :loading="isLoading">
-            <div style="min-height: 100vh">
-                <VaForm ref="sampleForm">
-                    <div class="row">
-                        <div class="flex lg6 md6 sm12 xs12">
-                            <IdGenerator />
-                        </div>
-                    </div>
-                    <div v-for="f in [
-            { label: 'Id', description: 'Mandatory fields used to generate the sample Id, fill them by order', fields: idFields },
-            { label: 'Required', description: 'Mandatory fields', fields: requiredFields },
-            { label: 'Optional', description: 'Optional fields', fields: optionalFields }
-        ]
-            .filter(f => f.fields.length)" :key="f.label">
+            <VaForm ref="sampleForm">
+                <VaStepper @finish="submitSample" v-if="steps.length" v-model="step" :steps="steps" linear>
+
+                    <template v-for="(step, i) in steps" :key="step.label" #[`step-content-${i}`]>
                         <div class="row">
-                            <div class="flex lg8 md8 sm12 xs12">
-                                <VaCard>
-                                    <VaCardContent>
-                                        <h4 class="va-h4">{{ f.label }} Fields</h4>
-                                        <p class="va-text-secondary">{{ f.description }} </p>
-                                    </VaCardContent>
-                                    <VaDivider/>
-                                    <VaCardContent>
-                                        <MetadataForm :existing-metadata="existingMetadata"
-                                            @update-field="updateSampleField" :fields="f.fields"></MetadataForm>
-                                    </VaCardContent>
-                                </VaCard>
-                            </div>
+                            <VaCard class="flex lg12 md12 sm12 xs12">
+                                <VaCardContent>
+                                    <h4 class="va-h4">{{ step.label }}</h4>
+                                    <p class="va-text-secondary">{{ step.description }} </p>
+                                </VaCardContent>
+                                <VaDivider />
+                                <VaCardContent v-if="step.label === 'Id Fields'">
+                                    <IdGenerator />
+                                </VaCardContent>
+                                <VaCardContent style="height: 300px;overflow: scroll;">
+                                    <MetadataForm :existing-metadata="existingMetadata"
+                                        @update-field="updateSampleField" :fields="step.fields"></MetadataForm>
+                                </VaCardContent>
+                            </VaCard>
                         </div>
-                    </div>
-                </VaForm>
-            </div>
+                    </template>
+                </VaStepper>
+            </VaForm>
         </VaInnerLoading>
     </div>
 </template>
 <script setup lang="ts">
 import { useSchemaStore } from '../../stores/schemas-store';
 import { useSampleStore } from '../../stores/sample-store';
-import { useToast } from 'vuestic-ui/web-components';
+import { useForm, useToast } from 'vuestic-ui/web-components';
 import { computed, onMounted, ref } from 'vue';
 import ProjectService from '../../services/clients/ProjectService';
 import MetadataForm from './components/MetadataForm.vue'
@@ -49,17 +41,23 @@ import { Filter } from '../../data/types';
 import Header from '../../components/ui/Header.vue';
 import SampleService from '../../services/clients/SampleService';
 import { AxiosError } from 'axios';
+import { Step } from 'vuestic-ui/dist/types/components/va-stepper/types';
+import { useRouter } from 'vue-router';
+
+
+const step = ref(0)
 
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { init } = useToast()
-
+const { validate } = useForm('sampleForm')
 
 const props = defineProps<{
     sampleId?: string
     projectId: string
 }>()
 
+const router = useRouter()
 const requiredFields = ref<Filter[]>([])
 const optionalFields = ref<Filter[]>([])
 const idFields = ref<Filter[]>([])
@@ -73,6 +71,38 @@ const existingMetadata = computed(() => {
     return Object.entries(sampleStore.sample.metadata)
 })
 
+const steps = computed(() => {
+    const validSteps = []
+    if (idFields.value.length) {
+        validSteps.push(
+            {
+                label: 'Id Fields',
+                description: 'Mandatory fields used to generate the sample Id, fill them by order',
+                fields: [...idFields.value],
+                beforeLeave: (step: Step) => { step.hasError = !validate() }
+            })
+    }
+    if (requiredFields.value.length) {
+        validSteps.push(
+            {
+                label: 'Required Fields',
+                description: 'Fill all the required fields',
+                fields: [...requiredFields.value],
+                beforeLeave: (step: Step) => { step.hasError = !validate() }
+            }
+        )
+    }
+    if (optionalFields.value.length) {
+        validSteps.push(
+            {
+                label: 'Optional Fields',
+                description: 'Optionally fill this fields',
+                fields: [...optionalFields.value]
+            }
+        )
+    }
+    return validSteps
+})
 onMounted(async () => {
 
     if (!schemaStore.schema.project_id) {
@@ -141,6 +171,37 @@ function mapFields() {
         } else {
             optionalFields.value.push(f)
         }
+    }
+}
+
+async function submitSample(): Promise<void> {
+    try {
+
+        isLoading.value = true
+        const { metadata } = sampleStore.sample
+        const response = await SampleService.createSample(schemaStore.schema.project_id, metadata);
+        const { data } = response;
+
+        init({
+            color: 'success',
+            message: Array.isArray(data) ? data.join(', ') : 'Sample created successfully',
+        });
+
+        router.push({ name: 'samples', params: { projectId: schemaStore.schema.project_id } })
+
+    } catch (error) {
+        console.error('Error creating sample:', error);
+
+        let message = 'Impossible to save';
+        if (error instanceof AxiosError) {
+            message = error.response?.data?.message || message;
+        }
+        init({
+            color: 'danger',
+            message,
+        });
+    } finally {
+        isLoading.value = false
     }
 }
 

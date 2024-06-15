@@ -5,10 +5,8 @@ from . import samples_service
 
 class SamplesApi(Resource):
     def get(self, project_id):
-        print(request.args.to_dict(flat=False))
-        total, data = samples_service.get_samples(project_id,**request.args)
-        json_resp = dict(total=total,data=list(data.as_pymongo()))
-        return Response(json.dumps(json_resp), mimetype="application/json", status=200)
+        response, mimetype, status = samples_service.get_samples(project_id, request.args)
+        return Response(response, mimetype=mimetype, status=status)
         
     def post(self, project_id):
         data = request.json if request.is_json else request.form

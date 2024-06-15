@@ -2,42 +2,45 @@ import csv
 from io import StringIO
 from itertools import islice
 from db.models import Sample,Project
-# from errors import NotFound
 from ..utils import utils
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.queryset.visitor import Q
+from ..helpers import data
 
-def get_samples(project_id, offset=0, 
-                limit=20, sort_column=None,
-                sort_order='asc', **filters):
+FIELDS_TO_EXCLUDE=['id']
+
+def get_samples(project_id, args):
+    
     project = Project.objects(project_id=project_id).first()
-
+    
     if not project:
         raise NotFound(f"Project: {project_id} not found!")
     
-    samples = Sample.objects(project=project_id)
-    if filters:
-        query=dict()
-        for key in filters:
-            val = filters[key]
-            if utils.validate_number(val):
-                val = float(val)
-            query[f"metadata__{key}"] = val
-        samples = samples.filter(**query)
-    samples = samples.exclude('id', 'created')
-    if sort_column:
-        sort = '-'+sort_column if sort_order == 'desc' else sort_column
-        samples = samples.order_by(sort)
-    return samples.count(), samples[int(offset):int(offset)+int(limit)]
+    filter = get_filter(args.get('filter'))
 
-def create_filter(key, value):
-    contains_k = f"metadata__{key}__icontains"
-    exact_k = f"metadata__{key}__iexact"
-    return Q(contains_k=value) | Q(exact_k=value)
+    tsv_fields = ['sample_id', 'created']
+
+    selected_fields = [f"metadata.{v}" for k, v in args.items(multi=True) if k.startswith('fields[]')]
+
+    if not selected_fields:
+        
+        selected_fields = [f"metadata.{field}" for field in project.sample['id_format']]
+
+    tsv_fields.extend(selected_fields)
+
+    return data.get_items(args, 
+                                 Sample, 
+                                 FIELDS_TO_EXCLUDE, 
+                                 filter,
+                                 tsv_fields)
+
+def get_filter(filter):
+    if filter:
+        return (Q(sample_id__iexact=filter) | Q(sample_id__icontains=filter))
+    return None
 
 def get_sample(project_id, sample_id):
-    query=dict(project=project_id,sample_id=sample_id)
-    sample = Sample.objects(**query).exclude('id','created').first()
+    sample = Sample.objects(project=project_id,sample_id=sample_id).exclude('id','created').first()
     if sample:
         return sample
     raise NotFound(description=f"Sample: {sample_id} not found")

@@ -42,7 +42,8 @@ export type Range = {
   unit: string
 }
 export interface ModelSearchForm {
-  filters: Record<string,any>
+  filter:string
+  query: Record<string,any>
   sort_column: string,
   sort_order: 'asc' | 'desc'
 }

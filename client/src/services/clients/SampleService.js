@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const { base, auth } = http
+const { base, auth,download } = http
 
 class SampleService {
 
@@ -22,6 +22,9 @@ class SampleService {
     uploadSampleTSV(projectId, data){
         return base.post(`/projects/${projectId}/samples/upload`, data)
     }
+    getTsv(projectId, params) {
+        return download.get(`/projects/${projectId}/samples`, { params: params })
+      }
 }
 
 export default new SampleService();
