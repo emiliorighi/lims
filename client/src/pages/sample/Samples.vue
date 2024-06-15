@@ -22,7 +22,7 @@
                                     <VaButton @click="" icon="upload">Upload</VaButton>
                                 </div>
                                 <div class="flex">
-                                    <VaButton @click="showModal = !showModal" icon="download">Donwload</VaButton>
+                                    <VaButton @click="showModal = !showModal" icon="download">Download</VaButton>
                                 </div>
                             </div>
                         </div>
@@ -76,7 +76,6 @@ import TableFilters from '../../components/filters/TableFilters.vue'
 import CRUDTable from '../../components/data/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
 import ProjectService from '../../services/clients/ProjectService';
-import console from 'console';
 import { AxiosError } from 'axios';
 
 const props = defineProps<{
@@ -110,8 +109,10 @@ function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Recor
 
 
 function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
-    const newQuery = Object.fromEntries(list)
-    sampleStore.searchForm = { ...sampleStore.searchForm, ...newQuery }
+    const { query, ...otherFields } = sampleStore.searchForm
+    const newQuery = { query: { ...query, ...Object.fromEntries(list) } }
+    sampleStore.searchForm = { ...otherFields, ...newQuery }
+
     handleSubmit()
 }
 
@@ -200,10 +201,18 @@ async function getSamples(query: Record<string, any>) {
 async function downloadData() {
     const downloadRequest = { format: "tsv", fields: [...downloadFields.value] }
     try {
+        console.log(sampleStore.searchForm)
         isTSVLoading.value = true
-        const { sort_column, sort_order, query } = sampleStore.searchForm
-        const requestData = applyFilters.value ? { sort_column, sort_order, ...query, ...downloadRequest } : { ...downloadRequest }
+        const requestData = applyFilters.value ? {
+            filter: sampleStore.searchForm.filter,
+            sort_column: sampleStore.searchForm.sort_column, sort_order: sampleStore.searchForm.sort_order,
+            ...sampleStore.searchForm.query,
+            ...downloadRequest
+        }
+            :
+            { ...downloadRequest }
 
+        console.log(requestData)
         const response = await SampleService.getTsv(props.projectId, requestData)
         const data = response.data
         const href = URL.createObjectURL(data);
