@@ -10,10 +10,12 @@ from mongoengine.queryset.visitor import Q
 def get_samples(project_id, offset=0, 
                 limit=20, sort_column=None,
                 sort_order='asc', **filters):
-    project = utils.get_documents_by_query(Project, dict(project_id=project_id))
-    if not project.first():
+    project = Project.objects(project_id=project_id).first()
+
+    if not project:
         raise NotFound(f"Project: {project_id} not found!")
-    samples = utils.get_documents_by_query(Sample, dict(project=project_id))
+    
+    samples = Sample.objects(project=project_id)
     if filters:
         query=dict()
         for key in filters:
@@ -43,9 +45,10 @@ def get_sample(project_id, sample_id):
 def create_sample_id(id_fields, data):
     return '_'.join(str(data.get(attr)) for attr in id_fields)
 
+
 def create_sample(project_id, data):
-    query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project,query).first()
+
+    project = Project.objects(project_id=project_id).first()
     
     if not project:
         raise NotFound(description=f"Project: {project_id} not found")
@@ -55,19 +58,21 @@ def create_sample(project_id, data):
 
     # Generate sample ID based on id fields
     sample_id = create_sample_id(id_fields, data)
+
     # Check if sample ID could be generated
     if not sample_id:
-        raise BadRequest(description="Unable to generate sample_d with the fields provided")
+        raise BadRequest(description="Unable to generate sample_id with the fields provided")
     
-    samples_query = dict(sample_id=sample_id,project=project_id)
-    samples = utils.get_documents_by_query(Sample,samples_query)    
+    sample = Sample.objects(project=project_id, sample_id=sample_id).first()   
 
-    if samples.first():
+    if sample:
         raise Conflict(description=f"Sample: {sample_id} already exists!")
     
     # Check for missing required fields
     required_fields = [f['key'] for f in project.sample['fields'] if f.get('required')]
-    missing_fields = [req_field for req_field in required_fields if req_field not in data or not data.get(req_field)]
+    missing_fields = [req_field for req_field in required_fields 
+                  if req_field not in data or data[req_field] in [None, '', [], {}]]
+    
     if missing_fields:
         raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
     

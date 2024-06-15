@@ -13,7 +13,7 @@
                 <VaInput class="flex lg6 md6 sm12 xs12" @update:modelValue="getDraftProjects(query)"
                     v-model="query.filter" label="Search" placeholder="Type to search a draft project"></VaInput>
                 <Pagination class="flex" @offset-changed="handlePagination" :limit="query.limit"
-                    :off-set="query.offset" :total="total" />
+                    :offset="query.offset" :total="total" />
                 <VaDataTable class="flex lg12 md12 sm12 xs12" :items="draftProjects"
                     :columns="['name', 'version', 'actions']">
                     <template #cell(actions)="{ row, isExpanded, rowData }">

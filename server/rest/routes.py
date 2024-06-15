@@ -16,6 +16,9 @@ def initialize_routes(api):
 	api.add_resource(projects_controller.ValidateProjectApi, '/api/projects/validate')
 
 	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
+	
+	api.add_resource(projects_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
+
 
 	api.add_resource(samples_controller.SamplesApi, '/api/projects/<project_id>/samples')
 	api.add_resource(samples_controller.SamplesUploadApi, '/api/projects/<project_id>/samples/upload')

@@ -10,6 +10,9 @@ class ProjectService {
   getProject(id) {
     return base.get(`/projects/${id}`)
   }
+  lookupProject(id) {
+    return base.get(`/projects/${id}/lookup`)
+  }
   createProject(data) {
     return base.post('/projects', data)
   }

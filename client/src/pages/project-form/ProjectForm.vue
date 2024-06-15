@@ -1,7 +1,8 @@
 <template>
     <div>
-        <Header></Header>
-        <VaDivider style="margin-top: 0;" />
+        <Header :title="title" :description="description"></Header>
+        <DraftActions />
+        <VaDivider />
         <VaInnerLoading :loading="isLoading">
             <div style="min-height: 100vh">
                 <VaForm ref="schemaForm">
@@ -25,7 +26,7 @@
                 </VaForm>
             </div>
         </VaInnerLoading>
-        <ConfirmOverwriteModal/>
+        <ConfirmOverwriteModal />
     </div>
 </template>
 <script setup lang="ts">
@@ -34,13 +35,17 @@ import { defineVaStepperSteps, useForm, useToast } from 'vuestic-ui'
 import { useProjectStore } from '../../stores/project-store'
 import ProjectService from '../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
-import Header from './components/Header.vue'
+import Header from '../../components/ui/Header.vue'
+import DraftActions from './components/actions/DraftActions.vue';
 import StepSlot from './components/StepSlot.vue'
 import ResumeSlot from './components/ResumeSlot.vue'
 import ProjectAttributes from './components/attributes/ProjectAttributes.vue';
 import ModelAttributes from './components/model/ModelAttributes.vue';
 import { useRouter } from 'vue-router';
 import ConfirmOverwriteModal from './components/ConfirmOverwriteModal.vue'
+
+const title = 'Project form'
+const description = 'Fill all the steps to create a new project, save it to draft at any moment'
 
 const { init } = useToast()
 const isLoading = ref(false)
@@ -77,21 +82,24 @@ const isValidExperiment = computed(() => {
 
 async function submitProject() {
     isLoading.value = !isLoading.value
-    console.log(projectStore.currentProject)
     try {
         const { data } = await ProjectService.createProject(projectStore.currentProject)
-        console.log(data)
-        data.forEach((d: Record<string, any>) => {
-            init({ color: 'success', message: d.message })
+        data.forEach((d: string) => {
+            init({ color: 'success', message: d })
         })
+        projectStore.resetProject()
+        projectStore.resetDraftProject()
+        projectStore.draftProjectExists = !projectStore.draftProjectExists
+        projectStore.projectExists = true
+
         router.push({ name: 'projects' })
     } catch (error) {
         const axiosError = error as AxiosError
         console.log(axiosError)
         if (axiosError.response && axiosError.response.data) {
-            const data = axiosError.response.data as Record<string, any>[]
-            data.forEach((d) => {
-                init({ color: 'danger', message: d.message })
+            const data = axiosError.response.data as string[]
+            data.forEach((d: string) => {
+                init({ color: 'danger', message: d })
             })
         }
     } finally {
@@ -99,9 +107,4 @@ async function submitProject() {
     }
 }
 
-function setDraftProjectConfirm() {
-    projectStore.overwriteProject()
-    init({ message: `Project ${projectStore.currentProject.project_id} uploaded`, color: 'success' })
-
-}
 </script>

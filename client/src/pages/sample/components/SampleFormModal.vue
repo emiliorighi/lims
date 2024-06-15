@@ -1,69 +1,172 @@
 <template>
-    <div>
-        <VaModal hide-default-actions class="modal-crud" :model-value="sampleStore.showForm" @cancel="reset">
-            <template #header>
-                <h2 class="va-h2">
-                    {{ sampleStore.isUpdate ? `Editing Sample ${sampleStore.sample?.sample_id}` : 'Creating Sample' }}
-                </h2>
-            </template>
-            <ItemForm @on-metadata-valid="validateSample" @on-reset="reset"
-                :existing-metadata="Object.entries(sampleStore.sample?.metadata || {})"
-                :fields="(schema.sample.fields as Filter[])" :id_format="(schema.sample.id_format as string[])" />
-        </VaModal>
-        <VaModal hide-default-actions :model-value="!!existingSample">
-            <template #header>
-                <h2 class="va-h2">
-                    Sample {{ existingSample?.sample_id }} already exists!
-                </h2>
-            </template>
+    <VaModal hide-default-actions class="modal-crud" :model-value="sampleStore.showForm" @cancel="reset">
+        <template #header>
+            <h2 class="va-h2">
+                {{ sampleStore.update ? `Editing Sample ${sampleStore.sample?.sample_id}` : 'Creating Sample' }}
+            </h2>
+        </template>
+        <!-- 
+            id logic -> if not update
+                compute ordered id
+                check sample exists
+
+            id fields -> if not update
+                check required
+
+            required fields
+                
+            optional fields
+        
+
+        -->
+        <VaForm v-if="sampleStore.sample" ref="sampleForm">
+
+            <div class="row">
+                <VaInput class="flex lg8 md8" readonly label="Unique identifier" v-model="sampleId"
+                    placeholder="The unique identifier will be generated here"
+                    :rules="[requiredIdRule, !sampleExists || 'Sample Id already exists']">
+                </VaInput>
+            </div>
+
             <VaDivider />
-            <div class="row justify-space-between">
-                <div class="flex">
-                    <VaButton @click="updateSample" color="warning">Overwrite</VaButton>
+            <div style="max-height: 400px;overflow: scroll;">
+                <div v-for="field in sampleFields" :key="field.key" class="row">
+
+                    <div v-if="isInputField(field.filter)" class="flex lg6 md6">
+                        <VaInput class="mt-4" :disabled="disabledRule(field)" :messages="[field.description]"
+                            :label="field.label" v-model="sampleStore.sample.metadata[field.key]"
+                            :rules="[requiredFieldRule(field.label, field.required)]" />
+                    </div>
+
+                    <div v-else-if="isSelectField(field.filter)" class="flex lg6 md6">
+                        <VaSelect class="mt-4" :disabled="disabledRule(field)" :messages="[field.description]"
+                            :label="field.label" v-model="sampleStore.sample.metadata[field.key]"
+                            :multiple="field.filter.multi" :options="field.filter.choices"
+                            :rules="[requiredSelectRule(field.label, field.required)]" />
+                    </div>
+
+                    <div v-else-if="isRangeField(field.filter)" class="flex lg8 md8">
+                        <VaSlider class="mt-4" :disabled="disabledRule(field)" :label="field.label"
+                            :max="field.filter.max" :min="field.filter.min"
+                            v-model="sampleStore.sample.metadata[field.key]" track-label-visible>
+                            <template #trackLabel="{ value }">
+                                <VaChip color="warning" size="small">
+                                    {{ value }}
+                                </VaChip>
+                            </template>
+                        </VaSlider>
+                        <VaInput class="mt-4" :rules="[requiredNumberFieldRule(field.label, field.required)]" :messages="[field.description]"
+                            readonly v-model="sampleStore.sample.metadata[field.key]">
+                            <template #appendInner>
+                                <span>{{ field.filter.unit }}</span>
+                            </template>
+                        </VaInput>
+                    </div>
                 </div>
-                <div class="flex">
-                    <VaButton @click="existingSample = undefined" color="secondary">Return</VaButton>
+                <VaDivider />
+                <div class="row justify-space-between">
+                    <div class="flex">
+                        <VaButton icon="save" @click="saveSample">Save</VaButton>
+                    </div>
+                    <div class="flex">
+                        <VaButton color="danger" @click="reset" icon="cancel">Cancel</VaButton>
+                    </div>
                 </div>
             </div>
-        </VaModal>
-    </div>
+        </VaForm>
+    </VaModal>
 </template>
 <script setup lang="ts">
 import { useSchemaStore } from '../../../stores/schemas-store';
 import { useSampleStore } from '../../../stores/sample-store';
-import { Filter, SampleModel } from '../../../data/types'
-import { ref } from 'vue';
+import { Filter, Input, Select, Range } from '../../../data/types'
+import { computed, onMounted, ref, watch } from 'vue';
 import SampleService from '../../../services/clients/SampleService'
 import { useGlobalStore } from '../../../stores/global-store';
 import { AxiosError } from 'axios';
-import ItemForm from '../../../components/forms/ItemForm.vue'
+import { useForm } from 'vuestic-ui/web-components';
+
+const { validate } = useForm('sampleForm')
+
+
+// Rules for validation
+const requiredIdRule = (v: string) => v.length > 0 || 'Fill the required fields to generate the unique identifier'
+const requiredFieldRule = (label: string, required = true) => (v: any) => !required || !!v || `${label} is required`;
+const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (Array.isArray(v) && v.length > 0) || (!!v) || `${label} is required`;
+const requiredNumberFieldRule = (label: string, required = true) => (v: any) => !required || !isNaN(v) || `${label} must be a number`;
 
 const emits = defineEmits(['onSampleEdited'])
 const { schema } = useSchemaStore()
 const sampleStore = useSampleStore()
-const existingSample = ref<SampleModel>()
+
+const sampleExists = ref(false)
+const sampleFields = ref<Filter[]>([...schema.sample.fields])
+
+
+const disabledRule = (filter: Filter) => sampleStore.update && schema.sample.id_format.includes(filter.key)
 
 const { toast } = useGlobalStore()
 
-async function updateSample(): Promise<void> {
-    if (!existingSample.value) return;
+const sampleId = computed(() => {
+    return Object.entries(sampleStore.sample?.metadata || {})
+        .filter(([k, v]) => {
+            // Ensure 'v' is a valid value and the key is included in the id_format
+            if (schema.sample.id_format.includes(k) && v !== null && v !== undefined && v !== '') {
+                // Check if 'v' is a number or a string
+                return typeof v === 'string' || typeof v === 'number';
+            }
+            return false;
+        })
+        .map(([k, v]) => {
+            // Ensure toString() conversion for numbers for joining purposes
+            return v.toString();
+        })
+        .join('_');
+});
 
+watch(() => sampleId.value, async () => {
+
+    if (sampleId.value.length < 2 || sampleStore.update) return
+
+    await getSample(sampleId.value)
+
+})
+
+async function saveSample() {
+    if (!validate()) {
+        toast({
+            color: 'danger',
+            message: 'Form is not valid',
+        });
+        return
+    }
+
+    if (sampleStore.update) {
+        await updateSample()
+    } else {
+        await createSample()
+    }
+
+}
+
+async function updateSample() {
     try {
-        const response = await SampleService.updateSample(
-            schema.project_id,
-            existingSample.value.sample_id,
-            existingSample.value.metadata
-        );
-        const { data } = response;
 
+        if (!sampleStore.sample) return
+
+        const { sample_id, metadata } = sampleStore.sample
+        const { data } = await SampleService.updateSample(schema.project_id, sample_id, metadata)
         toast({
             color: 'success',
             message: Array.isArray(data) ? data.join(', ') : 'Sample updated successfully',
         });
 
-        reset();
-        emits('onSampleEdited');
-        existingSample.value = undefined;
+        sampleStore.sample = null
+        sampleStore.update = false
+        sampleStore.showForm = false
+        emits('onSampleEdited')
+
+
     } catch (error) {
         console.error('Error updating sample:', error);
 
@@ -79,17 +182,27 @@ async function updateSample(): Promise<void> {
     }
 }
 
-async function createSample(formData: Record<string, any>): Promise<void> {
+async function createSample(): Promise<void> {
     try {
-        const response = await SampleService.createSample(schema.project_id, formData);
+        if (!sampleStore.sample) return
+
+        const { metadata } = sampleStore.sample
+        const response = await SampleService.createSample(schema.project_id, metadata);
         const { data } = response;
 
         toast({
             color: 'success',
             message: Array.isArray(data) ? data.join(', ') : 'Sample created successfully',
         });
-        reset();
-        emits('onSampleEdited');
+
+        sampleStore.sample = null
+        sampleStore.update = false
+        sampleStore.showForm = false
+
+        emits('onSampleEdited')
+
+        // reset();
+        // emits('onSampleEdited');
     } catch (error) {
         console.error('Error creating sample:', error);
 
@@ -105,33 +218,28 @@ async function createSample(formData: Record<string, any>): Promise<void> {
     }
 }
 
-async function validateSample(metadata: Record<string, any>): Promise<void> {
-    const id = Object.entries(metadata)
-        .filter(([key]) => schema.sample.id_format.includes(key))
-        .map(([, value]) => value)
-        .join('_');
+async function getSample(id: string): Promise<void> {
 
     try {
         const response = await SampleService.getSample(schema.project_id, id);
         const { data } = response;
-        existingSample.value = { ...data }
-        if (existingSample.value?.metadata) {
-            existingSample.value.metadata = { ...metadata }
-        }
-
+        if (data) sampleExists.value = true
+        toast({
+            message: `Sample ${id} already exists`,
+            color: 'danger',
+        });
     } catch (error) {
-        existingSample.value = undefined;
-
         if (error instanceof AxiosError) {
-            if (error.response?.status === 404) {
+            if (error.response?.status !== 404) {
                 // Sample is new
-                await createSample(metadata);
-            } else {
-                console.error('Error validating sample:', error);
+
+                console.error('Error:', error);
                 toast({
-                    message: error.response?.data?.message || 'Error occurred while validating',
+                    message: error.response?.data?.message,
                     color: 'danger',
                 });
+            } else {
+                sampleExists.value = false
             }
         } else {
             console.error('Unexpected error:', error);
@@ -144,8 +252,24 @@ async function validateSample(metadata: Record<string, any>): Promise<void> {
 }
 
 
+const isInputField = (filter: Filter['filter']): filter is Input => {
+    return (filter as Input).input_type !== undefined;
+};
+
+const isSelectField = (filter: Filter['filter']): filter is Select => {
+    return (filter as Select).choices !== undefined;
+};
+
+const isRangeField = (filter: Filter['filter']): filter is Range => {
+    return (filter as Range).min !== undefined;
+};
+
+
 function reset() {
+    sampleFields.value = []
     sampleStore.sample = null
-    sampleStore.showForm = !sampleStore.showForm
+    sampleFields.value = [...schema.sample.fields]
+    sampleStore.update = false
+    sampleStore.showForm = false
 }
 </script>

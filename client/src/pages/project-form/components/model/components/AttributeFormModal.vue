@@ -5,35 +5,33 @@
             <h2 class="va-h2"> Editing attribute</h2>
         </template>
         <VaForm ref="attributeForm">
-            <div v-if="attributeStore.attribute" class="row">
-                <VaInput class="flex" label="Attribute key" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.key === v) === -1 || attributeStore.attributes.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
-    (v: string) => v.length > 0 || 'Key is required!']" v-model="attributeStore.attribute.key" />
-                <div class="flex sm12 xs12">
-                    <VaInput class="mt-2" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.label === v) === -1 || attributeStore.attributes.findIndex(it => it.label === v) === attributeStore.attributeId || 'label must be unique',
+            <p class="va-text-secondary">Fill in the fields</p>
+            <VaDivider />
+            <div v-if="attributeStore.attribute" class="row justify-space-between">
+                <VaInput class="flex lg4 md4 sm12 xs12 mt-4" label="Attribute key (required)" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.key === v) === -1 || attributeStore.attributes.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
+    (v: string) => v.length > 0 || 'Key is required!']" placeholder="Type a value.."
+                    v-model="attributeStore.attribute.key" />
+                <VaInput class="flex lg4 md4 sm12 xs12 mt-4" placeholder="Type a value.." :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.label === v) === -1 || attributeStore.attributes.findIndex(it => it.label === v) === attributeStore.attributeId || 'label must be unique',
     (v: string) => v.length > 0 || 'Label is required!']" v-model="attributeStore.attribute.label"
-                        label="Attribute label" />
-                </div>
-                <div class="flex sm12 xs12">
-                    <VaInput class="mt-2" v-model="attributeStore.attribute.description"
-                        label="Attribute description" />
-                </div>
-                <div class="flex sm12 xs12">
-                    <VaSelect class="mt-2" label="Is the attribute required?"
-                        v-model="attributeStore.attribute.required" :options="[true, false]" />
-                </div>
-                <div class="flex sm12 xs12">
-                    <VaSelect class="mt-2" label="Attribute type" v-model="fType" :options="fieldTypes" />
-                    <div class="row row-equal mt-2">
+                    label="Attribute label (required)" />
+                <VaInput class="flex lg8 md8 sm12 xs12 mt-4" v-model="attributeStore.attribute.description"
+                    label="Attribute description (optional)" placeholder="Type a brief description of the project" />
+                <VaSelect class="flex lg6 md6 sm12 xs12 mt-4" label="Is required?" v-model="attributeStore.attribute.required"
+                    :options="[true, false]" />
+                <div class="flex lg12 md12 sm12 xs12">
+                    <VaSelect class="flex lg6 md12 sm6 xs12 mt-4 mb-2" label="Attribute type" v-model="fType"
+                        :options="fieldTypes" />
+                    <div class="row row-equal">
                         <div class="flex lg12 md12">
                             <VaCard square outlined>
                                 <VaCardTitle>{{ fType }}</VaCardTitle>
                                 <VaCardContent v-if="fType === 'input'">
-                                    <VaSelect class="mt-2" label="input type" v-model="input.input_type"
+                                    <VaSelect label="input type" v-model="input.input_type"
                                         :options="['text', 'number', 'date']" />
                                     <VaInput label="regex" v-model="input.regex" />
                                 </VaCardContent>
                                 <VaCardContent v-else-if="fType === 'select'">
-                                    <VaSelect class="mt-2" label="Is field multiple choice" v-model="select.multi"
+                                    <VaSelect label="Is field multiple choice" v-model="select.multi"
                                         :options="[true, false]" />
                                     <div class="row justify-center">
                                         <div v-for="(choice, index) in select.choices" class="flex lg12 md12 sm12 xs12"
@@ -57,14 +55,22 @@
                                     </div>
                                 </VaCardContent>
                                 <VaCardContent v-else>
-                                    <VaCounter class="mt-2" manual-input
-                                        :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v < range.max || 'min must be greater than max']"
-                                        type="number" label="min" v-model="range.min" />
-                                    <VaCounter class="mt-2" manual-input
-                                        :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v > range.min || 'max must be greater than min']"
-                                        type="number" label="max" v-model="range.max" />
-                                    <VaInput class="mt-2" :rules="[(v: string) => v.length > 0 || 'unit is mandatory']"
-                                        v-model="range.unit" label="unit"></VaInput>
+                                    <div class="row justify-space-between">
+                                        <div class="flex lg4 md4 sm12 xs12">
+                                            <VaCounter manual-input
+                                                :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v < range.max || 'min must be greater than max']"
+                                                type="number" label="min" v-model="range.min" />
+                                        </div>
+                                        <div class="flex lg4 md4 sm12 xs12">
+                                            <VaCounter manual-input
+                                                :rules="[(v: any) => numberRule(v) || 'Value must be a number', (v: number) => v > range.min || 'max must be greater than min']"
+                                                type="number" label="max" v-model="range.max" />
+                                        </div>
+                                        <div class="flex lg8 md8 sm12 xs12">
+                                            <VaInput :rules="[(v: string) => v.length > 0 || 'unit is mandatory']"
+                                                v-model="range.unit" label="unit"></VaInput>
+                                        </div>
+                                    </div>
                                 </VaCardContent>
                             </VaCard>
                         </div>
@@ -163,14 +169,3 @@ function resetAttribute() {
 }
 
 </script>
-<style lang="scss" scoped>
-.modal-crud {
-    .VaInput {
-        display: block;
-    }
-
-    .va-input-wrapper {
-        display: block;
-    }
-}
-</style>

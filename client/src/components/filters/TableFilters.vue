@@ -1,10 +1,19 @@
 <template>
     <div class="row">
+        <div class="flex">
+            <VaInput iconColor="primary" v-model="filter" clearable
+                @update:modelValue="(v: string) => emits('onFormChange', [['filter', v.length > 2 ? v : '']])"
+                placeholder="Type to search..">
+                <template #appendInner>
+                    <va-icon name="search" />
+                </template>
+            </VaInput>
+        </div>
         <div v-if="showFields.length" class="flex">
             <VaButtonDropdown :closeOnContentClick="false" icon="hide_source" preset="primary" label="Fields"
                 class="mr-2 mb-2">
-                <div class="w-200 row justify-center">
-                    <div class="flex lg12 md12 sm12 xs12" v-for="(field, index) in showFields">
+                <div class="row row-drop-down">
+                    <div class="flex lg7 md7 sm12 xs12" v-for="(field, index) in showFields">
                         <VaSwitch class="mt-2" :key="index" v-model="showFields[index].show" :label="field.value"
                             size="small" />
                     </div>
@@ -14,27 +23,47 @@
         <div class="flex">
             <VaButtonDropdown :closeOnContentClick="false" icon="filter_list" label="Filters" preset="primary"
                 class="mr-2 mb-2">
-                <div class="w-200">
-                    <div v-for="(field, index) in fields" :key="index">
-                        <VaInput class="mt-2" clearable :label="field.key" v-if="isInputField(field.filter)"
+                <div class="row row-drop-down">
+                    <div class="flex lg12 md12 sm12 xs12" v-if="searchForm.filters" v-for="(field, index) in fields"
+                        :key="index">
+                        <VaInput @update:modelValue="(v: string) => emits('onFormChange', [[field.key, v]])"
+                            class="mt-2" clearable :label="field.key" v-if="isInputField(field.filter)"
                             v-model="searchForm.filters[field.key]">
                         </VaInput>
-                        <VaSelect class="mt-2" clearable :label="field.key" v-else-if="isSelectField(field.filter)"
+                        <VaSelect class="mt-2"
+                            @update:modelValue="(v: string) => emits('onFormChange', [[field.key, v]])" clearable
+                            :label="field.key" v-else-if="isSelectField(field.filter)"
                             v-model="searchForm.filters[field.key]" :multiple="field.filter.multi"
                             :options="field.filter.choices">
                         </VaSelect>
-                        <VaSlider class="mt-2" range :label="field.key" v-else-if="isRangeField(field.filter)"
-                            v-model="searchForm.filters[field.key]" :min="field.filter.min" :max="field.filter.max" />
+
+                        <VaSlider label="Age range" v-else-if="isRangeField(field.filter)"
+                            @update:modelValue="(v: string) => emits('onFormChange', [[field.key, v]])"
+                            v-model="searchForm.filters[field.key]" class="mt-4" :min="field.filter.min"
+                            :max="field.filter.max" range track-label-visible>
+                            <template #trackLabel="{ value, order }">
+                                <VaChip size="small" :color="order === 0 ? 'secondary' : 'warning'">
+                                    {{ value }}
+                                </VaChip>
+                            </template>
+                        </VaSlider>
                     </div>
                 </div>
             </VaButtonDropdown>
         </div>
         <div class="flex">
             <VaButtonDropdown preset="primary" :closeOnContentClick="false" label="Sort" icon="sort" class="mr-2 mb-2">
-                <div class="w-200">
-                    <VaSelect class="mt-2" label="Sort Field" v-model="searchForm.sort_column" :options="columns" />
-                    <VaSelect class="mt-2" label="Sort Order" v-model="searchForm.sort_order"
-                        :options="['asc', 'desc']" />
+                <div class="row row-drop-down">
+                    <div class="flex lg12 md12 sm12 xs12">
+                        <VaSelect class="mt-2" label="Sort Field"
+                            @update:modelValue="(v: string) => emits('onFormChange', [['sort_column', v]])"
+                            v-model="searchForm.sort_column" :options="columns" />
+                    </div>
+                    <div class="flex lg12 md12 sm12 xs12">
+                        <VaSelect class="mt-2" label="Sort Order"
+                            @update:modelValue="(v: string) => emits('onFormChange', [['sort_order', v]])"
+                            v-model="searchForm.sort_order" :options="['asc', 'desc']" />
+                    </div>
                 </div>
             </VaButtonDropdown>
         </div>
@@ -49,6 +78,8 @@ const props = defineProps<{
     fields: Filter[],
 }>()
 
+const filter = ref('')
+
 onMounted(() => {
     searchForm.value.filters = { ...createFilters(props.fields) }
 })
@@ -59,7 +90,7 @@ const searchForm = ref<ModelSearchForm>({
     sort_order: 'asc'
 })
 
-const emits = defineEmits(['onFilterChange', 'onShowFieldChange'])
+const emits = defineEmits(['onFormChange', 'onShowFieldChange'])
 
 const showFields = ref(props.fields.map((filter: Filter) => {
     return {
@@ -71,10 +102,6 @@ const showFields = ref(props.fields.map((filter: Filter) => {
 
 watchEffect(() => {
     emits('onShowFieldChange', showFields.value)
-})
-
-watchEffect(() => {
-    emits('onFilterChange', searchForm.value)
 })
 
 function createFilters(fields: Filter[]) {
@@ -104,7 +131,10 @@ const isRangeField = (filter: Filter['filter']): filter is Range => {
 
 </script>
 <style scoped>
-.w-200 {
-    max-width: 350px;
+.row-drop-down {
+    width: min-content;
+    max-height:400px;
+    overflow: scroll;
+    padding: 16px;
 }
 </style>

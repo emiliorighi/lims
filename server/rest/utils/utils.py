@@ -27,6 +27,8 @@ def evaluate_fields(project, data):
     for field in project.sample['fields']:
         filter = field['filter']
         value = data.get(field['key'])
+        if value == None:
+            continue
         if 'input_type' in filter:
             evaluation_errors.extend(evaluate_input(filter['input_type'], field, value))    
         elif 'choices' in filter:
@@ -58,8 +60,13 @@ def evaluate_range(min_val, max_val, field,value):
 
 def evaluate_choices(choices, value):
     errors= []
-    if (isinstance(value, list) and any(v not in choices for v in value)) or (value not in choices):
-        errors.append(f"{value} is not in {','.join(choices)}")
+    if (isinstance(value, list)):
+        for v in value:
+            if v not in choices:
+                errors.append(f"{v} is not in {','.join(choices)}")
+    else:
+        if value not in choices:
+            errors.append(f"{value} is not in {','.join(choices)}")
     return errors        
 
 def get_documents_by_query(model, query, fields_to_exclude= None):

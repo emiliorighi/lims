@@ -1,9 +1,10 @@
 <template>
     <div>
-        <VaModal size="large" v-model="projectStore.confirmOverwrite" hide-default-actions>
+        <VaModal max-height="500px" size="large" v-model="projectStore.confirmOverwrite" hide-default-actions>
             <h2 class="va-h2">{{
             projectStore.incomingProject?.project_id }} </h2>
             <p class="va-text-secondary">Choose if you want to overwrite or keep the current Form</p>
+            <VaDivider />
             <VaCardBlock v-if="projectStore.incomingProject" horizontal>
                 <VaCardBlock class="flex-auto">
                     <VaButton color="secondary" @click="keep" icon-right="chevron_right"> Keep

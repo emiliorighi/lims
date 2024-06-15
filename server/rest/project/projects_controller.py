@@ -44,3 +44,9 @@ class ValidateProjectApi(Resource):
             format = 'yaml'
         messages, status = projects_service.validate_project(request.data,format)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
+
+
+class LookupProjectDataApi(Resource):
+    def get(self, project_id):
+        resp = projects_service.lookup_related_data(project_id)
+        return Response(json.dumps(resp), mimetype="application/json", status=200)

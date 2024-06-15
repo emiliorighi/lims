@@ -25,6 +25,12 @@ const routes: Array<RouteRecordRaw> = [
     props: true
   },
   {
+    path: '/:projectId/samples/form',
+    name: 'sample-form',
+    component: () => import('../pages/sample-form/SampleForm.vue'),
+    props: true
+  },
+  {
     name: 'experiments',
     path: '/:projectId/experiments',
     props: true,

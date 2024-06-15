@@ -20,9 +20,9 @@ const initPagination = {
 export const useSampleStore = defineStore('sample', {
   state: () => {
     return {
-      sample: null as SampleModel | null,
+      sample: {...defaultSample},
       showForm:false,
-      isUpdate: false,
+      update:false,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }
@@ -32,14 +32,11 @@ export const useSampleStore = defineStore('sample', {
     resetSeachForm() {
       this.searchForm = { ...initSearchForm }
     },
-    initSample() {
-      this.sample = { ...defaultSample }
-    },
     resetPagination() {
       this.pagination = { ...initPagination }
     },
     resetSample() {
-      this.sample = null
+      this.sample = {...defaultSample}
     }
   },
 })

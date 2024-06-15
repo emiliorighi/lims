@@ -17,7 +17,8 @@ const emit = defineEmits(['newSample', 'tsvUpload']);
 const sampleStore = useSampleStore()
 
 function newSample() {
-    sampleStore.showForm = !sampleStore.showForm
+    sampleStore.initSample()
+    sampleStore.showForm = true
 }
 
 function tsvUpload() {

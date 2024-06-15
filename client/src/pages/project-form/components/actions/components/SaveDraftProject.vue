@@ -1,16 +1,17 @@
 <template>
     <div>
-        {{ isDraftUpdated }}
-        <VaButton color="success" :loading="isLoading" :disabled="isDraftUpdated" @click="saveDraft" icon="save">Save
+        <VaButton color="success" :loading="isLoading" :disabled="!isValid" @click="saveDraft" icon="save">Save
             Draft</VaButton>
-        <VaModal size="large" v-model="show" hide-default-actions>
+        <VaModal max-height="500px" size="large" v-model="show" hide-default-actions>
+            <h2 class="va-h2">{{
+            projectStore.incomingProject?.project_id }} already exists!</h2>
+            <p class="va-text-secondary">Choose if you want to save the current changes or revert to the database
+                object</p>
+            <VaDivider />
             <VaCardBlock v-if="projectStore.incomingProject" horizontal>
-                <h2 class="va-h2">{{
-            projectStore.incomingProject.project_id }} already exists!</h2>
-                <p class="va-text-secondary">Choose if you want to save the current changes or revert to the database
-                    object</p>
                 <VaCardBlock class="flex-auto">
-                    <VaButton color="info" @click="updateDraftProject" icon-right="chevron_right"> Save Current Changes
+                    <VaButton color="success" @click="updateDraftProject" icon-right="chevron_right"> Save Current
+                        Changes
                     </VaButton>
                     <ProjectOverviewCard :metadata="projectStore.currentProject" />
                 </VaCardBlock>
@@ -40,8 +41,8 @@ const isLoading = ref(false)
 const show = ref(false)
 
 
-const isDraftUpdated = computed(() => {
-    return projectStore.incomingProject !== null && deepEqual(projectStore.currentProject, projectStore.incomingProject)
+const isValid = computed(() => {
+    return projectStore.currentProject.project_id
 })
 
 async function saveDraft() {
@@ -56,7 +57,8 @@ async function saveDraft() {
 }
 
 function revertProject() {
-
+    projectStore.overwriteProject()
+    show.value = !show.value
 }
 
 async function updateDraftProject() {
@@ -72,7 +74,7 @@ async function updateDraftProject() {
         init({ color: "danger", message: axiosError.message, title: 'Something happened', duration: 1500 })
     } finally {
         isLoading.value = !isLoading.value
-
+        show.value = !show.value
     }
 }
 async function checkDraftProjectExists(projectId: string) {
@@ -107,30 +109,5 @@ async function createDraftProject() {
     }
 }
 
-function deepEqual(currentProject: Record<string, any>, incomingProject: Record<string, any>) {
-    // Check if both arguments are objects
-    if (typeof currentProject !== 'object' || typeof incomingProject !== 'object' || currentProject === null || incomingProject === null) {
-        return currentProject === incomingProject; // Check for strict equality if not objects
-    }
-
-    // Get the keys of both objects
-    var keys1 = Object.keys(currentProject);
-    var keys2 = Object.keys(incomingProject);
-
-    // Check if the number of keys is the same
-    if (keys1.length !== keys2.length) {
-        return false;
-    }
-
-    // Check if all keys in currentProject exist in incomingProject and have the same value (recursively)
-    for (var key of keys1) {
-        if (!keys2.includes(key) || !deepEqual(currentProject[key], incomingProject[key])) {
-            return false;
-        }
-    }
-
-    // If all checks pass, the objects are considered equal
-    return true;
-}
 
 </script>

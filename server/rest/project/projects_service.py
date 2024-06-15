@@ -1,4 +1,4 @@
-from db.models import Project,ProjectDraft
+from db.models import Project,ProjectDraft,Sample,Experiment
 from mongoengine.queryset.visitor import Q
 from jsonschema import validators
 import json,yaml,requests
@@ -8,6 +8,14 @@ import csv
 from io import StringIO
 
 JSON_SCHEMA_PATH='/server/project-spec.json'
+
+
+
+def lookup_related_data(project_id):
+    response = {}
+    response['samples'] = Sample.objects(project=project_id).count()
+    response['experiments'] = Experiment.objects(project=project_id).count()
+    return response
 
 def get_project(project_id):
     projects = utils.get_documents_by_query(Project, dict(project_id=project_id), ('id','created'))
