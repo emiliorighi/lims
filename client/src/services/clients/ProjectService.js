@@ -22,8 +22,14 @@ class ProjectService {
   validateJSONProject(data) {
     return base.post('/projects/validate', data)
   }
-  inferAttributesProject(data){
+  inferAttributesProject(data) {
     return base.post('/projects/wrangling', data)
+  }
+  inferHeadersFromTSV(projectId, data) {
+    return base.post(`/projects/${projectId}/match_headers`, data)
+  }
+  uploadTSV(projectId, data) {
+    return base.post(`/projects/${projectId}/upload`, data)
   }
   getDraftProjects(params) {
     return base.get('/draft_projects', { params: params })
@@ -34,7 +40,7 @@ class ProjectService {
   createDraftProject(data) {
     return base.post('/draft_projects', data)
   }
-  updateDraftProject(id, data){
+  updateDraftProject(id, data) {
     return base.put(`/draft_projects/${id}`, data)
   }
 }

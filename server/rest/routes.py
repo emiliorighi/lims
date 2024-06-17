@@ -11,12 +11,17 @@ def initialize_routes(api):
 
 	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
 
-	api.add_resource(projects_controller.TsvUploadApi, '/api/projects/wrangling')
+	api.add_resource(projects_controller.TsvUploadMapApi, '/api/projects/wrangling')
 
 	api.add_resource(projects_controller.ValidateProjectApi, '/api/projects/validate')
 
 	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
 	
+	
+	api.add_resource(projects_controller.InferHeaderApi, '/api/projects/<project_id>/match_headers')
+
+	api.add_resource(projects_controller.TsvUploadApi, '/api/projects/<project_id>/upload')
+
 	api.add_resource(projects_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
 
 

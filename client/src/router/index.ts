@@ -31,6 +31,12 @@ const routes: Array<RouteRecordRaw> = [
     props: true
   },
   {
+    path: '/:projectId/samples/upload',
+    name: 'sample-upload',
+    component: () => import('../pages/sample-form/SamplesUpload.vue'),
+    props: true
+  },
+  {
     name: 'experiments',
     path: '/:projectId/experiments',
     props: true,

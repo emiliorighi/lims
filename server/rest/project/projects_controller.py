@@ -25,11 +25,18 @@ class ProjectsApi(Resource):
         return Response(json.dumps(messages), mimetype="application/json", status=status)
 
 ##returns the list of mapped attributes
-class TsvUploadApi(Resource):
+class TsvUploadMapApi(Resource):
     def post(self):
         data = request.json if request.is_json else request.form
         attributes = projects_service.map_attributes_from_tsv(request.files.get('tsv'),data)
         return Response(json.dumps(attributes), mimetype="application/json", status=200)
+
+
+class TsvUploadApi(Resource):
+    def post(self, project_id):
+        data = request.json if request.is_json else request.form
+        projects_service.upload_tsv(project_id, request.files.get('file'), data)
+        # return Response(json.dumps(messages), mimetype="application/json", status=status)
 
 class ProjectApi(Resource):
     def get(self, project_id):
@@ -50,3 +57,10 @@ class LookupProjectDataApi(Resource):
     def get(self, project_id):
         resp = projects_service.lookup_related_data(project_id)
         return Response(json.dumps(resp), mimetype="application/json", status=200)
+
+class InferHeaderApi(Resource):
+    def post(self, project_id):
+        data = request.json if request.is_json else request.form
+        messages, status = projects_service.infer_fields(project_id, data, request.files)
+        return Response(json.dumps(messages), mimetype="application/json", status=status)
+
