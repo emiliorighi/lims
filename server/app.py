@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import BaseConfig
 from rest import initialize_api
+from db.models import Sample
 from flask_jwt_extended import JWTManager
 from flask_mongoengine import MongoEngine
 

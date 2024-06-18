@@ -35,8 +35,8 @@ class TsvUploadMapApi(Resource):
 class TsvUploadApi(Resource):
     def post(self, project_id):
         data = request.json if request.is_json else request.form
-        projects_service.upload_tsv(project_id, request.files.get('file'), data)
-        # return Response(json.dumps(messages), mimetype="application/json", status=status)
+        message,status = projects_service.upload_tsv(project_id, request.files.get('file'), data)
+        return Response(json.dumps(message), mimetype="application/json", status=status)
 
 class ProjectApi(Resource):
     def get(self, project_id):

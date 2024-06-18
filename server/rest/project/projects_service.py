@@ -6,6 +6,7 @@ from ..utils import utils
 from werkzeug.exceptions import NotFound
 import csv
 from io import StringIO
+from werkzeug.exceptions import BadRequest, NotFound, Conflict
 
 JSON_SCHEMA_PATH='/server/project-spec.json'
 
@@ -78,7 +79,6 @@ def validate_project(data, format='json'):
     else:
         return [f"Project {content.get('project_id')} is valid!"], 200
     
-
 def validate_model(model):
     errors = []
     for id_field in model.get('id_format'):
@@ -98,7 +98,6 @@ def jsonschema_validation(project):
 
 
 def upload_tsv(project_id, tsv, data):
-
     project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(description=f"Project: {project_id} not found!")
@@ -109,20 +108,81 @@ def upload_tsv(project_id, tsv, data):
     model = data.get('model')
     if not model or not model in ['sample', 'experiment']:
         return 'model is mandatory, choose between sample or experiment', 400
-
+   
+    model_doc = Experiment if model == 'experiment' else Sample
     map = data.get('map')
     if not map:
         return 'map is mandatory', 400
     
     mapped_values = [m.split(':') for m in map.split(',')]
-    print(mapped_values)
+    if not mapped_values or (not mapped_values[0] and mapped_values[1]):
+        return f'map values are not valid: {mapped_values}, 400'
 
-
-    #STEPS
-    #MAP ITEMS
-    #VALIDATE FIELDS
-    #SAVE ITEMS
+    data_model = project[model]
+    data_model_required_fields=[f.get('key') for f in data_model.get('fields') if f.get('required')]
+    data_model_id_fields = data_model.get('id_format')
+    incoming_model_fields = [t[1] for t in mapped_values]
     
+    missing_id_fields=[]
+    for id_field in data_model_id_fields:
+        if not id_field in incoming_model_fields:
+            missing_id_fields.append(id_field)
+    
+    if missing_id_fields:
+        return f"The following fields used to generate the id of {model} are missing {', '.join(missing_id_fields)}", 400
+    
+    missing_required_fields = []
+    for req_field in data_model_required_fields:
+        if not req_field in incoming_model_fields:
+            missing_required_fields.append(req_field)
+
+    if missing_required_fields:
+        return f"The following required fields of {model} are missing {', '.join(missing_required_fields)}", 400    
+    
+    valid_map = {t[0]:t[1] for t in mapped_values if t[1]}
+    tsv_data = StringIO(tsv.read().decode('utf-8'))
+    tsvreader = csv.DictReader(tsv_data, delimiter='\t')
+    
+    items=[]
+    for row in tsvreader:
+        item = {}
+        for k,v in valid_map.items():
+            value = row.get(k)
+            if value:
+                item[v] = row[k]
+        items.append(item)
+
+    header=2
+    saved_items = []
+    for index, obj in enumerate(items):
+        obj_id = create_model_id(data_model_id_fields, obj)
+        if not obj_id:
+            raise BadRequest(description=f"Unable to generate {model}_id with the fields provided at row{header+index}")
+
+        missing_fields = [req_field for req_field in data_model_required_fields 
+                  if req_field not in obj or obj[req_field] in [None, '', [], {}]]
+    
+        if missing_fields:
+            raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory for {model} at row {header+index}")
+        
+        evaluation_errors = utils.evaluate_fields(project, obj)
+        if evaluation_errors:
+            raise BadRequest(description=f"{'; '.join(evaluation_errors)} for {model} at row {header+index}")
+        
+        doc_to_save={f"{model}_id":obj_id, 'project':project_id, 'metadata':obj }
+        try: 
+            saved_item = model_doc(**doc_to_save).save()
+            saved_items.append(saved_item)
+        except Exception as e:
+            raise BadRequest(description=f"{e} at row {header+index}")
+
+
+    return f'A total of {len(saved_items)} have been saved', 200
+
+def create_model_id(id_fields, data):
+    return '_'.join(str(data.get(attr)) for attr in id_fields)
+
+
 ## guess attribute types from tsv
 def map_attributes_from_tsv(tsv, data):
     treshold = int(data.get('treshold', 25))

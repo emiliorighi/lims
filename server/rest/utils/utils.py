@@ -62,11 +62,14 @@ def evaluate_choices(choices, value):
     errors= []
     if (isinstance(value, list)):
         for v in value:
-            if v not in choices:
+            if v.strip() not in choices:
                 errors.append(f"{v} is not in {','.join(choices)}")
     else:
-        if value not in choices:
-            errors.append(f"{value} is not in {','.join(choices)}")
+        #check for comma separeted values
+        value = value.split(',')
+        for v in value:
+            if v.strip() not in choices:
+                errors.append(f"{value} is not in {','.join(choices)}")
     return errors        
 
 def get_documents_by_query(model, query, fields_to_exclude= None):

@@ -90,7 +90,7 @@ class Analysis(db.Document):
     }
 
 class Sample(db.Document):
-    created = db.DateTimeField(default=datetime.utcnow)
+    created = db.DateTimeField(default=datetime.now())
     sample_id = db.StringField(required=True)
     taxid = db.StringField()
     scientific_name = db.StringField()
@@ -101,8 +101,10 @@ class Sample(db.Document):
         'indexes': [
             'project',
             'sample_id',
-            ('project','sample_id')
-
+            {
+                'fields': ['project', 'sample_id'],
+                'unique': True  # This enforces uniqueness
+            }
         ],
         'strict': False
     }
