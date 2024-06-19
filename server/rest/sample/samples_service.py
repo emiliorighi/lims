@@ -51,8 +51,7 @@ def create_sample_id(id_fields, data):
 
 def create_sample(project_id, data):
 
-    project = Project.objects(project_id=project_id).first()
-    
+    project = Project.objects(project_id=project_id).first()    
     if not project:
         raise NotFound(description=f"Project: {project_id} not found")
     

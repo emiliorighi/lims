@@ -5,12 +5,9 @@
         <VaInnerLoading :loading="isLoading">
             <VaForm>
                 <div class="row align-center">
-                    <div class="flex">
-                        <VaFileUpload style="z-index: 0" v-model="tsv" icon="upload" file-types=".tsv" type="single"
+                    <div class="flex lg12 md12 sm12 xs12">
+                        <VaFileUpload dropzone dropzone-text="Upload a TSV here" style="z-index: 0" v-model="tsv" icon="upload" file-types=".tsv" type="single"
                             undo uploadButtonText="Upload TSV" />
-                    </div>
-                    <div class="flex">
-                        <VaCounter v-model="header" messages="Header row number"></VaCounter>
                     </div>
                 </div>
                 <h4 class="va-h4">Edit the cell values</h4>
@@ -89,6 +86,8 @@ import { computed, onMounted, ref, watch } from 'vue';
 import ProjectService from '../../services/clients/ProjectService';
 import Header from '../../components/ui/Header.vue';
 import { VaSelect } from 'vuestic-ui/web-components';
+import { AxiosError } from 'axios';
+import { useRouter } from 'vue-router';
 
 const { init } = useToast()
 const schemaStore = useSchemaStore()
@@ -97,6 +96,7 @@ const tsv = ref()
 const header = ref(0)
 const { validate } = useForm('samplesUpload')
 
+const router = useRouter()
 const filter = ref('')
 type InferMap = {
     tsv_column: string,
@@ -259,21 +259,25 @@ async function handleSubmit() {
 
     //stringify mapped fields tsv_column:id_field 
     const stringifiedFields = mappedFields.value.filter(f => f.field_key).map(({ tsv_column, field_key }) => `${tsv_column}:${field_key}`).join(',')
-    formData.append('map',stringifiedFields)
+    formData.append('map', stringifiedFields)
 
 
     try {
+        isLoading.value = true
         const { data } = await ProjectService.uploadTSV(schemaStore.schema.project_id, formData)
-        // uploadState.value = data.state
-        // jobID.value = data.id
-        // intervalId.value = window.setInterval(fetchStatus, pollingInterval);
+        init({ message: data, color: 'success' })
+        router.push({ name: 'samples', params: { projectId: props.projectId } })
 
     } catch (error) {
-        // isError.value = true
-        // const axiosError = error as AxiosError
-        // if (axiosError.response && axiosError.response.data) messages.value = [...axiosError.response.data as Record<string, string>[]]
-        // else messages.value = [{ error: axiosError.message }]
-        // isLoading.value = false
+        const axiosError = error as AxiosError
+        if(axiosError.response?.data){
+            const message = (axiosError.response.data as {message:string}).message
+            init({ message: message, color: 'danger' })
+        }else{
+            init({ message: 'Error importing samples', color: 'danger' })
+        }
+    } finally {
+        isLoading.value = false
     }
 }
 </script>

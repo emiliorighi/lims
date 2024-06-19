@@ -25,6 +25,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { TreeNode } from 'vuestic-ui/web-components';
+
 type ObjectEntry = [string, any];
 const filter = ref('')
 const props = defineProps<{
@@ -40,7 +41,7 @@ const customFilterMethod = computed(() => {
 const nodes = ref([...buildTree(props.metadata, undefined)])
 
 const currenNodes = computed(() => {
-    if(nodes.value.length) return nodes
+    if (nodes.value.length) return nodes
     return [{ id: 'noMetadata', label: "No Metadata Found!", description: "No Metadata are linked to this item!" }]
 })
 

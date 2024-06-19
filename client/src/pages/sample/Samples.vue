@@ -1,7 +1,7 @@
 <template>
     <div>
         <h1 class="va-h1">List of Samples</h1>
-        <p style="margin-bottom: 6px" class="va-text-secondary"></p>
+        <p style="margin-bottom: 6px" class="va-text-secondary">Samples of {{ schemaStore.schema.project_id }}</p>
         <div v-if="schemaStore.schema.project_id" class="row row-equal">
             <div class="flex lg12 md12 sm12 xs12">
                 <VaCard>
@@ -12,19 +12,22 @@
                                 @on-show-field-change="updateShowFields" />
                         </div>
                         <div class="flex">
-                            <div class="row">
-                                <div class="flex">
-                                    <VaButton
-                                        :to="{ name: 'sample-form', params: { projectId: schemaStore.schema.project_id } }"
-                                        icon="add">Sample</VaButton>
-                                </div>
-                                <div class="flex">
-                                    <VaButton @click="" icon="upload">Upload</VaButton>
-                                </div>
-                                <div class="flex">
-                                    <VaButton @click="showModal = !showModal" icon="download">Download</VaButton>
-                                </div>
-                            </div>
+                            <VaMenu>
+                                <template #anchor>
+                                    <VaButton preset="primary">Actions</VaButton>
+                                </template>
+                                <VaMenuItem icon="add"
+                                    @selected="router.push({ name: 'sample-form', params: { projectId: schemaStore.schema.project_id } })">
+                                    Create Sample
+                                </VaMenuItem>
+                                <VaMenuItem icon="upload"
+                                    @selected="router.push({ name: 'sample-upload', params: { projectId: schemaStore.schema.project_id } })">
+                                    Upload Samples
+                                </VaMenuItem>
+                                <VaMenuItem icon="download" @selected="showModal = !showModal">
+                                    Download Report
+                                </VaMenuItem>
+                            </VaMenu>
                         </div>
                     </VaCardContent>
                     <VaCardContent>
@@ -67,7 +70,6 @@
 <script setup lang="ts">
 import { useSampleStore } from '../../stores/sample-store';
 import { useSchemaStore } from '../../stores/schemas-store';
-// import SampleForm from './SampleForm.vue';
 import { computed, onMounted, ref } from 'vue';
 import { Filter, SampleModel } from '../../data/types';
 import SampleService from '../../services/clients/SampleService';
@@ -77,11 +79,13 @@ import CRUDTable from '../../components/data/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
 import ProjectService from '../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     projectId: string
 }>()
 
+const router = useRouter()
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { toast } = useGlobalStore()
@@ -90,7 +94,6 @@ const downloadFields = ref<string[]>([])
 const showModal = ref(false)
 const isTSVLoading = ref(false)
 const applyFilters = ref(true)
-
 
 const mappedFields = schemaStore.schema.sample.fields.map((f: Filter) => { return { show: f.required, value: f.key } })
 
@@ -161,9 +164,13 @@ async function handlePagination(value: number) {
 }
 
 function editSample(index: number) {
-    sampleStore.sample = { ...samples.value[index] }
-    sampleStore.update = true
-    sampleStore.showForm = true
+    router.push({
+        name: 'sample-form',
+        params: {
+            projectId: schemaStore.schema.project_id,
+            sampleId: samples.value[index].sample_id
+        }
+    })
 }
 
 async function deleteSample(index: number) {
@@ -201,7 +208,6 @@ async function getSamples(query: Record<string, any>) {
 async function downloadData() {
     const downloadRequest = { format: "tsv", fields: [...downloadFields.value] }
     try {
-        console.log(sampleStore.searchForm)
         isTSVLoading.value = true
         const requestData = applyFilters.value ? {
             filter: sampleStore.searchForm.filter,
@@ -212,7 +218,6 @@ async function downloadData() {
             :
             { ...downloadRequest }
 
-        console.log(requestData)
         const response = await SampleService.getTsv(props.projectId, requestData)
         const data = response.data
         const href = URL.createObjectURL(data);
