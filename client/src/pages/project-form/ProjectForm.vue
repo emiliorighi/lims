@@ -59,7 +59,7 @@ const steps = ref(defineVaStepperSteps([
         label: 'Project Info', beforeLeave: (step) => { step.hasError = !validate() }
     },
     {
-        label: 'Model Attributes', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
+        label: 'Model filters', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
     },
     {
         label: 'Sample Info', beforeLeave: (step) => { step.hasError = !isValidSample.value }
@@ -83,6 +83,10 @@ const isValidExperiment = computed(() => {
 async function submitProject() {
     isLoading.value = !isLoading.value
     try {
+        if(projectStore.currentProject.valid){
+            const {valid, ...projectData} = projectStore.currentProject
+            projectStore.currentProject = {...projectData}
+        }
         const { data } = await ProjectService.createProject(projectStore.currentProject)
         data.forEach((d: string) => {
             init({ color: 'success', message: d })

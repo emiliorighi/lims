@@ -1,7 +1,7 @@
 <template>
     <VaDataTable sticky-header height="500px" :items="attributeStore.attributes" :columns="columns">
         <template #header(actions)>
-            <VaButton @click="attributeStore.initAttribute" icon="add">New Attribute
+            <VaButton @click="attributeStore.initAttribute" icon="add">New Filter
             </VaButton>
         </template>
         <template #cell(type)="{ rowData }">

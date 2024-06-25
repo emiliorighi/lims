@@ -154,11 +154,16 @@ def upload_tsv(project_id, tsv, data):
 
     header=2
     saved_items = []
+    id_set = set()
+    print(len(items))
     for index, obj in enumerate(items):
+        print(id_set)
         obj_id = create_model_id(data_model_id_fields, obj)
         if not obj_id:
             raise BadRequest(description=f"Unable to generate {model}_id with the fields provided at row{header+index}")
-
+        if obj_id in id_set:
+            continue #SKIP REPEATED OBJECTS
+        
         missing_fields = [req_field for req_field in data_model_required_fields 
                   if req_field not in obj or obj[req_field] in [None, '', [], {}]]
     
@@ -173,6 +178,8 @@ def upload_tsv(project_id, tsv, data):
         try: 
             saved_item = model_doc(**doc_to_save).save()
             saved_items.append(saved_item)
+            id_set.add(obj_id)
+
         except Exception as e:
             raise BadRequest(description=f"{e} at row {header+index}")
 
@@ -183,7 +190,7 @@ def create_model_id(id_fields, data):
     return '_'.join(str(data.get(attr)) for attr in id_fields)
 
 
-## guess attribute types from tsv
+## guess filter types from tsv
 def map_attributes_from_tsv(tsv, data):
     treshold = int(data.get('treshold', 25))
     tsv_data = StringIO(tsv.read().decode('utf-8'))

@@ -1,33 +1,45 @@
 <template>
     <div>
-        <h1 class="va-h1">List of Samples</h1>
-        <p style="margin-bottom: 6px" class="va-text-secondary">Samples of {{ schemaStore.schema.project_id }}</p>
+        <div class="row justify-space-between align-end">
+            <div class="flex">
+                <h1 class="va-h1">List of Samples</h1>
+                <p style="margin-bottom: 6px" class="va-text-secondary">Samples of {{ schemaStore.schema.project_id }}
+                </p>
+            </div>
+            <div class="flex">
+                <VaMenu>
+                    <template #anchor>
+                        <VaButton>Actions</VaButton>
+                    </template>
+                    <VaMenuItem icon="add"
+                        @selected="router.push({ name: 'sample-form', params: { projectId: schemaStore.schema.project_id } })">
+                        Create Sample
+                    </VaMenuItem>
+                    <VaMenuItem icon="upload"
+                        @selected="router.push({ name: 'sample-upload', params: { projectId: schemaStore.schema.project_id } })">
+                        Upload Samples
+                    </VaMenuItem>
+                    <VaMenuItem icon="download" @selected="showModal = !showModal">
+                        Download Report
+                    </VaMenuItem>
+                </VaMenu>
+            </div>
+        </div>
         <div v-if="schemaStore.schema.project_id" class="row row-equal">
+            <VaDivider />
             <div class="flex lg12 md12 sm12 xs12">
                 <VaCard>
-                    <VaCardContent class="row justify-space-between">
-                        <div class="flex">
-                            <TableFilters @on-metadata-update="updateQueryForm" @on-search-change="updateSearchForm"
-                                :columns="columns" :fields="schemaStore.schema.sample.fields"
-                                @on-show-field-change="updateShowFields" />
-                        </div>
-                        <div class="flex">
-                            <VaMenu>
-                                <template #anchor>
-                                    <VaButton preset="primary">Actions</VaButton>
-                                </template>
-                                <VaMenuItem icon="add"
-                                    @selected="router.push({ name: 'sample-form', params: { projectId: schemaStore.schema.project_id } })">
-                                    Create Sample
-                                </VaMenuItem>
-                                <VaMenuItem icon="upload"
-                                    @selected="router.push({ name: 'sample-upload', params: { projectId: schemaStore.schema.project_id } })">
-                                    Upload Samples
-                                </VaMenuItem>
-                                <VaMenuItem icon="download" @selected="showModal = !showModal">
-                                    Download Report
-                                </VaMenuItem>
-                            </VaMenu>
+                    <VaCardContent>
+                        <div class="row justify-space-between">
+                            <div class="flex">
+                                <TableFilters @on-metadata-update="updateQueryForm" @on-search-change="updateSearchForm"
+                                    :columns="columns" :fields="schemaStore.schema.sample.fields"
+                                    @on-show-field-change="updateShowFields" />
+                            </div>
+                            <div class="flex">
+                                <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
+                                    :offset="sampleStore.pagination.offset" :total="total" />
+                            </div>
                         </div>
                     </VaCardContent>
                     <VaCardContent>
@@ -35,10 +47,12 @@
                             @delete-clicked="deleteSample" />
                     </VaCardContent>
                     <VaDivider />
-                    <VaCardContent class="row justify-center">
-                        <div class="flex">
-                            <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
-                                :offset="sampleStore.pagination.offset" :total="total" />
+                    <VaCardContent>
+                        <div class="row justify-center">
+                            <div class="flex">
+                                <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
+                                    :offset="sampleStore.pagination.offset" :total="total" />
+                            </div>
                         </div>
                     </VaCardContent>
                 </VaCard>
@@ -165,7 +179,7 @@ async function handlePagination(value: number) {
 
 function editSample(index: number) {
     router.push({
-        name: 'sample-form',
+        name: 'sample-form-update',
         params: {
             projectId: schemaStore.schema.project_id,
             sampleId: samples.value[index].sample_id

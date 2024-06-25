@@ -54,14 +54,21 @@ class ProjectDraft(db.Document):
 
 class Experiment(db.Document):
     sample_id= db.StringField(required=True)
-    experiment_id= db.StringField(unique=True,required=True)
-    # user=db.StringField(required=True)
+    experiment_id= db.StringField(required=True)
     created = db.DateTimeField(default=datetime.now())
     project=db.StringField(required=True)
     files=db.ListField(db.StringField)
     metadata=db.DictField()
     meta = {
-        'indexes': ['experiment_id','sample_id']
+        'indexes': [
+            'project',
+            'experiment_id',
+            {
+                'fields': ['project', 'experiment_id'],
+                'unique': True  # This enforces uniqueness
+            }
+        ],
+        'strict': False
     }
 
 class File(db.Document):

@@ -10,14 +10,20 @@ class ExperimentService {
     getExperiment(projectId, experimentId) {
         return base.get(`/projects/${projectId}/experiments/${experimentId}`)
     }
-    createExperiment(projectId, sampleId, data) {
-        return base.post(`/projects/${projectId}/samples/${sampleId}/experiments`, data)
+    createExperiment(projectId, data) {
+        return base.post(`/projects/${projectId}/experiments`, data)
     }
-    updateExperiment(projectId, sampleId, experimentId, data) {
-        return base.put(`/projects/${projectId}/samples/${sampleId}/experiments/${experimentId}`, data)
+    updateExperiment(projectId, experimentId, data) {
+        return base.put(`/projects/${projectId}/experiments/${experimentId}`, data)
     }
-    deleteExperiment(projectId, sampleId, experimentId) {
-        return base.delete(`/projects/${projectId}/samples/${sampleId}/experiments/${experimentId}`)
+    deleteExperiment(projectId, experimentId) {
+        return base.delete(`/projects/${projectId}/experiments/${experimentId}`)
+    }
+    uploadExperimentTSV(projectId, data) {
+        return base.post(`/projects/${projectId}/experiments/upload`, data)
+    }
+    getTsv(projectId, params) {
+        return download.get(`/projects/${projectId}/experiments`, { params: params })
     }
 }
 

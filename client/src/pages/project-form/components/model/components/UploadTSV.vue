@@ -2,7 +2,7 @@
     <VaInnerLoading :loading="isLoading">
         <div class="row justify-space-between">
             <div class="flex">
-                Create attributes or upload them from a TSV file
+                Create filters or upload them from a TSV file
             </div>
             <div class="flex">
                 <div class="row justify-space-between">

@@ -1,9 +1,12 @@
 <template>
-    <h1 class="va-h1">{{ sampleId }}</h1>
-    <p style="margin-bottom: 6px" class="va-text-secondary"> Sample of {{ projectId }}</p>
-    <div v-if="sample" class="row">
-        <div class="flex lg12 md12 sm12 xs12">
-            <MetadataTree :metadata="Object.entries(sample.metadata)" />
+    <div>
+        <h1 class="va-h1">{{ sampleId }}</h1>
+        <p style="margin-bottom: 6px" class="va-text-secondary"> Sample of {{ projectId }}</p>
+        <VaDivider/>
+        <div v-if="sample" class="row">
+            <div class="flex lg12 md12 sm12 xs12">
+                <MetadataTree :metadata="Object.entries(sample.metadata)" />
+            </div>
         </div>
     </div>
 </template>
@@ -35,7 +38,7 @@ onMounted(async () => {
         await fetchSchema(props.projectId)
     }
 
-    await fetchSample(props.sampleId)
+    await fetchSample(props.projectId, props.sampleId)
 })
 
 
@@ -60,10 +63,10 @@ async function fetchSchema(projectId: string) {
     }
 }
 
-async function fetchSample(sampleId: string) {
+async function fetchSample(projectId: string, sampleId: string) {
     try {
         isLoading.value = true
-        const { data } = await SampleService.getSample(props.projectId, props.sampleId)
+        const { data } = await SampleService.getSample(projectId, sampleId)
         sample.value = { ...data }
     } catch (e) {
         let message: string
@@ -77,7 +80,7 @@ async function fetchSample(sampleId: string) {
 
         init({ message: message, color: 'danger' })
     } finally {
-
+        isLoading.value = false
     }
 
 }

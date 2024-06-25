@@ -2,24 +2,24 @@
     <VaModal class="modal-crud" :model-value="!!attributeStore.attribute" @ok="submitAttribute"
         @cancel="resetAttribute()">
         <template #header>
-            <h2 class="va-h2"> Editing attribute</h2>
+            <h2 class="va-h2"> Editing filter</h2>
         </template>
         <VaForm ref="attributeForm">
             <p class="va-text-secondary">Fill in the fields</p>
             <VaDivider />
             <div v-if="attributeStore.attribute" class="row justify-space-between">
-                <VaInput class="flex lg4 md4 sm12 xs12 mt-4" label="Attribute key (required)" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.key === v) === -1 || attributeStore.attributes.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
+                <VaInput class="flex lg4 md4 sm12 xs12 mt-4" label="filter key (required)" :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.key === v) === -1 || attributeStore.attributes.findIndex(it => it.key === v) === attributeStore.attributeId || 'Key must be unique',
     (v: string) => v.length > 0 || 'Key is required!']" placeholder="Type a value.."
                     v-model="attributeStore.attribute.key" />
                 <VaInput class="flex lg4 md4 sm12 xs12 mt-4" placeholder="Type a value.." :rules="[(v: string) => attributeStore.attributes.findIndex(it => it.label === v) === -1 || attributeStore.attributes.findIndex(it => it.label === v) === attributeStore.attributeId || 'label must be unique',
     (v: string) => v.length > 0 || 'Label is required!']" v-model="attributeStore.attribute.label"
                     label="Attribute label (required)" />
                 <VaInput class="flex lg8 md8 sm12 xs12 mt-4" v-model="attributeStore.attribute.description"
-                    label="Attribute description (optional)" placeholder="Type a brief description of the project" />
+                    label="filter description (optional)" placeholder="Type a brief description of the project" />
                 <VaSelect class="flex lg6 md6 sm12 xs12 mt-4" label="Is required?" v-model="attributeStore.attribute.required"
                     :options="[true, false]" />
                 <div class="flex lg12 md12 sm12 xs12">
-                    <VaSelect class="flex lg6 md12 sm6 xs12 mt-4 mb-2" label="Attribute type" v-model="fType"
+                    <VaSelect class="flex lg6 md12 sm6 xs12 mt-4 mb-2" label="filter type" v-model="fType"
                         :options="fieldTypes" />
                     <div class="row row-equal">
                         <div class="flex lg12 md12">

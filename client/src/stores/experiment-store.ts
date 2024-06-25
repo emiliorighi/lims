@@ -1,16 +1,17 @@
 import { defineStore } from 'pinia'
-import { ExperimentModel } from '../data/types'
+import { ExperimentModel, ModelSearchForm } from '../data/types'
 
-const defaultSample: ExperimentModel = {
+const defaultExperiment: ExperimentModel = {
   experiment_id: '',
-  sample_id:'',
+  sample_id: '',
   metadata: {}
 }
 
-const initSearchForm = {
-  filters: {} as Record<string,any>,
+const initSearchForm: ModelSearchForm = {
+  filter: '',
+  query: {},
   sort_column: '',
-  sort_order: 'asc' as 'asc' | 'desc'
+  sort_order: 'asc'
 }
 
 const initPagination = {
@@ -21,8 +22,10 @@ const initPagination = {
 export const useExperimentStore = defineStore('experiment', {
   state: () => {
     return {
-      experiment: null as ExperimentModel | null,
-      isUpdate: false,
+      experiment: { ...defaultExperiment },
+      showForm: false,
+      formValid: false,
+      update: false,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }
@@ -35,6 +38,8 @@ export const useExperimentStore = defineStore('experiment', {
     resetPagination() {
       this.pagination = { ...initPagination }
     },
-
+    resetExperiment() {
+      this.experiment = { ...defaultExperiment }
+    }
   },
 })

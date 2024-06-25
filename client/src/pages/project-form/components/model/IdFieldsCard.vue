@@ -10,7 +10,7 @@
             </p>
         </VaCardContent>
         <VaCardContent v-else>
-            <p>1. Select at least one attribute key that will be used as the id of {{ model }}! </p>
+            <p>1. Select at least one filter key that will be used as the id of {{ model }}! </p>
         </VaCardContent>
         <VaCardContent>
             IMPORTANT: The attributes used as id

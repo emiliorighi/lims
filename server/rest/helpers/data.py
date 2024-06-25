@@ -42,7 +42,7 @@ def get_pagination(args):
 def get_sort(args):
     return args.get('sort_column'), args.get('sort_order', 'desc')
 
-def get_items(args, model, fieldToExclude, q_query, tsvFields):
+def get_items(args, model, fieldToExclude, q_query, tsvFields,project_id):
     mimetype = "application/json"
     ##parse args
     format = args.get('format', 'json')
@@ -50,15 +50,11 @@ def get_items(args, model, fieldToExclude, q_query, tsvFields):
     limit, offset = get_pagination(args)     
     sort_column, sort_order = get_sort(args)
     query, q_query =create_query(args, q_query)
-
+    query['project'] = project_id
     items = model.objects(**query).exclude(*fieldToExclude)
 
-    print(type(items[0].metadata['age']))
-
     if q_query:
-        print(items.count(), 'before')
         items = items.filter(q_query)
-        print(items.count(), 'after')
 
     if sort_column:
         sort =f"-metadata.{sort_column}" if sort_order == 'desc' else  f"metadata.{sort_column}"

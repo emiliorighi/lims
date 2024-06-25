@@ -10,7 +10,7 @@
                             undo uploadButtonText="Upload TSV" />
                     </div>
                     <div class="flex lg6 md6 sm12 xs12">
-                        <VaSelect label="Existing samples behaviour" v-model="behaviour" :option="['SKIP', 'UPDATE']"/>
+                        <VaSelect label="Existing experiments behaviour" v-model="behaviour" :option="['SKIP', 'UPDATE']"/>
                     </div>
                 </div>
                 <h4 class="va-h4">Edit the cell values</h4>
@@ -59,7 +59,7 @@
                             <VaDataTable striped class="table-inline" :items="mappedFields"
                                 :columns="['tsv_column', 'field_key']" :filter="filter"
                                 :filter-method="customFilteringFn">
-                                <template #cell(tsv_column)="{ value, row }">
+                                <template #cell(tsv_column)="{ value }">
                                     <VaInput :model-value="value" read-only />
                                 </template>
                                 <template #cell(field_key)="{ value, row }">
@@ -144,12 +144,12 @@ const duplicates = computed(() => {
 
 const requiredFields = computed(() => {
     const filledFields = mappedFields.value.map(({ field_key }) => field_key).filter(f => f)
-    return schemaStore.schema.sample.fields.filter(f => f.required && !filledFields.includes(f.key))
+    return schemaStore.schema.experiment.fields.filter(f =>  (f.required && !filledFields.includes(f.key)))
 })
 
 const idMapped = computed(() => {
 
-    const { id_format } = schemaStore.schema.sample;
+    const { id_format } = schemaStore.schema.experiment;
 
     // Create a mapping from field_key to tsv_column
     const fieldMap = Object.fromEntries(mappedFields.value.map(({ tsv_column, field_key }) => [field_key, tsv_column]));
@@ -181,20 +181,23 @@ const ICONS = {
 const fieldOptions = computed(() => {
     const schema = schemaStore.schema; // Ensure to type your schema
     const mappedF = mappedFields.value.map(({ field_key }) => field_key).filter(f => f)
-    console.log(mappedF)
-    return schema.sample.fields.map(f => {
+    const fields =  schema.experiment.fields.map(f => {
         const text = f.key;
         let icon = ICONS.ADD;
         let disabled = mappedF.includes(text)
-        console.log(disabled)
-        if (schema.sample.id_format.includes(f.key)) {
+        if (schema.experiment.id_format.includes(f.key)) {
             icon = ICONS.BUILD;
         } else if (f.required) {
             icon = ICONS.ERROR;
         }
-
         return { text, icon, disabled };
-    });
+    })
+    fields.push({
+        text: 'sample_id',
+        disabled: mappedF.includes('sample_id'),
+        icon: ICONS.ERROR
+    })
+    return fields
 });
 
 
@@ -229,7 +232,7 @@ async function fetchHeaderMap(projectId: string) {
         isLoading.value = true
         const formData = new FormData()
         formData.append('tsv', tsv.value)
-        formData.append('model', 'sample')
+        formData.append('model', 'experiment')
         formData.append('header_row', header.value.toString())
         const { data } = await ProjectService.inferHeadersFromTSV(projectId, formData)
         mappedFields.value = [...data]
@@ -259,7 +262,7 @@ async function handleSubmit() {
 
     const formData = new FormData()
     formData.append('file', tsv.value)
-    formData.append('model', 'sample')
+    formData.append('model', 'experiment')
     formData.append('behaviour', behaviour.value)
 
     //stringify mapped fields tsv_column:id_field 
@@ -271,7 +274,7 @@ async function handleSubmit() {
         isLoading.value = true
         const { data } = await ProjectService.uploadTSV(schemaStore.schema.project_id, formData)
         init({ message: data, color: 'success' })
-        router.push({ name: 'samples', params: { projectId: props.projectId } })
+        router.push({ name: 'experiments', params: { projectId: props.projectId } })
 
     } catch (error) {
         const axiosError = error as AxiosError

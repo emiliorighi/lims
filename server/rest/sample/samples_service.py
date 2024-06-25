@@ -18,7 +18,7 @@ def get_samples(project_id, args):
     
     filter = get_filter(args.get('filter'))
 
-    tsv_fields = ['sample_id', 'created']
+    tsv_fields = ['sample_id']
 
     selected_fields = [f"metadata.{v}" for k, v in args.items(multi=True) if k.startswith('fields[]')]
 
@@ -32,7 +32,8 @@ def get_samples(project_id, args):
                                  Sample, 
                                  FIELDS_TO_EXCLUDE, 
                                  filter,
-                                 tsv_fields)
+                                 tsv_fields,
+                                 project_id)
 
 def get_filter(filter):
     if filter:

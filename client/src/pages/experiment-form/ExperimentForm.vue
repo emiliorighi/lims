@@ -63,8 +63,6 @@ const idFields = ref<Filter[]>([])
 const isLoading = ref(false)
 
 
-
-
 const header = computed(() => {
     const title = 'Sample form'
     const description = 'Fill all the steps to create a new sample'

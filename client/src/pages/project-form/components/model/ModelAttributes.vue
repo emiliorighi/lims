@@ -1,10 +1,10 @@
 <template>
     <VaCard>
         <VaCardContent class="va-h4">
-            Model Attributes
+            Model filters
         </VaCardContent>
         <VaCardContent class="va-text-secondary">
-            Create a list of attributes that will be used to define samples and experiments. Optionally, upload a tsv
+            Create a list of filters that will be used to define samples and experiments. Optionally, upload a tsv
             file to generate the list of attributes
         </VaCardContent>
         <VaDivider />
@@ -32,7 +32,7 @@
                                 <div class="row">
                                     <div class="flex lg12 md12 sm12 xs12">
                                         <ModelAttributeList :columns="modelColumns" :items="sampleAttributes"
-                                            title="Sample Attributes" />
+                                            title="sample filters" />
                                     </div>
                                 </div>
                             </template>
@@ -40,7 +40,7 @@
                                 <div class="row">
                                     <div class="flex lg12 md12 sm12 xs12">
                                         <ModelAttributeList :columns="modelColumns" :items="experimentAttributes"
-                                            title="Experiment Attributes" />
+                                            title="experiment filters" />
                                     </div>
                                 </div>
                             </template>
