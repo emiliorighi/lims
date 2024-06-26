@@ -17,8 +17,7 @@ class DraftProjectsApi(Resource):
 class DraftProjectApi(Resource):
     def get(self,project_id):
         project = draft_projects_service.get_draft_project(project_id)
-        print(project)
-        return Response(json.dumps(project), mimetype="application/json", status=200)
+        return Response(project.to_json(), mimetype="application/json", status=200)
 
     def put(self,project_id):
         data = request.json if request.is_json else request.form

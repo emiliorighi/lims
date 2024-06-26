@@ -17,9 +17,9 @@ def lookup_related_data(project_id):
     return response
 
 def get_project(project_id):
-    projects = utils.get_documents_by_query(Project, dict(project_id=project_id), ('id','created'))
-    if projects.first():
-        return projects.as_pymongo()[0]
+    project = Project.objects(project_id=project_id).exclude('id', 'created').first()
+    if project:
+        return project
     raise NotFound(description=f"Project: {project_id} not found!")
 
 def get_projects(offset=0,limit=20,
@@ -53,11 +53,13 @@ def create_project(data):
     #change id fields to required
     # print(data)
     project_to_save = Project(**data)
-    if utils.get_documents_by_query(Project,dict(project_id=project_to_save.project_id)).first():
+    if Project.objects(project_id=project_to_save.project_id).first():
         return [f"Project: {project_to_save.project_id} already exists"], 401
-    project_draft = utils.get_documents_by_query(ProjectDraft,dict(project_id=project_to_save.project_id))
-    if project_draft.first():
+    
+    project_draft = ProjectDraft.objects(project_id=project_to_save.project_id).first()
+    if project_draft:
         project_draft.delete()
+
     project_to_save.save()
     return [f"Project {project_to_save.project_id} correctly saved"], 201
 
@@ -155,12 +157,12 @@ def upload_tsv(project_id, tsv, data):
     header=2
     saved_items = []
     id_set = set()
-    print(len(items))
     for index, obj in enumerate(items):
-        print(id_set)
         obj_id = create_model_id(data_model_id_fields, obj)
+        
         if not obj_id:
             raise BadRequest(description=f"Unable to generate {model}_id with the fields provided at row{header+index}")
+        
         if obj_id in id_set:
             continue #SKIP REPEATED OBJECTS
         
@@ -285,7 +287,6 @@ def infer_fields(project_id, data, files):
     tsvreader = generate_tsv_reader(file)
 
     header = list(tsvreader)[int(header_row)]
-    print(header)
     mapped_header=[]
 
     for column in header:
@@ -307,22 +308,5 @@ def infer_fields(project_id, data, files):
         # If no match was found, add an entry with an empty field_key
         if not match:
             mapped_header.append({'tsv_column': column, 'field_key': ''})
-
-    return mapped_header, 200
-    # for column in header:
-    #     c = column.lower()
-    #     match = False
-
-    #     for field in fields:
-    #         if match:
-    #             continue
-    #         key = field.get('key')
-    #         f = key.lower()
-    #         if c == f or c in f or f in c:
-    #             mapped_header.append(dict(tsv_column=column, field_key=key))
-    #             match=True
-    #     if match:
-    #         continue
-    #     mapped_header.append(dict(tsv_column=column, field_key=''))
 
     return mapped_header, 200

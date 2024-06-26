@@ -5,9 +5,9 @@ from werkzeug.exceptions import NotFound
 
 
 def get_draft_project(project_id):
-    draft_projects=utils.get_documents_by_query(ProjectDraft, dict(project_id=project_id),('id','created','valid'))
-    if draft_projects.first():
-        return draft_projects.as_pymongo()[0]
+    draft_projects=ProjectDraft.objects(project_id=project_id).exclude('id','created','valid').first()
+    if draft_projects:
+        return draft_projects
     raise NotFound(description=f"Draft Project: {project_id} not found!")
 
 def create_draft_project(data):
@@ -15,7 +15,6 @@ def create_draft_project(data):
         if not data.get(req_field):
             message = f"{req_field} is mandatory in ProjectDraft objects"
             status = 400
-            return [message],status
     if Project.objects(project_id=data['project_id']).first():
         message= f"An existing project with id: {data['project_id']} already exists"
         status = 409
@@ -30,9 +29,10 @@ def create_draft_project(data):
     return [message],status
 
 def update_draft_project(project_id, data):
-    projects_to_update = utils.get_documents_by_query(ProjectDraft, dict(project_id=project_id))
+    projects_to_update = ProjectDraft.objects(project_id=project_id)
     if not projects_to_update.first():
         raise NotFound(description=f"Draft Projects: {project_id} not found!")
+    
     projects_to_update.update_one(**data)
     message = f"Draft project {project_id} correctly updated"
     return [message], 201
@@ -52,7 +52,7 @@ def get_draft_projects(offset=0,limit=20,
 
 
 def delete_draft_project(project_id):
-    project_to_delete=utils.get_documents_by_query(ProjectDraft,dict(project_id=project_id)).first()
+    project_to_delete=ProjectDraft.objects(project_id=project_id).first()
     if not project_to_delete:
         raise NotFound(description=f"Draft Projects: {project_id} not found!")
     project_to_delete.delete()

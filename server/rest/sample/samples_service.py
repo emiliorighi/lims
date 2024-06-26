@@ -99,7 +99,7 @@ def create_sample(project_id, data):
 
 def update_sample(project_id,sample_id,data):
     query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project,query).first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(descritpion=f"Project: {project_id} not Found")
     query['sample_id'] = sample_id
@@ -121,8 +121,7 @@ def update_sample(project_id,sample_id,data):
     return [f"Sample {sample_id} successfully updated"], 201
 
 def delete_sample(project_id, sample_id):
-    query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project,query).first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(description=f"Project: {project_id} not Found")
     sample_to_delete = Sample.objects(project=project_id,sample_id=sample_id).first()
@@ -144,8 +143,7 @@ test sample value against project field
 
 def upload_samples(project_id, files_dict, payload):
 
-    project_query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project, project_query).first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(f"Project: {project_id} not found!")
     

@@ -106,15 +106,16 @@ def create_experiment(project_id, data):
     return f"Experiment {experiment_id} of {project_id} correctly saved!", 201  # Return the created sample with 201 Created status
 
 
-def update_Experiment(project_id,experiment_id,data):
-    query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project,query).first()
+def update_experiment(project_id,experiment_id,data):
+    project = Project.objects(project_id=project_id).first()
+    
     if not project:
         raise NotFound(descritpion=f"Project: {project_id} not Found")
-    query['experiment_id'] = experiment_id
-    sample = utils.get_documents_by_query(Experiment,dict(project=project_id))   
-    if not sample.first():
-        raise NotFound
+    
+    
+    experiment = Experiment.objects(project=project_id, experiment_id=experiment_id).first()
+    if not experiment:
+        raise NotFound(descritpion=f"Experiment: {experiment_id} not Found")
     
        # Get required fields and id fields from project definition
     id_fields = project.experiment.get('id_format', [])
@@ -126,24 +127,25 @@ def update_Experiment(project_id,experiment_id,data):
     evaluation_errors = utils.evaluate_fields(project, data)
     if evaluation_errors:
         return BadRequest(description=f"{'; '.join(evaluation_errors)}")
-    sample.update(metadata=data)
-    return [f"Sample {experiment_id} successfully updated"], 201
+    
+    experiment.update(metadata=data)
+    return [f"Experiment {experiment_id} successfully updated"], 201
 
 def delete_experiment(project_id, experiment_id):
-    query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project,query).first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(description=f"Project: {project_id} not Found")
-    sample_to_delete = Experiment.objects(project=project_id,experiment_id=experiment_id).first()
-    if not sample_to_delete:
-        raise NotFound(description=f"Sample: {experiment_id} not found")
-    sample_to_delete.delete()
-    return f"Sample {experiment_id} successfully deleted", 201
+    
+    exp_to_delete = Experiment.objects(project=project_id,experiment_id=experiment_id).first()
+    if not exp_to_delete:
+        raise NotFound(description=f"Experiment: {experiment_id} not found")
+    
+    exp_to_delete.delete()
+    return f"Experiment {experiment_id} successfully deleted", 201
 
 def upload_experiments(project_id, files_dict, payload):
 
-    project_query=dict(project_id=project_id)
-    project = utils.get_documents_by_query(Project, project_query).first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(f"Project: {project_id} not found!")
     

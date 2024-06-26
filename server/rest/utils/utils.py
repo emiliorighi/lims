@@ -71,10 +71,3 @@ def evaluate_choices(choices, value):
             if v.strip() not in choices:
                 errors.append(f"{value} is not in {','.join(choices)}")
     return errors        
-
-def get_documents_by_query(model, query, fields_to_exclude= None):
-    if fields_to_exclude:
-       query_set =  model.objects(**query).exclude(*fields_to_exclude)
-    else:
-        query_set = model.objects(**query)
-    return query_set

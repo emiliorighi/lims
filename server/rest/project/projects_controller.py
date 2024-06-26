@@ -41,7 +41,7 @@ class TsvUploadApi(Resource):
 class ProjectApi(Resource):
     def get(self, project_id):
         project = projects_service.get_project(project_id)
-        return Response(json.dumps(project), mimetype="application/json", status=200)
+        return Response(project.to_json(), mimetype="application/json", status=200)
 
 
 class ValidateProjectApi(Resource):
