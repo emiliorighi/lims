@@ -103,7 +103,7 @@ def update_sample(project_id,sample_id,data):
     if not project:
         raise NotFound(descritpion=f"Project: {project_id} not Found")
     query['sample_id'] = sample_id
-    sample = utils.get_documents_by_query(Sample,dict(project=project_id))   
+    sample = Sample.objects(project=project_id, sample_id=sample_id)   
     if not sample.first():
         raise NotFound
     
@@ -113,10 +113,10 @@ def update_sample(project_id,sample_id,data):
     new_sample_id = create_sample_id(id_fields, data)
     if sample_id != new_sample_id:
         message = f"Sample ID {sample_id} has changed into {new_sample_id}, the value of the fields {','.join(id_fields)} can't be changed"
-        return BadRequest(description=message)
+        raise BadRequest(description=message)
     evaluation_errors = utils.evaluate_fields(project, data)
     if evaluation_errors:
-        return BadRequest(description=f"{'; '.join(evaluation_errors)}")
+        raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
     sample.update(metadata=data)
     return [f"Sample {sample_id} successfully updated"], 201
 

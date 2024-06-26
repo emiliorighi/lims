@@ -6,12 +6,12 @@
             <VaForm>
                 <div class="row align-center">
                     <div class="flex lg12 md12 sm12 xs12">
-                        <VaFileUpload dropzone dropzone-text="Upload a TSV here" style="z-index: 0" v-model="tsv" icon="upload" file-types=".tsv" type="single"
-                            undo uploadButtonText="Upload TSV" />
+                        <VaFileUpload dropzone dropzone-text="Upload a TSV here" style="z-index: 0" v-model="tsv"
+                            icon="upload" file-types=".tsv" type="single" undo uploadButtonText="Upload TSV" />
                     </div>
-                    <div class="flex lg6 md6 sm12 xs12">
+                    <!-- <div class="flex lg6 md6 sm12 xs12">
                         <VaSelect label="Existing samples behaviour" v-model="behaviour" :option="['SKIP', 'UPDATE']"/>
-                    </div>
+                    </div> -->
                 </div>
                 <h4 class="va-h4">Edit the cell values</h4>
                 <p class="va-text-secondary">Map the TSV column to the corresponding field</p>
@@ -106,14 +106,14 @@ type InferMap = {
     tsv_column: string,
     field_key: string | null
 }
-
-const title = 'Upload Samples'
-const description = 'Upload Samples from a TSV'
-
-const mappedFields = ref<InferMap[]>([])
 const props = defineProps<{
     projectId: string
 }>()
+const title = 'Samples Upload'
+const description = 'Upload Samples from a TSV for ' + props.projectId
+
+const mappedFields = ref<InferMap[]>([])
+
 
 onMounted(async () => {
     if (!schemaStore.schema.project_id) {
@@ -275,10 +275,10 @@ async function handleSubmit() {
 
     } catch (error) {
         const axiosError = error as AxiosError
-        if(axiosError.response?.data){
-            const message = (axiosError.response.data as {message:string}).message
+        if (axiosError.response?.data) {
+            const message = (axiosError.response.data as { message: string }).message
             init({ message: message, color: 'danger' })
-        }else{
+        } else {
             init({ message: 'Error importing samples', color: 'danger' })
         }
     } finally {

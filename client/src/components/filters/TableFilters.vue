@@ -20,12 +20,12 @@
                 </div>
             </VaButtonDropdown>
         </div>
-        <div class="flex">
+        <div v-if="searchForm.query" class="flex">
             <VaBadge style="z-index: 1;" overlap color="info" :text="activeFilters">
                 <VaButtonDropdown :closeOnContentClick="false" icon="filter_list" label="Filters" preset="primary"
                     class="mr-2 mb-2">
                     <div class="row row-drop-down">
-                        <div class="flex lg12 md12 sm12 xs12" v-if="searchForm.query" v-for="(field, index) in fields"
+                        <div class="flex lg12 md12 sm12 xs12"  v-for="(field, index) in fields"
                             :key="index">
                             <VaInput @update:modelValue="(v: string) => onQueryUpdate(v, field)" class="mt-2" clearable
                                 :label="field.key" v-if="isInputField(field.filter)"
@@ -36,8 +36,7 @@
                                 v-model="searchForm.query[field.key]" :multiple="field.filter.multi"
                                 :options="field.filter.choices">
                             </VaSelect>
-
-                            <VaSlider label="Age range" v-else-if="isRangeField(field.filter)"
+                            <VaSlider :label="field.label" v-else-if="isRangeField(field.filter)"
                                 @update:modelValue="(v: any) => onQueryUpdate(v, field)"
                                 v-model="searchForm.query[field.key]" class="mt-4" :min="field.filter.min"
                                 :max="field.filter.max" range track-label-visible>

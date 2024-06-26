@@ -35,7 +35,7 @@ const props = defineProps<{
 function canBeEdited(rowData: Record<string, any>) {
     let modelType: 'sample' | 'experiment' = rowData.sample_id ? 'sample' : 'experiment'
     const { id_format } = schemaStore.schema[modelType]
-    return id_format.length === Object.keys(rowData.metadata).length
+    return id_format.length !== Object.keys(rowData.metadata).length
 }
 
 </script>

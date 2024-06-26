@@ -67,8 +67,9 @@ const isLoading = ref(false)
 
 const header = computed(() => {
     const title = 'Sample form'
-    const description = 'Fill all the steps to create a new sample'
-    if (props.sampleId) return { title: `Sample form of ${props.sampleId}`, description: 'Fill all the steps to update the sample' + ' ' + props.sampleId }
+    const projectTest = ` for Project ${props.projectId}`
+    const description = 'Fill all the steps to create a new sample' + projectTest
+    if (props.sampleId) return { title: `Sample form of ${props.sampleId}`, description: 'Fill all the steps to update the sample' + ' ' + props.sampleId + projectTest }
     return { title, description }
 })
 const existingMetadata = computed(() => {
@@ -116,7 +117,7 @@ onMounted(async () => {
 
     mapFields()
 
-    if (props.sampleId && sampleStore.sample === null) {
+    if (props.sampleId) {
         await getSample(props.sampleId)
     }
 })
@@ -164,7 +165,7 @@ async function getSample(id: string): Promise<void> {
             });
         }
     } finally {
-        isLoading.value = true
+        isLoading.value = false
     }
 }
 function mapFields() {
@@ -184,13 +185,25 @@ async function submitSample(): Promise<void> {
 
         isLoading.value = true
         const { metadata } = sampleStore.sample
-        const response = await SampleService.createSample(schemaStore.schema.project_id, metadata);
-        const { data } = response;
+        if (props.sampleId) {
+            const response = await SampleService.updateSample(schemaStore.schema.project_id, props.sampleId, metadata);
+            const { data } = response;
 
-        init({
-            color: 'success',
-            message: Array.isArray(data) ? data.join(', ') : 'Sample created successfully',
-        });
+            init({
+                color: 'success',
+                message: Array.isArray(data) ? data.join(', ') : `Sample ${props.sampleId} edited successfully`,
+            });
+
+        } else {
+            const response = await SampleService.createSample(schemaStore.schema.project_id, metadata);
+            const { data } = response;
+
+            init({
+                color: 'success',
+                message: Array.isArray(data) ? data.join(', ') : 'Sample created successfully',
+            });
+
+        }
 
         router.push({ name: 'samples', params: { projectId: schemaStore.schema.project_id } })
 

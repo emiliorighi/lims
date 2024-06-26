@@ -179,8 +179,15 @@ def upload_experiments(project_id, files_dict, payload):
             evaluation_errors.append(dict(row=index, messages=errors))
     if evaluation_errors:
         return evaluation_errors, 400 #custom bad request
+    
     exp_to_save = [Experiment(**mapped_exp) for mapped_exp in mapped_experiments]
 
+    sample_id_list = [exp.sample_id for exp in exp_to_save]
+    existing_samples = Sample.objects(project=project_id, sample_id__in=sample_id_list).scalar('sample_id')
+    missing_samples = [missing_id for missing_id in sample_id_list if not missing_id in existing_samples ]
+    if missing_samples:
+        raise BadRequest(description=f"The following samples are missing {' ,'.join(missing_samples)}")
+    
     Experiment.insert(exp_to_save)
     #VALIDATE SAMPLES
     return f"A total of {len(exp_to_save)} samples successfully saved",201

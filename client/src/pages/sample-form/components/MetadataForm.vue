@@ -42,7 +42,7 @@ const metadata = ref<Record<string, any> | null>(null)
 
 
 const requiredFieldRule = (label: string, required = true) => (v: any) => !required || (!!v) || `${label} is required`;
-const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (Array.isArray(v) && v.length > 0) || `${label} is required`;
+const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (!!v) || `${label} is required`;
 const requiredNumberFieldRule = (label: string, required = true) => (v: any) => !required || (!isNaN(v) || (!!v)) || `${label} must be a number`;
 
 

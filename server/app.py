@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import BaseConfig
 from rest import initialize_api
-from db.models import Sample,Project, ProjectDraft,Experiment
+from db.models import Sample,Project, ProjectDraft
 from flask_jwt_extended import JWTManager
 from flask_mongoengine import MongoEngine
 
@@ -30,11 +30,8 @@ CORS(app)
 
 jwt = JWTManager(app)
 
-# print(Experiment._get_collection().drop_index('experiment_id_1')
-
 # Project.drop_collection()
 # Sample.drop_collection()
-# ProjectDraft.drop_collection()
 # ProjectDraft.drop_collection()
 
 
