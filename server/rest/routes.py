@@ -2,12 +2,14 @@ from .project import projects_controller
 from .experiment import experiments_controller
 from .sample import samples_controller
 from .draft_project import draft_projects_controller
-
+from .stats import stats_controller
 def initialize_routes(api):
 
 	##ADMIN
 	# api.add_resource(users_controller.LoginApi, '/api/login')
 	# api.add_resource(users_controller.LogoutApi, '/api/logout')
+	api.add_resource(stats_controller.StatsApi, '/api/stats/<model>')
+
 
 	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
 

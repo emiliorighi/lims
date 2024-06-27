@@ -83,28 +83,21 @@ const isValidExperiment = computed(() => {
 async function submitProject() {
     isLoading.value = !isLoading.value
     try {
-        if(projectStore.currentProject.valid){
-            const {valid, ...projectData} = projectStore.currentProject
-            projectStore.currentProject = {...projectData}
-        }
         const { data } = await ProjectService.createProject(projectStore.currentProject)
         data.forEach((d: string) => {
             init({ color: 'success', message: d })
         })
         projectStore.resetProject()
         projectStore.resetDraftProject()
-        projectStore.draftProjectExists = !projectStore.draftProjectExists
-        projectStore.projectExists = true
 
         router.push({ name: 'projects' })
     } catch (error) {
         const axiosError = error as AxiosError
         console.log(axiosError)
         if (axiosError.response && axiosError.response.data) {
-            const data = axiosError.response.data as string[]
-            data.forEach((d: string) => {
-                init({ color: 'danger', message: d })
-            })
+            const data = axiosError.response.data as string
+            init({ color: 'danger', message: data })
+
         }
     } finally {
         isLoading.value = !isLoading.value

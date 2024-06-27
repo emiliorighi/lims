@@ -43,7 +43,6 @@ class ProjectDraft(db.Document):
     experiment = db.DictField()
     sample = db.DictField()
     created = db.DateTimeField(default=datetime.utcnow)
-    valid=db.BooleanField(default=False)
     meta = {
         'indexes': [
             'project_id',

@@ -1,5 +1,3 @@
-Manage project names as a fixed list, where only the version can change..
-
 How to manage users?
     --> Admin CRUD
     
@@ -8,32 +6,28 @@ How to manage users?
         --> CRUD us
 
 
-    --> Researcher
+    --> Sample Manager
 
-    --> 
+    --> Experiment manager
         
 
-development todo:
+IMPROVE UX IN TSV ATTRIBUTES INFER ON PROJECT CREATION
 
-    --> tsv import logic
-        --> samples
-        --> expeiments
-        --> project from tsv
-            --> upload tsv
-            --> return mapped attributes
-            --> submit project
-    --> samples service
-    --> experiment service
-    --> user service
+IMPROVE UX AND NAVIGATION ON PROJECT DETAILS/SAMPLES/experiments
 
+ROUTING ON THE FLY
 
-THURSDAY DEMO:
-    - PROJECT CREATION
-        - INFER ATTRIBUTES FROM TSV(OPTIONAL)
-        - CREATE FIELDS
-    - PROJECT LIST/DETAILS
-    - SAMPLE CREATION
-    - SAMPLE LIST/DETAILS
-    - EXPERIMENT CREATION
-    - EXPERIMENT LIST/DETAILS
-    - TSV IMPORT?
+    PROJECT MANAGER (PM) LOGS IN:
+        ACCESS TO SPECIFIC PROJECT CRUD ACTIONS
+        PM ACTIONS
+            CREATE SAMPLE MANAGER (SM) AND EXPERIMENT MANAGER (EM)
+            CREATE SAMPLES AND Experiment
+            DOWNLOAD AUDIT TRAILS (USER LOGS ACTIVITIES)
+
+    SAMPLE MANAGER
+        SM ACTIONS:
+            CRUD PROJECT'S SAMPLES
+
+    EXPERIMENT MANAGER
+        EM ACTIONS:
+            CRUD PROJECT'S EXPERIMENTS

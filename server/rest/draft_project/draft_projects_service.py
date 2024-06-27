@@ -5,7 +5,7 @@ from werkzeug.exceptions import NotFound
 
 
 def get_draft_project(project_id):
-    draft_projects=ProjectDraft.objects(project_id=project_id).exclude('id','created','valid').first()
+    draft_projects=ProjectDraft.objects(project_id=project_id).exclude('id','created').first()
     if draft_projects:
         return draft_projects
     raise NotFound(description=f"Draft Project: {project_id} not found!")

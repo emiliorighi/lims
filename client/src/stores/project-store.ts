@@ -35,24 +35,14 @@ export const useProjectStore = defineStore('project', {
   actions: {
     overwriteProject() {
       if (this.incomingProject) {
-        
-        if(this.incomingProject.valid){
-          const {valid, ...projectData} = this.incomingProject
-          this.currentProject = { ...projectData }
-        }else{
-          this.currentProject = { ...this.incomingProject }
-        }
+        this.currentProject = { ...this.incomingProject }
         init({ message: `Project ${this.currentProject.project_id} uploaded`, color: 'success' })
       }
     },
-    switchConfirm(){
+    switchConfirm() {
       this.confirmOverwrite = !this.confirmOverwrite
     },
-    // overWriteDraftProject() {
-    //   if (this.incomingProject) {
-    //     this.incomingProject = { ...this.project }
-    //   }
-    // },
+
     resetProject() {
       this.currentProject = { ...initProject }
     },

@@ -54,7 +54,6 @@ export interface SchemaForm {
   description?: string,
   sample: ProjectModel,
   experiment: ProjectModel,
-  valid?: boolean
 }
 
 export type ProjectModel = {

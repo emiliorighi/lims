@@ -2,8 +2,20 @@ import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { experiments } from './experiment'
 import { samples } from './sample'
 import { projects } from './project'
+import Dashboard from '../pages/dashboard/Dashboard.vue'
+
+
 
 const routes: Array<RouteRecordRaw> = [
+  {
+    name:'home',
+    path: '/',
+    component: Dashboard
+  },
+  {
+    path: '/:catchAll(.*)',
+    redirect: { name: 'home' },
+  },
   ...projects,
   ...samples,
   ...experiments
