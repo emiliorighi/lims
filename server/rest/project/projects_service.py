@@ -24,6 +24,8 @@ def get_project(project_id):
 
 def get_projects(offset=0,limit=20,
                 filter=None,sort_order=None):
+    limit=int(limit)
+    offset=int(offset)
     if filter:
         projects= Project.objects((Q(name__icontains=filter) | Q(name__iexact=filter))).exclude('id','created')
     else:
@@ -32,7 +34,7 @@ def get_projects(offset=0,limit=20,
         sort_column = "name"
         sort = '-'+sort_column if sort_order == 'desc' else sort_column
         projects = projects.order_by(sort)
-    return projects.count(), projects[int(offset):int(offset)+int(limit)]
+    return projects.count(), list(projects.skip(offset).limit(limit).as_pymongo())
 
 def create_project(data):
     errors = []

@@ -14,6 +14,7 @@
           <VaBreadcrumbs color="primary">
             <VaBreadcrumbsItem :to="bc.path" v-for="bc in breadcrumbs" :label="bc.name" />
           </VaBreadcrumbs>
+          <VaDivider />
           <router-view v-slot="{ Component }">
             <Transition name="fade">
               <component :is="Component" />

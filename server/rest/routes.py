@@ -42,6 +42,8 @@ def initialize_routes(api):
 	api.add_resource(draft_projects_controller.DraftProjectsApi, '/api/draft_projects')
 	api.add_resource(draft_projects_controller.DraftProjectApi, '/api/draft_projects/<project_id>')
 
+	# all samples 
+	# all experiments
 	# api.add_resource(uploads_controller.ExcelParserApi, '/api/spreadsheet_upload')
 	
 	# api.add_resource(reports_controller.ReportsApi,'/api/reports',)

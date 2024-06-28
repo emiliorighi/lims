@@ -1,49 +1,30 @@
 <template>
     <div>
         <h1 class="va-h1 mb-2">
-            {{ schemaStore.schema.project_id }}
+            {{ projectId }}
         </h1>
-        <p> <b>Name:</b> {{ schemaStore.schema.name }}</p>
-        <p> <b>Version:</b> {{ schemaStore.schema.version }}</p>
-        <p> <b>Description:</b> {{ schemaStore.schema.description }}</p>
-        <div class="row justify-space-between">
-            <!-- <div class="flex lg4 md4 sm12 xs12">
-                <ProjectOverviewCard :metadata="schemaStore.schema" />
-            </div> -->
-            <div class="flex lg4 md4 sm12 xs12">
-                <VaCard stripe stripe-color="success">
-                    <VaCardContent>
-                        <h2 class="va-h4">Samples: {{ lookupData.samples }}</h2>
-                    </VaCardContent>
-                    <VaCardActions align="between">
-                        <VaButton :to="{ name: 'samples', params: { projectId: projectId } }">View</VaButton>
-                        <VaButton color="secondary" icon="upload">Upload</VaButton>
-                    </VaCardActions>
-                </VaCard>
+        <div class="row">
+            <div class="flex">
+                <VaButton :to="{ name: 'samples', params: { projectId: projectId } }" icon="fa-vial" color="success">
+                    Samples {{ lookupData.samples }}</VaButton>
             </div>
-            <!-- <div class="flex">
-                <VaCard color="secondary">
-                    <VaCardContent>
-                        <div class="row">
-                            <div class="flex">
-                                <h2 class="va-h4 ma-0" style="color: white">Experiments {{ lookupData.experiments }}
-                                </h2>
-                            </div>
-                            <div class="flex">
-                                <va-chip :to="{ name: 'experiments', params: { projectId: projectId } }">view</va-chip>
-                            </div>
-                        </div>
-                    </VaCardContent>
-                </VaCard>
-            </div> -->
+            <div class="flex">
+                <VaButton :to="{ name: 'experiments', params: { projectId: projectId } }" icon="fa-dna">Experiments {{
+                lookupData.experiments }}</VaButton>
+            </div>
         </div>
-
+        <div v-if="showProject" class="row">
+            <div class="flex lg12 md12 sm12 xs12">
+                <ProjectOverviewCard :metadata="schemaStore.schema" />
+            </div>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useSchemaStore } from '../../stores/schemas-store';
 import ProjectService from '../../services/clients/ProjectService';
+import ProjectOverviewCard from '../../components/project/ProjectOverviewCard.vue';
 
 const schemaStore = useSchemaStore()
 const props = defineProps<{
@@ -51,12 +32,34 @@ const props = defineProps<{
 }>()
 const lookupData = ref({ samples: 0, experiments: 0 })
 
-onMounted(async () => {
-    const { data } = await ProjectService.getProject(props.projectId)
-    schemaStore.schema = { ...data }
-    const response = await ProjectService.lookupProject(props.projectId)
-    const { samples, experiments } = response.data
-    lookupData.value = { samples, experiments }
+
+const showProject = computed(() => {
+    return !!schemaStore.schema.project_id
 })
+
+onMounted(async () => {
+    if (!schemaStore.schema.project_id) await getProject()
+    await getData()
+})
+
+
+async function getProject() {
+    try {
+        const { data } = await ProjectService.getProject(props.projectId)
+        schemaStore.schema = { ...data }
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+async function getData() {
+    try {
+        const response = await ProjectService.lookupProject(props.projectId)
+        const { samples, experiments } = response.data
+        lookupData.value = { samples, experiments }
+    } catch (error) {
+        console.error(error)
+    }
+}
 
 </script>

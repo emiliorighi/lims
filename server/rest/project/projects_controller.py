@@ -16,7 +16,7 @@ CREATE PROJECT FROM JSON
 class ProjectsApi(Resource):
     def get(self):
         total, data = projects_service.get_projects(**request.args)
-        json_resp = dict(total=total,data=list(data.as_pymongo()))
+        json_resp = dict(total=total,data=data)
         return Response(json.dumps(json_resp), mimetype="application/json", status=200)
     
     def post(self):
