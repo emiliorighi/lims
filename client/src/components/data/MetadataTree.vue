@@ -1,9 +1,10 @@
 <template>
-    <div class="row align-center">
+    <!-- <div class="row">
         <div class="flex lg6 md6">
             <va-input v-model="filter" placeholder="Filter..." clearable />
         </div>
     </div>
+    <VaDivider/> -->
     <va-tree-view :nodes="currenNodes" :filter="filter" :filter-method="customFilterMethod">
         <template #content="node">
             <div class="flex items-center">

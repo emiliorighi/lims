@@ -1,54 +1,41 @@
 <template>
     <div>
-        <div class="row justify-space-between align-end">
-            <div class="flex">
-                <h1 class="va-h1">List of Samples</h1>
-                <p style="margin-bottom: 6px" class="va-text-secondary">Samples of {{ schemaStore.schema.project_id }}
-                </p>
-            </div>
-            <div class="flex">
-                <VaMenu>
-                    <template #anchor>
-                        <VaButton>Actions</VaButton>
-                    </template>
-                    <VaMenuItem icon="add"
-                        @selected="router.push({ name: 'sample-form', params: { projectId: schemaStore.schema.project_id } })">
-                        Create Sample
-                    </VaMenuItem>
-                    <VaMenuItem icon="upload"
-                        @selected="router.push({ name: 'sample-upload', params: { projectId: schemaStore.schema.project_id } })">
-                        Upload Samples
-                    </VaMenuItem>
-                    <VaMenuItem icon="download" @selected="showModal = !showModal">
-                        Download Report
-                    </VaMenuItem>
-                </VaMenu>
-            </div>
-        </div>
         <div v-if="schemaStore.schema.project_id" class="row row-equal">
-            <VaDivider />
             <div class="flex lg12 md12 sm12 xs12">
                 <VaCard>
+                    <VaCardTitle class="va-text-secondary mb-0">Sample List</VaCardTitle>
                     <VaCardContent>
                         <div class="row justify-space-between">
                             <div class="flex">
-                                <TableFilters @on-metadata-update="updateQueryForm" @on-search-change="updateSearchForm"
-                                    :columns="columns" :fields="schemaStore.schema.sample.fields"
-                                    @on-show-field-change="updateShowFields" />
+                                <div class="row">
+                                    <div class="flex">
+                                        <TableFilters @on-metadata-update="updateQueryForm"
+                                            @on-search-change="updateSearchForm" :columns="columns"
+                                            :fields="schemaStore.schema.sample.fields"
+                                            @on-show-field-change="updateShowFields" />
+                                    </div>
+                                    <div class="flex">
+                                        <VaButton :disabled="total === 0" @click="showModal = !showModal"
+                                            icon-right="download">Report
+                                        </VaButton>
+                                    </div>
+                                </div>
                             </div>
                             <div class="flex">
-                                <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
-                                    :offset="sampleStore.pagination.offset" :total="total" />
+                                <VaButton icon="add" color="success" @click="showCreationModal = !showCreationModal">
+                                    Sample
+                                </VaButton>
                             </div>
                         </div>
-                    </VaCardContent>
-                    <VaCardContent>
                         <CRUDTable :items="samples" :columns="columns" @edit-clicked="editSample"
                             @delete-clicked="deleteSample" />
-                    </VaCardContent>
-                    <VaDivider />
-                    <VaCardContent>
-                        <div class="row justify-center">
+                        <div class="row align-center justify-space-between">
+                            <div class="flex">
+                                <b>Total {{ total }}</b>
+                                Results per page
+                                <VaSelect style="width: 100px;" :options="[10, 20, 50]"
+                                    v-model="sampleStore.pagination.limit" />
+                            </div>
                             <div class="flex">
                                 <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
                                     :offset="sampleStore.pagination.offset" :total="total" />
@@ -56,8 +43,8 @@
                         </div>
                     </VaCardContent>
                 </VaCard>
-                <va-modal v-model="showModal" hide-default-actions title="Download TSV Report">
-                    <va-inner-loading :loading="isTSVLoading">
+                <VaModal v-model="showModal" hide-default-actions title="Download TSV Report">
+                    <VaInnerLoading :loading="isTSVLoading">
                         <div class="row">
                             <VaSelect class="flex lg12 md12 sm12 xs12" v-model="downloadFields"
                                 searchPlaceholderText="Type to search" label="Columns"
@@ -69,13 +56,21 @@
                                 <VaCheckbox style="margin-top: 6px;" v-model="applyFilters"
                                     label="Apply current filter">
                                 </VaCheckbox>
+                                <VaCheckbox style="margin-top: 6px;" v-model="selectAllColumns"
+                                    label="Select all columns">
+                                </VaCheckbox>
                             </div>
                         </div>
-                    </va-inner-loading>
+                    </VaInnerLoading>
                     <template #footer>
-                        <va-button @click="downloadData"> Submit</va-button>
+                        <VaButton @click="downloadData"> Submit</VaButton>
                     </template>
-                </va-modal>
+                </VaModal>
+                <VaModal v-model="showCreationModal" hide-default-actions
+                    :title="sampleIdToUpdate ? `Update ${sampleIdToUpdate}` : 'Create Sample'">
+                    <SampleForm @sample-edited="showCreationModal = !showCreationModal" :project-id="projectId"
+                        :sample-id="sampleIdToUpdate" />
+                </VaModal>
             </div>
         </div>
     </div>
@@ -93,22 +88,23 @@ import CRUDTable from '../../components/data/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
 import ProjectService from '../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
-import { useRouter } from 'vue-router';
+import SampleForm from '../sample-form/SampleForm.vue';
 
 const props = defineProps<{
     projectId: string
 }>()
 
-const router = useRouter()
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { toast } = useGlobalStore()
-
+const showCreationModal = ref(false)
+const selectAllColumns = ref(false)
 const downloadFields = ref<string[]>([])
 const showModal = ref(false)
 const isTSVLoading = ref(false)
 const applyFilters = ref(true)
 
+const sampleIdToUpdate = ref<string | undefined>()
 const mappedFields = schemaStore.schema.sample.fields.map((f: Filter) => { return { show: f.required, value: f.key } })
 
 const showFields = ref(mappedFields)
@@ -117,19 +113,19 @@ const columns = computed(() => {
     return ['sample_id', ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`), 'actions']
 })
 
-function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
+async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
     const store = { ...sampleStore.searchForm }
     store[tuple[0]] = tuple[1]
     sampleStore.searchForm = { ...store }
-    handleSubmit()
+    await handleSubmit()
 }
 
+async function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
 
-function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
-    const { query, ...otherFields } = sampleStore.searchForm
+    //check ranges
+    const { query } = sampleStore.searchForm
     const newQuery = { query: { ...query, ...Object.fromEntries(list) } }
-    sampleStore.searchForm = { ...otherFields, ...newQuery }
-
+    sampleStore.searchForm = { ...sampleStore.searchForm, ...newQuery }
     handleSubmit()
 }
 
@@ -168,8 +164,8 @@ async function handleSubmit() {
     offset.value = 1
     const { query, ...fields } = sampleStore.searchForm
     // console.log(query)
-    const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
-    await getSamples({ ...validFilters, ...fields, ...sampleStore.pagination })
+    // const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
+    await getSamples({ ...query, ...fields, ...sampleStore.pagination })
 }
 
 async function handlePagination(value: number) {
@@ -178,13 +174,8 @@ async function handlePagination(value: number) {
 }
 
 function editSample(index: number) {
-    router.push({
-        name: 'sample-form-update',
-        params: {
-            projectId: schemaStore.schema.project_id,
-            sampleId: samples.value[index].sample_id
-        }
-    })
+    sampleIdToUpdate.value = samples.value[index].sample_id
+    showCreationModal.value = true
 }
 
 async function deleteSample(index: number) {
@@ -220,7 +211,13 @@ async function getSamples(query: Record<string, any>) {
 }
 
 async function downloadData() {
-    const downloadRequest = { format: "tsv", fields: [...downloadFields.value] }
+    let fields
+    if (selectAllColumns.value) {
+        fields = mappedFields.map(m => m.value)
+    } else {
+        fields = [...downloadFields.value]
+    }
+    const downloadRequest = { format: "tsv", fields: fields }
     try {
         isTSVLoading.value = true
         const requestData = applyFilters.value ? {

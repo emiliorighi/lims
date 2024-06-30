@@ -176,7 +176,9 @@ def upload_samples(project_id, files_dict, payload):
     if evaluation_errors:
         return evaluation_errors, 400 #custom bad request
     samples_to_save = [Sample(**mapped_sample) for mapped_sample in mapped_samples]
+
     Sample.insert(samples_to_save)
+
     #VALIDATE SAMPLES
     return f"A total of {len(samples_to_save)} samples successfully saved",201
 

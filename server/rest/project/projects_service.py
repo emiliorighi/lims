@@ -6,7 +6,7 @@ from ..utils import utils
 from werkzeug.exceptions import NotFound
 import csv
 from io import StringIO
-from werkzeug.exceptions import BadRequest, NotFound, Conflict
+from werkzeug.exceptions import BadRequest, NotFound
 
 JSON_SCHEMA_PATH='/server/project-spec.json'
 
@@ -21,6 +21,18 @@ def get_project(project_id):
     if project:
         return project
     raise NotFound(description=f"Project: {project_id} not found!")
+
+
+def get_stats(project_id, model, field):
+    
+    get_project(project_id)
+
+    if not model in ['sample', 'experiment']:
+        raise BadRequest(description=f"{model} must be sample or experiment")
+
+    db_model = Sample if model == 'sample' else Experiment
+    return db_model.objects(project=project_id).item_frequencies(f"metadata.{field}")
+
 
 def get_projects(offset=0,limit=20,
                 filter=None,sort_order=None):

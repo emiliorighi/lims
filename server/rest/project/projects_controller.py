@@ -43,6 +43,11 @@ class ProjectApi(Resource):
         project = projects_service.get_project(project_id)
         return Response(project.to_json(), mimetype="application/json", status=200)
 
+class ProjectStatsApi(Resource):
+    def get(self, project_id, model, field):
+        stats = projects_service.get_stats(project_id, model, field)
+        return Response(json.dumps(stats), mimetype="application/json", status=200)
+
 
 class ValidateProjectApi(Resource):
     def post(self):

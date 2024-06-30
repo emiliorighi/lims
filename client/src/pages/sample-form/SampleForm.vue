@@ -1,29 +1,27 @@
 <template>
     <div>
-        <Header :title="header.title" :description="header.description"></Header>
-        <VaDivider style="margin-top: 0;" />
         <VaInnerLoading :loading="isLoading">
             <VaForm ref="sampleForm">
-                <VaStepper @finish="submitSample" v-if="steps.length" v-model="step" :steps="steps" linear>
-                    <template v-for="(step, i) in steps" :key="step.label" #[`step-content-${i}`]>
-                        <div class="row">
-                            <VaCard class="flex lg12 md12 sm12 xs12">
-                                <VaCardContent>
-                                    <h4 class="va-h4">{{ step.label }}</h4>
-                                    <p class="va-text-secondary">{{ step.description }} </p>
-                                </VaCardContent>
-                                <VaDivider />
-                                <VaCardContent v-if="step.label === 'Id Fields'">
-                                    <IdGenerator />
-                                </VaCardContent>
-                                <VaCardContent style="height: 300px;overflow: scroll;">
-                                    <MetadataForm :existing-metadata="existingMetadata"
-                                        @update-field="updateSampleField" :fields="step.fields"></MetadataForm>
-                                </VaCardContent>
-                            </VaCard>
-                        </div>
-                    </template>
-                </VaStepper>
+                <div class="row row-equal">
+                    <div v-for="step in steps" class="flex lg12 md12 sm12 xs12">
+                        <VaCardContent>
+                            <h4 class="va-h4">{{ step.label }}</h4>
+                            <p class="va-text-secondary">{{ step.description }} </p>
+                        </VaCardContent>
+                        <VaDivider />
+                        <VaCardContent v-if="step.label === 'Id Fields'">
+                            <IdGenerator />
+                        </VaCardContent>
+                        <VaCardContent style="height: 300px;overflow: scroll;">
+                            <MetadataForm :existing-metadata="existingMetadata" @update-field="updateSampleField"
+                                :fields="step.fields"></MetadataForm>
+                        </VaCardContent>
+                        <VaDivider vertical />
+                    </div>
+                </div>
+                <VaCardActions>
+                    <VaButton @click="submitSample">Submit</VaButton>
+                </VaCardActions>
             </VaForm>
         </VaInnerLoading>
     </div>
@@ -37,14 +35,10 @@ import ProjectService from '../../services/clients/ProjectService';
 import MetadataForm from './components/MetadataForm.vue'
 import IdGenerator from './components/IdGenerator.vue'
 import { Filter } from '../../data/types';
-import Header from '../../components/ui/Header.vue';
 import SampleService from '../../services/clients/SampleService';
 import { AxiosError } from 'axios';
 import { Step } from 'vuestic-ui/dist/types/components/va-stepper/types';
 import { useRouter } from 'vue-router';
-
-
-const step = ref(0)
 
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
@@ -56,22 +50,13 @@ const props = defineProps<{
     projectId: string
 }>()
 
+const emits = defineEmits(['sampleEdited'])
 const router = useRouter()
 const requiredFields = ref<Filter[]>([])
 const optionalFields = ref<Filter[]>([])
 const idFields = ref<Filter[]>([])
 const isLoading = ref(false)
 
-
-
-
-const header = computed(() => {
-    const title = 'Sample form'
-    const projectTest = ` for Project ${props.projectId}`
-    const description = 'Fill all the steps to create a new sample' + projectTest
-    if (props.sampleId) return { title: `Sample form of ${props.sampleId}`, description: 'Fill all the steps to update the sample' + ' ' + props.sampleId + projectTest }
-    return { title, description }
-})
 const existingMetadata = computed(() => {
     if (sampleStore.sample === null) return undefined
     return Object.entries(sampleStore.sample.metadata)
@@ -181,6 +166,7 @@ function mapFields() {
 }
 
 async function submitSample(): Promise<void> {
+    if (!validate()) return
     try {
 
         isLoading.value = true
@@ -205,7 +191,8 @@ async function submitSample(): Promise<void> {
 
         }
 
-        router.push({ name: 'samples', params: { projectId: schemaStore.schema.project_id } })
+        emits('sampleEdited')
+        // router.push({ name: 'samples', params: { projectId: schemaStore.schema.project_id } })
 
     } catch (error) {
         console.error('Error creating sample:', error);

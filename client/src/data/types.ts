@@ -15,16 +15,16 @@ export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDo
 export type FieldType = "input" | "select" | "range";
 
 export type SampleModel = {
-  sample_id:string,
-  metadata:Record<string,any>
+  sample_id: string,
+  metadata: Record<string, any>
 }
 
 export type ExperimentModel = {
-  experiment_id:string,
-  sample_id:string,
-  metadata:Record<string,any>
+  experiment_id: string,
+  sample_id: string,
+  metadata: Record<string, any>
 }
-export const fieldTypes = ['input','select','range']
+export const fieldTypes = ['input', 'select', 'range']
 
 export type Input = {
   input_type: 'text' | 'number' | 'date'
@@ -42,8 +42,8 @@ export type Range = {
   unit: string
 }
 export interface ModelSearchForm {
-  filter:string
-  query: Record<string,any>
+  filter: string
+  query: Record<string, any>
   sort_column: string,
   sort_order: 'asc' | 'desc'
 }
@@ -54,10 +54,11 @@ export interface SchemaForm {
   description?: string,
   sample: ProjectModel,
   experiment: ProjectModel,
+  created?: { $date: number }
 }
 
 export type ProjectModel = {
-  fields : Filter[],
+  fields: Filter[],
   id_format: string[]
 }
 
@@ -68,7 +69,7 @@ export type Filter = {
   key: string
   required: boolean
   value?: string
-  model?:'sample'|'experiment'
+  model?: 'sample' | 'experiment'
 }
 
 export interface SearchForm {

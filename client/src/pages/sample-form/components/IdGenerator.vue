@@ -1,12 +1,15 @@
 <template>
-    <div class="row">
-        <VaInput class="flex lg6 md6 sm12 xs12" readonly label="Unique identifier" v-model="id" placeholder="The unique identifier will be generated here"
-            :rules="[requiredIdRule, !sampleExists || 'Sample Id already exists']">
-        </VaInput>
+    <div>
+        <div class="row">
+            <VaInput class="flex" readonly label="Unique identifier" v-model="id"
+                placeholder="The unique identifier will be generated here"
+                :rules="[requiredIdRule, !sampleExists || 'Sample Id already exists']">
+            </VaInput>
+        </div>
     </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import { useSampleStore } from '../../../stores/sample-store';
 import { useSchemaStore } from '../../../stores/schemas-store';
 import { AxiosError } from 'axios';

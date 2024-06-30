@@ -1,19 +1,19 @@
 <template>
     <div v-if="metadata">
         <div v-for="field in fields" :key="field.key" class="row">
-            <div v-if="isInputField(field.filter)" class="flex lg12 md12 sm12 xs12">
+            <div v-if="isInputField(field.filter)" class="flex ">
                 <VaInput @update:modelValue="(v: any) => emits('updateField', [field.key, v])"
                     :messages="[field.description]" :label="field.label" v-model="metadata[field.key]"
                     :rules="[requiredFieldRule(field.label, field.required)]" />
             </div>
-            <div v-else-if="isSelectField(field.filter)" class="flex lg12 md12 sm12 xs12">
+            <div v-else-if="isSelectField(field.filter)" class="flex ">
                 <VaSelect @update:modelValue="(v: any) => emits('updateField', [field.key, v])"
                     :messages="[field.description]" :label="field.label" v-model="metadata[field.key]"
                     :multiple="field.filter.multi" :options="field.filter.choices"
                     :rules="[requiredSelectRule(field.label, field.required)]" />
             </div>
 
-            <div v-else-if="isRangeField(field.filter)" class="flex lg12 md12 sm12 xs12">
+            <div v-else-if="isRangeField(field.filter)" class="flex ">
                 <VaSlider @update:modelValue="(v: any) => emits('updateField', [field.key, v])" class="mt-4"
                     :label="field.label" :max="field.filter.max" :min="field.filter.min" v-model="metadata[field.key]"
                     track-label-visible>

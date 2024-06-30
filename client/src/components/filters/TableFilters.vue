@@ -25,8 +25,7 @@
                 <VaButtonDropdown :closeOnContentClick="false" icon="filter_list" label="Filters" preset="primary"
                     class="mr-2 mb-2">
                     <div class="row row-drop-down">
-                        <div class="flex lg12 md12 sm12 xs12"  v-for="(field, index) in fields"
-                            :key="index">
+                        <div class="flex lg12 md12 sm12 xs12" v-for="(field, index) in fields" :key="index">
                             <VaInput @update:modelValue="(v: string) => onQueryUpdate(v, field)" class="mt-2" clearable
                                 :label="field.key" v-if="isInputField(field.filter)"
                                 v-model="searchForm.query[field.key]">
@@ -87,8 +86,26 @@ onMounted(() => {
 })
 
 const activeFilters = computed(() => {
-    return Object.entries(searchForm.value.query)
-        .filter(([k, v]) => v).length
+
+    const entries = Object.entries(searchForm.value.query)
+
+    const inputs = entries.filter(([k, v]) => !!v && !Array.isArray(v))
+
+    //check ranges
+    const ranges = entries.filter(([k, v]) => Array.isArray(v))
+    const filteredRanges: any[][] = []
+    ranges.forEach(([k, v]) => {
+        const [minV, maxV] = v
+        //get filter
+        const filter = props.fields.find(f => f.key === k)
+        if (filter && isRangeField(filter.filter)) {
+            const { min, max } = filter.filter
+            if (minV !== min || maxV !== max) {
+                filteredRanges.push([k, v])
+            }
+        }
+    })
+    return [...inputs, ...filteredRanges].length
 })
 const searchForm = ref<ModelSearchForm>({
     query: {},
@@ -120,10 +137,12 @@ function onQueryUpdate(v: any, field: Filter) {
         const tuple = [field.key, filter.multi ? v.join(', ') : v]
         list.push(tuple)
     } else {
-        const lteTuple = [`${field.key}__lte`, v[1]]
-        const gteTuple = [`${field.key}__gte`, v[0]]
+        const [min, max] = v
+        const lteTuple = [`${field.key}__lte`, max]
+        const gteTuple = [`${field.key}__gte`, min]
         list.push(lteTuple)
         list.push(gteTuple)
+
     }
     emits('onMetadataUpdate', list)
 

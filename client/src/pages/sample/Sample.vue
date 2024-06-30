@@ -1,11 +1,12 @@
 <template>
     <div>
         <h1 class="va-h1">{{ sampleId }}</h1>
-        <p style="margin-bottom: 6px" class="va-text-secondary"> Sample of {{ projectId }}</p>
-        <VaDivider/>
+        <VaDivider />
         <div v-if="sample" class="row">
             <div class="flex lg12 md12 sm12 xs12">
-                <MetadataTree :metadata="Object.entries(sample.metadata)" />
+                <VaCard>
+                    <MetadataTree :metadata="Object.entries(sample.metadata)" />
+                </VaCard>
             </div>
         </div>
     </div>

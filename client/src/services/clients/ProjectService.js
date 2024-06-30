@@ -10,6 +10,9 @@ class ProjectService {
   getProject(id) {
     return base.get(`/projects/${id}`)
   }
+  getProjectStats(id, model, field) {
+    return base.get(`/projects/${id}/statistics/${model}/${field}`)
+  }
   lookupProject(id) {
     return base.get(`/projects/${id}/lookup`)
   }
