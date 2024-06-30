@@ -2,17 +2,15 @@ from flask_restful import Resource
 from flask import Response, request
 import json
 from . import experiments_service
-from flask_jwt_extended import jwt_required
 
 
 FIELDS_TO_EXCLUDE = ['id','created']
 
 class ExperimentsApi(Resource):
     def get(self, project_id):
-        total, data = experiments_service.get_experiments(project_id,**request.args)
-        json_resp = dict(total=total,data=list(data.as_pymongo()))
-        return Response(json.dumps(json_resp), mimetype="application/json", status=200)
-        
+        response, mimetype, status = experiments_service.get_experiments(project_id, request.args)
+        return Response(response, mimetype=mimetype, status=status)
+    
     def post(self, project_id):
         data = request.json if request.is_json else request.form
         messages, status = experiments_service.create_experiment(project_id,data)

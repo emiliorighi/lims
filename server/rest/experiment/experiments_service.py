@@ -18,7 +18,7 @@ def get_experiments(project_id, args):
     
     filter = get_filter(args.get('filter'))
 
-    tsv_fields = ['experiment_id','experiment_id']
+    tsv_fields = ['experiment_id','sample_id']
 
     selected_fields = [f"metadata.{v}" for k, v in args.items(multi=True) if k.startswith('fields[]')]
 
@@ -123,10 +123,10 @@ def update_experiment(project_id,experiment_id,data):
     new_experiment_id = create_experiment_id(id_fields, data)
     if experiment_id != new_experiment_id:
         message = f"Experiment ID {experiment_id} has changed into {new_experiment_id}, the value of the fields {','.join(id_fields)} can't be changed"
-        return BadRequest(description=message)
+        raise BadRequest(description=message)
     evaluation_errors = utils.evaluate_fields(project, data)
     if evaluation_errors:
-        return BadRequest(description=f"{'; '.join(evaluation_errors)}")
+        raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
     
     experiment.update(metadata=data)
     return [f"Experiment {experiment_id} successfully updated"], 201

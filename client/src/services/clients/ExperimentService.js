@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const { base, auth } = http
+const { base, download } = http
 
 class ExperimentService {
 

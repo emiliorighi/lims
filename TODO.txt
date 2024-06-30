@@ -1,15 +1,3 @@
-How to manage users?
-    --> Admin CRUD
-    
-    --> Project Manager
-        --> CRUD project_name in assigned project
-        --> CRUD us
-
-
-    --> Sample Manager
-
-    --> Experiment manager
-        
 
 IMPROVE UX IN TSV ATTRIBUTES INFER ON PROJECT CREATION
 
@@ -24,10 +12,10 @@ ROUTING ON THE FLY
             CREATE SAMPLES AND Experiment
             DOWNLOAD AUDIT TRAILS (USER LOGS ACTIVITIES)
 
-    SAMPLE MANAGER
-        SM ACTIONS:
-            CRUD PROJECT'S SAMPLES
 
-    EXPERIMENT MANAGER
-        EM ACTIONS:
-            CRUD PROJECT'S EXPERIMENTS
+PRIORITIES
+1 ADD EXPERIMENTS LOGIC
+2 IMPROVE FORM CREATION UX
+3 ADD STATISTICS
+4 ADD USERS
+5 ADD FILES

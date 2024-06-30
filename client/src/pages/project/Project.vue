@@ -10,26 +10,7 @@
             </template>
         </va-tabs>
         <VaDivider style="margin-top:0" />
-
-        <!-- <div class="row">
-            <div class="flex">
-                <VaButton :to="{ name: 'samples', params: { projectId: projectId } }" icon="fa-vial" color="success">
-                    Samples {{ lookupData.samples }}</VaButton>
-            </div>
-            <div class="flex">
-                <VaButton :to="{ name: 'experiments', params: { projectId: projectId } }" icon="fa-dna">Experiments {{
-                lookupData.experiments }}</VaButton>
-            </div>
-        </div> -->
         <router-view v-if="showProject"></router-view>
-        <!-- <div v-if="showProject" class="row">
-            <div class="flex lg4 md4 sm12 xs12">
-                <VaCard>
-                    <VaCardTitle>Project schema</VaCardTitle>
-                    <ProjectOverviewCard :metadata="schemaStore.schema" />
-                </VaCard>
-            </div>
-        </div> -->
     </div>
 </template>
 <script setup lang="ts">
@@ -44,7 +25,6 @@ const schemaStore = useSchemaStore()
 const props = defineProps<{
     projectId: string
 }>()
-const lookupData = ref({ samples: 0, experiments: 0 })
 
 const value = ref('Details')
 
@@ -104,27 +84,18 @@ async function getProject() {
     }
 }
 
-// async function getData() {
-//     try {
-//         const response = await ProjectService.lookupProject(props.projectId)
-//         const { samples, experiments } = response.data
-//         lookupData.value = { samples, experiments }
-//     } catch (error) {
-//         console.error(error)
-//     }
-// }
 
 function pushRoute(value: 'Details' | 'Samples' | 'Experiments' | 'Upload' | 'Statistics') {
     if (value === 'Details') {
         router.push({ name: 'project', params: { projectId: props.projectId } })
     } else if (value === 'Experiments') {
-        router.push({ name: 'experiments', params: { projectId: props.projectId } })
+        router.push({ name: 'experiments' })
     } else if (value === 'Samples') {
-        router.push({ name: 'samples', params: { projectId: props.projectId } })
+        router.push({ name: 'samples' })
     } else if (value === 'Upload') {
-        router.push({ name: 'upload', params: { projectId: props.projectId } })
+        router.push({ name: 'upload' })
     } else {
-        router.push({ name: 'statistics', params: { projectId: props.projectId } })
+        router.push({ name: 'statistics' })
     }
 }
 </script>

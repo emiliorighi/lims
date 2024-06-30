@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const { base, auth,download } = http
+const { base, auth, download } = http
 
 class SampleService {
 
@@ -19,12 +19,12 @@ class SampleService {
     deleteSample(projectId, sampleId) {
         return base.delete(`/projects/${projectId}/samples/${sampleId}`)
     }
-    uploadSampleTSV(projectId, data){
+    uploadSampleTSV(projectId, data) {
         return base.post(`/projects/${projectId}/samples/upload`, data)
     }
     getTsv(projectId, params) {
         return download.get(`/projects/${projectId}/samples`, { params: params })
-      }
+    }
 }
 
 export default new SampleService();

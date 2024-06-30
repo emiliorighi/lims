@@ -31,7 +31,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { Filter, Input, Select, Range } from '../../../data/types'
+import { Filter, Input, Select, Range } from '../../data/types'
 
 const props = defineProps<{
     fields: Filter[]

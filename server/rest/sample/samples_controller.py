@@ -20,7 +20,6 @@ class SampleApi(Resource):
     
     def put(self, project_id,sample_id):
         data = request.json if request.is_json else request.form
-        print(data)
         messages, status = samples_service.update_sample(project_id,sample_id,data)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
     

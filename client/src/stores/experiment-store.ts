@@ -24,8 +24,8 @@ export const useExperimentStore = defineStore('experiment', {
     return {
       experiment: { ...defaultExperiment },
       showForm: false,
-      formValid: false,
-      update: false,
+      showReport: false,
+      expIdToUpdate: undefined as string | undefined,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }

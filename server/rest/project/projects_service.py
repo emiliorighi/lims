@@ -7,6 +7,10 @@ from werkzeug.exceptions import NotFound
 import csv
 from io import StringIO
 from werkzeug.exceptions import BadRequest, NotFound
+from pymongo.errors import DuplicateKeyError
+from mongoengine.errors import NotUniqueError
+from ..sample.samples_service import update_sample
+from ..experiment.experiments_service import update_experiment
 
 JSON_SCHEMA_PATH='/server/project-spec.json'
 
@@ -153,8 +157,9 @@ def upload_tsv(project_id, tsv, data):
             missing_required_fields.append(req_field)
 
     if missing_required_fields:
-        return f"The following required fields of {model} are missing {', '.join(missing_required_fields)}", 400    
+        return f"The following required fields of {model} are missing {', '.join(missing_required_fields)}", 400
     
+    behaviour = data.get('behaviour', 'SKIP')
     valid_map = {t[0]:t[1] for t in mapped_values if t[1]}
     tsv_data = StringIO(tsv.read().decode('utf-8'))
     tsvreader = csv.DictReader(tsv_data, delimiter='\t')
@@ -170,12 +175,14 @@ def upload_tsv(project_id, tsv, data):
 
     header=2
     saved_items = []
+    skipped_items = set()
+    updated_items = set()
     id_set = set()
     for index, obj in enumerate(items):
         obj_id = create_model_id(data_model_id_fields, obj)
         
         if not obj_id:
-            raise BadRequest(description=f"Unable to generate {model}_id with the fields provided at row{header+index}")
+            raise BadRequest(description=f"row {header+index}: Unable to generate {model}_id with the fields provided")
         
         if obj_id in id_set:
             continue #SKIP REPEATED OBJECTS
@@ -184,23 +191,44 @@ def upload_tsv(project_id, tsv, data):
                   if req_field not in obj or obj[req_field] in [None, '', [], {}]]
     
         if missing_fields:
-            raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory for {model} at row {header+index}")
+            raise BadRequest(description=f"row {header+index} {', '.join(missing_fields)} is/are mandatory for {model} ")
         
         evaluation_errors = utils.evaluate_fields(project, obj)
         if evaluation_errors:
-            raise BadRequest(description=f"{'; '.join(evaluation_errors)} for {model} at row {header+index}")
+            raise BadRequest(description=f"row {header+index} {'; '.join(evaluation_errors)} for {model} ")
         
         doc_to_save={f"{model}_id":obj_id, 'project':project_id, 'metadata':obj }
-        try: 
+        if model == 'experiment':
+            sample_id = doc_to_save.get('metadata').get('sample_id')
+            if not sample_id:
+                raise BadRequest(description=f"{sample_id} is missing in {model} at row {header+index}")
+            elif not Sample.objects(project=project_id, sample_id=sample_id).first():
+                raise BadRequest(description=f"row {header+index}: {sample_id} is not present in the database created it first! ")
+
+            doc_to_save['sample_id'] = sample_id
+        try:
+
             saved_item = model_doc(**doc_to_save).save()
             saved_items.append(saved_item)
             id_set.add(obj_id)
 
+        except NotUniqueError as e:
+            if behaviour == 'UPDATE':
+                if obj_id in updated_items: continue
+                if model == 'sample':
+                    message, status = update_sample(project_id, obj_id, doc_to_save['metadata'])
+                else:
+                    message, status = update_experiment(project_id, obj_id, doc_to_save['metadata'])
+                if status == 201:
+                    updated_items.add(obj_id)
+            else:
+                if not obj_id in skipped_items:
+                    skipped_items.add(obj_id)
+                continue
         except Exception as e:
-            raise BadRequest(description=f"{e} at row {header+index}")
+            raise BadRequest(description=f"row {header+index}: {e}")
 
-
-    return f'A total of {len(saved_items)} have been saved', 200
+    return f'Created: {len(saved_items)}, Skipped:  {len(skipped_items)}, Updated: {len(updated_items)}', 200
 
 def create_model_id(id_fields, data):
     return '_'.join(str(data.get(attr)) for attr in id_fields)

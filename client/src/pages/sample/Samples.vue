@@ -1,77 +1,50 @@
 <template>
-    <div>
-        <div v-if="schemaStore.schema.project_id" class="row row-equal">
-            <div class="flex lg12 md12 sm12 xs12">
-                <VaCard>
-                    <VaCardTitle class="va-text-secondary mb-0">Sample List</VaCardTitle>
-                    <VaCardContent>
-                        <div class="row justify-space-between">
-                            <div class="flex">
-                                <div class="row">
-                                    <div class="flex">
-                                        <TableFilters @on-metadata-update="updateQueryForm"
-                                            @on-search-change="updateSearchForm" :columns="columns"
-                                            :fields="schemaStore.schema.sample.fields"
-                                            @on-show-field-change="updateShowFields" />
-                                    </div>
-                                    <div class="flex">
-                                        <VaButton :disabled="total === 0" @click="showModal = !showModal"
-                                            icon-right="download">Report
-                                        </VaButton>
-                                    </div>
+    <div class="row row-equal">
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardTitle class="va-text-secondary mb-0">Sample List</VaCardTitle>
+                <VaCardContent>
+                    <div class="row justify-space-between">
+                        <div class="flex">
+                            <div class="row">
+                                <div class="flex">
+                                    <TableFilters @on-metadata-update="updateQueryForm"
+                                        @on-search-change="updateSearchForm" :columns="columns"
+                                        :fields="schemaStore.schema.sample.fields.filter(f => !singleId || singleId !== f.key)"
+                                        @on-show-field-change="updateShowFields" />
+                                </div>
+                                <div class="flex">
+                                    <VaButton :disabled="total === 0" preset="primary"
+                                        @click="sampleStore.showReport = !sampleStore.showReport" icon-right="download">
+                                        Report
+                                    </VaButton>
                                 </div>
                             </div>
-                            <div class="flex">
-                                <VaButton icon="add" color="success" @click="showCreationModal = !showCreationModal">
-                                    Sample
-                                </VaButton>
-                            </div>
                         </div>
-                        <CRUDTable :items="samples" :columns="columns" @edit-clicked="editSample"
-                            @delete-clicked="deleteSample" />
-                        <div class="row align-center justify-space-between">
-                            <div class="flex">
-                                <b>Total {{ total }}</b>
-                                Results per page
-                                <VaSelect style="width: 100px;" :options="[10, 20, 50]"
-                                    v-model="sampleStore.pagination.limit" />
-                            </div>
-                            <div class="flex">
-                                <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
-                                    :offset="sampleStore.pagination.offset" :total="total" />
-                            </div>
+                        <div class="flex">
+                            <VaButton icon="add" @click="sampleStore.showForm = !sampleStore.showForm">
+                                Sample
+                            </VaButton>
                         </div>
-                    </VaCardContent>
-                </VaCard>
-                <VaModal v-model="showModal" hide-default-actions title="Download TSV Report">
-                    <VaInnerLoading :loading="isTSVLoading">
-                        <div class="row">
-                            <VaSelect class="flex lg12 md12 sm12 xs12" v-model="downloadFields"
-                                searchPlaceholderText="Type to search" label="Columns"
-                                :options="schemaStore.schema.sample.fields.map(f => f.key)" placeholder="Column list"
-                                multiple :messages="['Search fields to use as TSV columns']" />
+                    </div>
+                    <CRUDTable :items="samples" :columns="columns" @edit-clicked="editSample"
+                        @delete-clicked="deleteSample" />
+                    <div class="row align-center justify-space-between">
+                        <div class="flex">
+                            <b>Total {{ total }}</b>
+                            Results per page
+                            <VaSelect style="width: 100px;" :options="[10, 20, 50]"
+                                v-model="sampleStore.pagination.limit" />
                         </div>
-                        <div class="row">
-                            <div class="flex lg12 md12 sm12 xs12">
-                                <VaCheckbox style="margin-top: 6px;" v-model="applyFilters"
-                                    label="Apply current filter">
-                                </VaCheckbox>
-                                <VaCheckbox style="margin-top: 6px;" v-model="selectAllColumns"
-                                    label="Select all columns">
-                                </VaCheckbox>
-                            </div>
+                        <div class="flex">
+                            <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
+                                :offset="sampleStore.pagination.offset" :total="total" />
                         </div>
-                    </VaInnerLoading>
-                    <template #footer>
-                        <VaButton @click="downloadData"> Submit</VaButton>
-                    </template>
-                </VaModal>
-                <VaModal v-model="showCreationModal" hide-default-actions
-                    :title="sampleIdToUpdate ? `Update ${sampleIdToUpdate}` : 'Create Sample'">
-                    <SampleForm @sample-edited="showCreationModal = !showCreationModal" :project-id="projectId"
-                        :sample-id="sampleIdToUpdate" />
-                </VaModal>
-            </div>
+                    </div>
+                </VaCardContent>
+            </VaCard>
+            <SampleFormModal @sample-edited="handleSubmit" />
+            <ReportModal />
         </div>
     </div>
 </template>
@@ -86,31 +59,24 @@ import { useGlobalStore } from '../../stores/global-store';
 import TableFilters from '../../components/filters/TableFilters.vue'
 import CRUDTable from '../../components/data/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
-import ProjectService from '../../services/clients/ProjectService';
-import { AxiosError } from 'axios';
-import SampleForm from '../sample-form/SampleForm.vue';
+import SampleFormModal from './components/SampleFormModal.vue';
+import ReportModal from './components/ReportModal.vue'
 
-const props = defineProps<{
-    projectId: string
-}>()
 
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { toast } = useGlobalStore()
-const showCreationModal = ref(false)
-const selectAllColumns = ref(false)
-const downloadFields = ref<string[]>([])
-const showModal = ref(false)
-const isTSVLoading = ref(false)
-const applyFilters = ref(true)
 
-const sampleIdToUpdate = ref<string | undefined>()
-const mappedFields = schemaStore.schema.sample.fields.map((f: Filter) => { return { show: f.required, value: f.key } })
+const singleId = computed(() => {
+    return schemaStore.schema.sample.id_format.length === 1 ? schemaStore.schema.sample.id_format[0] : undefined
+})
+const mappedFields = ref(schemaStore.schema.sample.fields.filter(f => !singleId.value || singleId.value !== f.key).map((f: Filter) => { return { show: f.required, value: f.key } }))
 
-const showFields = ref(mappedFields)
+const showFields = ref([...mappedFields.value])
 
 const columns = computed(() => {
-    return ['sample_id', ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`), 'actions']
+
+    return ['sample_id', ...showFields.value.filter(f => f.show).filter(f => !singleId.value || singleId.value !== f.value).map(f => `metadata.${f.value}`), 'actions']
 })
 
 async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
@@ -135,36 +101,17 @@ function updateShowFields(updatedShowFields: { show: boolean, value: string }[])
 
 const samples = ref<SampleModel[]>([])
 const total = ref(0)
-const errorMessage = ref('')
 const isLoading = ref(false)
 const offset = ref(1 + sampleStore.pagination.offset)
 
 onMounted(async () => {
-    if (!schemaStore.schema.project_id) {
-        await fetchSchema(props.projectId)
-    }
     await handleSubmit()
 })
-
-async function fetchSchema(projectId: string) {
-    try {
-        const { data } = await ProjectService.getProject(projectId)
-        schemaStore.schema = {
-            ...data
-        }
-    } catch (error) {
-        console.error(error)
-        toast({ message: 'Error Fetching project', color: 'danger', duration: 1500 })
-    } finally {
-    }
-}
 
 async function handleSubmit() {
     sampleStore.resetPagination()
     offset.value = 1
     const { query, ...fields } = sampleStore.searchForm
-    // console.log(query)
-    // const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
     await getSamples({ ...query, ...fields, ...sampleStore.pagination })
 }
 
@@ -174,14 +121,14 @@ async function handlePagination(value: number) {
 }
 
 function editSample(index: number) {
-    sampleIdToUpdate.value = samples.value[index].sample_id
-    showCreationModal.value = true
+    sampleStore.sampleIdToUpdate = samples.value[index].sample_id
+    sampleStore.showForm = !sampleStore.showForm
 }
 
 async function deleteSample(index: number) {
     try {
         const sampleToDelete = samples.value[index]
-        const { data } = await SampleService.deleteSample(props.projectId, sampleToDelete.sample_id)
+        const { data } = await SampleService.deleteSample(schemaStore.schema.project_id, sampleToDelete.sample_id)
         toast({ message: data, color: 'success', duration: 1500 })
     } catch (error) {
         console.error(error)
@@ -198,61 +145,18 @@ async function reset() {
     await handleSubmit()
 }
 
+
 async function getSamples(query: Record<string, any>) {
     try {
         const { data } = await SampleService.getSamples(schemaStore.schema.project_id, query)
         samples.value = [...data.data]
         total.value = data.total
     } catch (e) {
-        errorMessage.value = 'Something happened'
+        console.error(e)
     } finally {
         isLoading.value = false
     }
 }
 
-async function downloadData() {
-    let fields
-    if (selectAllColumns.value) {
-        fields = mappedFields.map(m => m.value)
-    } else {
-        fields = [...downloadFields.value]
-    }
-    const downloadRequest = { format: "tsv", fields: fields }
-    try {
-        isTSVLoading.value = true
-        const requestData = applyFilters.value ? {
-            filter: sampleStore.searchForm.filter,
-            sort_column: sampleStore.searchForm.sort_column, sort_order: sampleStore.searchForm.sort_order,
-            ...sampleStore.searchForm.query,
-            ...downloadRequest
-        }
-            :
-            { ...downloadRequest }
-
-        const response = await SampleService.getTsv(props.projectId, requestData)
-        const data = response.data
-        const href = URL.createObjectURL(data);
-
-        const filename = 'sample_report.tsv'
-        // create "a" HTML element with href to file & click
-        const link = document.createElement('a');
-        link.href = href;
-        link.setAttribute('download', filename); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-        // clean up "a" element & remove ObjectURL
-        document.body.removeChild(link);
-        URL.revokeObjectURL(href);
-
-    } catch (e) {
-
-        const axiosError = e as AxiosError
-        toast({ message: axiosError.message, color: 'danger' })
-
-    } finally {
-        isTSVLoading.value = false
-        showModal.value = !showModal.value
-    }
-}
 
 </script>

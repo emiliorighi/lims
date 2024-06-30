@@ -1,8 +1,13 @@
 <template>
     <VaCard>
-        <VaCardActions align="end">
-            <VaButton @click="emits('onDelete', index)" icon="delete" color="danger" />
-        </VaCardActions>
+        <VaCardTitle>
+            <div class="row justify-space-between">
+                <div class="flex p-0">{{ label }}</div>
+                <div class="flex p-0 a-text-secondary">
+                    <VaButton size="small" @click="emits('onDelete', index)" icon="delete" color="danger" />
+                </div>
+            </div>
+        </VaCardTitle>
         <VaCardContent>
             <VaChart :type="chart.type" :data="createChartData(chart.data)" />
         </VaCardContent>

@@ -1,57 +1,51 @@
 <template>
-    <div>
+    <VaModal @cancel="sampleStore.sampleIdToUpdate = undefined" max-height="500px" fixed-layout
+        v-model="sampleStore.showForm" hide-default-actions>
+        <template #header>
+            <h3 class="va-h3">
+                {{ sampleStore.sampleIdToUpdate ? `Update ${sampleStore.sampleIdToUpdate}` : 'Create Sample' }}
+            </h3>
+        </template>
+        <VaDivider />
         <VaInnerLoading :loading="isLoading">
             <VaForm ref="sampleForm">
-                <div class="row row-equal">
+                <div class="row">
                     <div v-for="step in steps" class="flex lg12 md12 sm12 xs12">
-                        <VaCardContent>
-                            <h4 class="va-h4">{{ step.label }}</h4>
-                            <p class="va-text-secondary">{{ step.description }} </p>
-                        </VaCardContent>
-                        <VaDivider />
-                        <VaCardContent v-if="step.label === 'Id Fields'">
-                            <IdGenerator />
-                        </VaCardContent>
-                        <VaCardContent style="height: 300px;overflow: scroll;">
-                            <MetadataForm :existing-metadata="existingMetadata" @update-field="updateSampleField"
-                                :fields="step.fields"></MetadataForm>
-                        </VaCardContent>
-                        <VaDivider vertical />
+                        <h4 class="va-h4">{{ step.label }}</h4>
+                        <p class="va-text-secondary">{{ step.description }} </p>
+                        <IdGenerator v-if="step.label === 'Id Fields'" />
+                        <MetadataForm :existing-metadata="existingMetadata" @update-field="updateSampleField"
+                            :fields="step.fields"></MetadataForm>
                     </div>
                 </div>
-                <VaCardActions>
-                    <VaButton @click="submitSample">Submit</VaButton>
-                </VaCardActions>
             </VaForm>
         </VaInnerLoading>
-    </div>
+        <VaDivider />
+        <template #footer>
+            <VaCardActions align="end">
+                <VaButton @click="submitSample">Submit</VaButton>
+            </VaCardActions>
+        </template>
+    </VaModal>
 </template>
 <script setup lang="ts">
-import { useSchemaStore } from '../../stores/schemas-store';
-import { useSampleStore } from '../../stores/sample-store';
-import { useForm, useToast } from 'vuestic-ui/web-components';
+import { useSchemaStore } from '../../../stores/schemas-store';
+import { useSampleStore } from '../../../stores/sample-store';
+import { VaModal, useForm, useToast } from 'vuestic-ui/web-components';
 import { computed, onMounted, ref } from 'vue';
-import ProjectService from '../../services/clients/ProjectService';
-import MetadataForm from './components/MetadataForm.vue'
-import IdGenerator from './components/IdGenerator.vue'
-import { Filter } from '../../data/types';
-import SampleService from '../../services/clients/SampleService';
+import MetadataForm from './../../../components/forms/MetadataForm.vue'
+import IdGenerator from './IdGenerator.vue'
+import { Filter } from '../../../data/types';
+import SampleService from '../../../services/clients/SampleService';
 import { AxiosError } from 'axios';
 import { Step } from 'vuestic-ui/dist/types/components/va-stepper/types';
-import { useRouter } from 'vue-router';
 
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { init } = useToast()
 const { validate } = useForm('sampleForm')
 
-const props = defineProps<{
-    sampleId?: string
-    projectId: string
-}>()
-
 const emits = defineEmits(['sampleEdited'])
-const router = useRouter()
 const requiredFields = ref<Filter[]>([])
 const optionalFields = ref<Filter[]>([])
 const idFields = ref<Filter[]>([])
@@ -64,7 +58,7 @@ const existingMetadata = computed(() => {
 
 const steps = computed(() => {
     const validSteps = []
-    if (idFields.value.length && !props.sampleId) {
+    if (idFields.value.length && !sampleStore.sampleIdToUpdate) {
         validSteps.push(
             {
                 label: 'Id Fields',
@@ -96,31 +90,15 @@ const steps = computed(() => {
 })
 onMounted(async () => {
 
-    if (!schemaStore.schema.project_id) {
-        await fetchSchema(props.projectId)
-    }
 
     mapFields()
 
-    if (props.sampleId) {
-        await getSample(props.sampleId)
+    if (sampleStore.sampleIdToUpdate) {
+        await getSample(sampleStore.sampleIdToUpdate)
     }
 })
 
-async function fetchSchema(projectId: string) {
-    try {
-        isLoading.value = true
-        const { data } = await ProjectService.getProject(projectId)
-        schemaStore.schema = {
-            ...data
-        }
-    } catch (error) {
-        console.error(error)
-        init({ message: 'Error fetching project..', color: 'danger', duration: 1500 })
-    } finally {
-        isLoading.value = false
-    }
-}
+
 async function getSample(id: string): Promise<void> {
 
     try {
@@ -171,13 +149,13 @@ async function submitSample(): Promise<void> {
 
         isLoading.value = true
         const { metadata } = sampleStore.sample
-        if (props.sampleId) {
-            const response = await SampleService.updateSample(schemaStore.schema.project_id, props.sampleId, metadata);
+        if (sampleStore.sampleIdToUpdate) {
+            const response = await SampleService.updateSample(schemaStore.schema.project_id, sampleStore.sampleIdToUpdate, metadata);
             const { data } = response;
 
             init({
                 color: 'success',
-                message: Array.isArray(data) ? data.join(', ') : `Sample ${props.sampleId} edited successfully`,
+                message: Array.isArray(data) ? data.join(', ') : `Sample ${sampleStore.sampleIdToUpdate} edited successfully`,
             });
 
         } else {
@@ -191,6 +169,7 @@ async function submitSample(): Promise<void> {
 
         }
 
+        sampleStore.showForm = !sampleStore.showForm
         emits('sampleEdited')
         // router.push({ name: 'samples', params: { projectId: schemaStore.schema.project_id } })
 

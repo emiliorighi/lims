@@ -13,7 +13,7 @@
             <VaButtonDropdown :closeOnContentClick="false" icon="hide_source" preset="primary" label="Fields"
                 class="mr-2 mb-2">
                 <div class="row row-drop-down">
-                    <div class="flex lg7 md7 sm12 xs12" v-for="(field, index) in showFields">
+                    <div class="flex lg12 md12 sm12 xs12" v-for="(field, index) in showFields">
                         <VaSwitch class="mt-2" :key="index" v-model="showFields[index].show" :label="field.value"
                             size="small" />
                     </div>

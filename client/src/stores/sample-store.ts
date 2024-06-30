@@ -7,7 +7,7 @@ const defaultSample: SampleModel = {
 }
 
 const initSearchForm: ModelSearchForm = {
-  filter:'',
+  filter: '',
   query: {},
   sort_column: '',
   sort_order: 'asc'
@@ -21,10 +21,10 @@ const initPagination = {
 export const useSampleStore = defineStore('sample', {
   state: () => {
     return {
-      sample: {...defaultSample},
-      showForm:false,
-      formValid:false,
-      update:false,
+      sample: { ...defaultSample },
+      showForm: false,
+      showReport: false,
+      sampleIdToUpdate: undefined as string | undefined,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }
@@ -38,7 +38,7 @@ export const useSampleStore = defineStore('sample', {
       this.pagination = { ...initPagination }
     },
     resetSample() {
-      this.sample = {...defaultSample}
+      this.sample = { ...defaultSample }
     }
   },
 })

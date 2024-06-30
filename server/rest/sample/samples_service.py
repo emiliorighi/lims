@@ -47,8 +47,9 @@ def get_sample(project_id, sample_id):
     raise NotFound(description=f"Sample: {sample_id} not found")
 
 def create_sample_id(id_fields, data):
-    return '_'.join(str(data.get(attr)) for attr in id_fields)
-
+    l = [str(data.get(attr)) for attr in id_fields if data.get(attr)]
+    if l:
+        return '_'.join(l)
 
 def create_sample(project_id, data):
 
@@ -111,7 +112,8 @@ def update_sample(project_id,sample_id,data):
     id_fields = project.sample.get('id_format', [])
     # Generate sample ID based on id fields
     new_sample_id = create_sample_id(id_fields, data)
-    if sample_id != new_sample_id:
+    print(type(new_sample_id))
+    if new_sample_id and sample_id != new_sample_id:
         message = f"Sample ID {sample_id} has changed into {new_sample_id}, the value of the fields {','.join(id_fields)} can't be changed"
         raise BadRequest(description=message)
     evaluation_errors = utils.evaluate_fields(project, data)

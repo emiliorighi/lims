@@ -124,6 +124,10 @@ const onCloseSidebarButtonClick = () => {
 $mobileBreakPointPX: 640px;
 $tabletBreakPointPX: 768px;
 
+.p-0 {
+  padding: 0;
+}
+
 .app-layout {
   height: 100vh;
   display: flex;

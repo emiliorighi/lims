@@ -1,6 +1,5 @@
 import { RouteRecordRaw } from 'vue-router';
-import { samples } from './sample';
-import { experiments } from './experiment';
+
 export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects',
@@ -26,17 +25,23 @@ export const projects: Array<RouteRecordRaw> = [
       {
         path: 'statistics',
         name: 'statistics',
-        props: true,
         component: () => import('../pages/project/StatisticsPage.vue'),
       },
       {
         path: 'upload',
         name: 'upload',
-        props: true,
         component: () => import('../pages/project/ItemsUpload.vue'),
       },
-      ...samples,
-      ...experiments
+      {
+        path: 'samples',
+        name: 'samples',
+        component: () => import('../pages/sample/Samples.vue'),
+      },
+      {
+        path: 'experiments',
+        name: 'experiments',
+        component: () => import('../pages/experiment/Experiments.vue'),
+      },
     ]
   }
 ]
