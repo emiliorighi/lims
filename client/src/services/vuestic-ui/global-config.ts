@@ -15,6 +15,9 @@ export default {
     },
   },
   components: {
-    VaIcon
-  },
+    VaIcon,
+    VaModal:{
+      zIndex:100,
+    }
+  }
 }
