@@ -5,8 +5,7 @@
         </VaButton>
         <VaModal v-model="show" hide-default-actions>
             <template #header>
-                <h2 class="va-h2"> Draft Project list</h2>
-                <p>Select a Draft Project to use</p>
+                <h2 class="va-h2"> Draft Projects</h2>
             </template>
             <VaDivider/>
             <div class="row align-end justify-space-between">

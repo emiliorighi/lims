@@ -18,6 +18,8 @@ export default {
     VaIcon,
     VaModal:{
       zIndex:100,
+      fixedLayout:true,
+      maxHeight:"500px"
     }
   }
 }

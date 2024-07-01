@@ -21,10 +21,10 @@ def lookup_related_data(project_id):
     return response
 
 def get_project(project_id):
-    project = Project.objects(project_id=project_id).exclude('id', 'created').first()
-    if project:
-        return project
-    raise NotFound(description=f"Project: {project_id} not found!")
+    project = Project.objects(project_id=project_id).exclude('id').first()
+    if not project:
+        raise NotFound(description=f"Project: {project_id} not found!")
+    return project
 
 
 def get_stats(project_id, model, field):
@@ -259,22 +259,23 @@ def map_attributes_from_tsv(tsv, data):
                     mapped_values[key].add(value)
 
     attributes = []
-    
+    percentage=treshold*total_rows / 100
+    print(treshold)
+    print(percentage)
     for attr_key, opts in mapped_values.items():
         options = list(opts)
         num_unique_values= len(options)
         filter = {}
-
-        if num_unique_values < total_rows * (treshold / 100):
+        if num_unique_values >= percentage:
             filter['choices'] = options
             filter['multi'] = False
-        elif num_unique_values <= 10:  # Fewer than or equal to 10 unique values
-            filter['choices'] = options
-            filter['multi'] = False
+        # elif num_unique_values <= 10:  # Fewer than or equal to 10 unique values
+        #     filter['choices'] = options
+        #     filter['multi'] = False
         elif attr_key in multi_select_candidates:  # Check if there are any multi-select candidates
             multi_select_options = list(multi_select_candidates[attr_key])
             multi_select_unique_values = len(multi_select_options)
-            if multi_select_unique_values <= 10 or multi_select_unique_values < total_rows * (treshold / 100):
+            if  multi_select_unique_values >= percentage:
                 filter['choices'] = multi_select_options
                 filter['multi'] = True
         else:

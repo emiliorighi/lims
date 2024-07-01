@@ -3,42 +3,24 @@
     <VaModal v-model="show" hide-default-actions>
         <template #header>
             <h2 class="va-h2"> Project upload</h2>
-            <p class="va-text-secondary">Upload a YAML or JSON file containing the project schema</p>
         </template>
-        <VaDivider/>
+        <VaDivider />
         <Transition>
             <div v-if="projectIsValid">
-                <div>
-                    <div class="row align-end justify-space-between">
-                        <div class="flex ">
-                            <h3 class="va-h3">{{ parsedProject?.project_id }}</h3>
-                            <p class="va-text-secondary">Review the project then click confirm to use it or cancel to cancel the action</p>
-                        </div>
-                        <div class="flex">
-                            <div class="row justify-space-between">
-                                <div class="flex">
-                                    <VaButton icon="check_circle" color="warning" @click="uploadProject">Confirm
-                                    </VaButton>
-                                </div>
-                                <div class="flex">
-                                    <VaButton icon="cancel" color="secondary" @click="reset">Cancel
-                                    </VaButton>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <VaDivider />
-                    <ProjectOverviewCard v-if="parsedProject" :metadata="parsedProject" />
-                </div>
+                <b>{{ parsedProject?.project_id }}</b>
+                <p class="va-text-secondary">Review the project then click confirm to use it or cancel to
+                    cancel the
+                    action</p>
+                <VaDivider />
+                <ProjectOverviewCard v-if="parsedProject" :metadata="parsedProject" />
             </div>
             <div v-else>
                 <VaInnerLoading :loading="isLoading">
                     <VaFileUpload dropzone type="single" label="Upload Yaml" v-model="file"
                         file-types=".yaml,.yml,.json">
                     </VaFileUpload>
-                    <VaButton :disabled="!file" color="warning" @click="submitFile">Submit</VaButton>
                     <div v-if="errors.length">
-                        <h4 class="va-h4">Error</h4>
+                        <b>Error</b>
                         <p v-for="error, index in errors" :key="index">
                             {{ error }}
                         </p>
@@ -46,6 +28,23 @@
                 </VaInnerLoading>
             </div>
         </Transition>
+        <template #footer>
+            <div v-if="projectIsValid" class="row justify-space-between">
+                <div class="flex">
+                    <VaButton icon="check_circle" color="warning" @click="uploadProject">Confirm
+                    </VaButton>
+                </div>
+                <div class="flex">
+                    <VaButton icon="cancel" color="secondary" @click="reset">Cancel
+                    </VaButton>
+                </div>
+            </div>
+            <div v-else class="row justify-end">
+                <div class="flex">
+                    <VaButton :disabled="!file" color="warning" @click="submitFile">Submit</VaButton>
+                </div>
+            </div>
+        </template>
     </VaModal>
 </template>
 <script setup lang="ts">
