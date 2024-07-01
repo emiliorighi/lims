@@ -1,4 +1,11 @@
+import GitHub from '../../../components/icons/GitHub.vue'
+
+
 export default [
+  {
+    name: 'github',
+    component: GitHub,
+  },
   {
     name: 'angle_down',
     to: 'fa4-angle-down',

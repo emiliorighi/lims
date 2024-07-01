@@ -3,18 +3,18 @@
         <h1 class="va-h1 mb-2">
             {{ projectId }}
         </h1>
-        <va-tabs @update:modelValue="pushRoute" v-model="value">
+        <VaTabs @update:modelValue="pushRoute" v-model="value">
             <template #tabs>
-                <va-tab :name="tab.label" v-for="tab in validTabs" :key="tab.label" :label="tab.label" :icon="tab.icon">
-                </va-tab>
+                <VaTab v-for="tab in validTabs" :name="tab.name" :key="tab.label" :label="tab.label" :icon="tab.icon">
+                </VaTab>
             </template>
-        </va-tabs>
+        </VaTabs>
         <VaDivider style="margin-top:0" />
         <router-view v-if="showProject"></router-view>
     </div>
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useSchemaStore } from '../../stores/schemas-store';
 import ProjectService from '../../services/clients/ProjectService';
 import { useRoute, useRouter } from 'vue-router';
@@ -26,34 +26,56 @@ const props = defineProps<{
     projectId: string
 }>()
 
-const value = ref('Details')
 
 const showProject = computed(() => {
     return !!schemaStore.schema.project_id
+})
+
+watch(() => route.name, () => {
+    if (route.name && route.name !== value.value) {
+        const t = tabs.find(({ name }) => route.name === name)
+        if (t) value.value = t.name
+    }
+})
+
+onMounted(() => {
+    if (route.name) value.value = route.name as string
 })
 
 const tabs = [
     {
         label: 'Details',
         icon: 'info',
+        to: { name: 'project', params: { projectId: props.projectId } },
+        name: 'project'
     },
     {
         label: 'Samples',
         icon: 'fa-vial',
+        to: { name: 'samples' },
+        name: 'samples'
     },
     {
         label: 'Experiments',
         icon: 'fa-dna',
+        to: { name: 'experiments' },
+        name: 'experiments'
     },
     {
         label: 'Upload',
         icon: 'upload',
+        to: { name: 'upload' },
+        name: 'upload'
     },
     {
         label: 'Statistics',
         icon: 'query_stats',
+        to: { name: 'statistics' },
+        name: 'statistics'
     },
 ]
+
+const value = ref('')
 
 const validTabs = computed(() => {
     if (schemaStore.schema.experiment.id_format.length) {
@@ -63,18 +85,8 @@ const validTabs = computed(() => {
 })
 onMounted(async () => {
     if (!schemaStore.schema.project_id) await getProject()
-    const currentRoute = route.name
-    if (currentRoute && currentRoute !== 'project') {
-        value.value = capitalizeFirstChar(currentRoute.toString())
-    }
-
 })
 
-function capitalizeFirstChar(str: string) {
-    if (str.length === 0) return str; // Handle empty string
-    const [first, ...rest] = str;
-    return first.toUpperCase() + rest.join('');
-}
 async function getProject() {
     try {
         const { data } = await ProjectService.getProject(props.projectId)
@@ -85,17 +97,8 @@ async function getProject() {
 }
 
 
-function pushRoute(value: 'Details' | 'Samples' | 'Experiments' | 'Upload' | 'Statistics') {
-    if (value === 'Details') {
-        router.push({ name: 'project', params: { projectId: props.projectId } })
-    } else if (value === 'Experiments') {
-        router.push({ name: 'experiments' })
-    } else if (value === 'Samples') {
-        router.push({ name: 'samples' })
-    } else if (value === 'Upload') {
-        router.push({ name: 'upload' })
-    } else {
-        router.push({ name: 'statistics' })
-    }
+function pushRoute(n: string) {
+    const t = tabs.find(({ name }) => name === n)
+    if (t) router.push(t.to)
 }
 </script>

@@ -1,8 +1,8 @@
 <template>
-  <AppLayout/>
+  <NewLayout/>
 </template>
 <script setup lang="ts">
-import AppLayout from './layouts/AppLayout.vue';
+import NewLayout from './layouts/NewLayout.vue';
 
 </script>
 <style lang="scss">

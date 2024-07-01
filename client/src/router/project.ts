@@ -8,7 +8,7 @@ export const projects: Array<RouteRecordRaw> = [
     component: () => import('../pages/project/Projects.vue'),
   },
   {
-    path: '/projects/project-form',
+    path: '/project-form',
     name: 'project-form',
     component: () => import('../pages/project-form/ProjectForm.vue'),
   },
