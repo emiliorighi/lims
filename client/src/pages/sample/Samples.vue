@@ -22,7 +22,7 @@
                             </div>
                         </div>
                         <div class="flex">
-                            <VaButton icon="add" @click="sampleStore.showForm = !sampleStore.showForm">
+                            <VaButton color="success" icon="add" @click="sampleStore.showForm = !sampleStore.showForm">
                                 Sample
                             </VaButton>
                         </div>
@@ -43,7 +43,7 @@
                     </div>
                 </VaCardContent>
             </VaCard>
-            <SampleFormModal @sample-edited="handleSubmit" />
+            <SampleFormModal @sample-edited="reset" />
             <ReportModal />
         </div>
     </div>
@@ -83,7 +83,7 @@ async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order',
     const store = { ...sampleStore.searchForm }
     store[tuple[0]] = tuple[1]
     sampleStore.searchForm = { ...store }
-    await handleSubmit()
+    await getSamples()
 }
 
 async function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
@@ -92,7 +92,7 @@ async function updateQueryForm(list: [keyof Record<string, any>, Record<string, 
     const { query } = sampleStore.searchForm
     const newQuery = { query: { ...query, ...Object.fromEntries(list) } }
     sampleStore.searchForm = { ...sampleStore.searchForm, ...newQuery }
-    handleSubmit()
+    getSamples()
 }
 
 function updateShowFields(updatedShowFields: { show: boolean, value: string }[]) {
@@ -105,24 +105,32 @@ const isLoading = ref(false)
 const offset = ref(1 + sampleStore.pagination.offset)
 
 onMounted(async () => {
-    await handleSubmit()
+    await getSamples()
 })
 
-async function handleSubmit() {
-    sampleStore.resetPagination()
-    offset.value = 1
-    const { query, ...fields } = sampleStore.searchForm
-    await getSamples({ ...query, ...fields, ...sampleStore.pagination })
-}
 
 async function handlePagination(value: number) {
     sampleStore.pagination.offset = value - 1
-    await getSamples({ ...sampleStore.searchForm, ...sampleStore.pagination })
+    await getSamples()
 }
 
 function editSample(index: number) {
     sampleStore.sampleIdToUpdate = samples.value[index].sample_id
     sampleStore.showForm = !sampleStore.showForm
+}
+
+function parseQuery() {
+    let q = { ...sampleStore.pagination }
+    const { query, ...fields } = sampleStore.searchForm
+    const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
+    if (Object.keys(validFilters).length) {
+        q = { ...q, ...validFilters }
+    }
+    if (Object.entries(fields).filter(([k, v]) => v).length) {
+        q = { ...q, ...fields }
+    }
+    return q
+
 }
 
 async function deleteSample(index: number) {
@@ -142,11 +150,12 @@ async function reset() {
     offset.value = 1
     sampleStore.resetSeachForm()
     sampleStore.resetPagination()
-    await handleSubmit()
+    await getSamples()
 }
 
 
-async function getSamples(query: Record<string, any>) {
+async function getSamples() {
+    const query = parseQuery()
     try {
         const { data } = await SampleService.getSamples(schemaStore.schema.project_id, query)
         samples.value = [...data.data]

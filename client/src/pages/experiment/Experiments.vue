@@ -23,7 +23,8 @@
                             </div>
                         </div>
                         <div class="flex">
-                            <VaButton icon="add" @click="experimentStore.showForm = !experimentStore.showForm">
+                            <VaButton color="success" icon="add"
+                                @click="experimentStore.showForm = !experimentStore.showForm">
                                 Experiment
                             </VaButton>
                         </div>
@@ -35,7 +36,7 @@
                             <b>Total {{ total }}</b>
                             Results per page
                             <VaSelect style="width: 100px;" :options="[10, 20, 50]"
-                                v-model="experimentStore.pagination.limit" />
+                                v-model="experimentStore.pagination.limit" @update:modelValue="handleLimit" />
                         </div>
                         <div class="flex">
                             <Pagination @offset-changed="handlePagination" :limit="experimentStore.pagination.limit"
@@ -44,7 +45,7 @@
                     </div>
                 </VaCardContent>
             </VaCard>
-            <ExperimentFormModal @experiment-edited="handleSubmit" />
+            <ExperimentFormModal @experiment-edited="reset()" />
             <ReportModal />
         </div>
     </div>
@@ -78,20 +79,23 @@ const columns = computed(() => {
     return ['experiment_id', 'sample_id', ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`), 'actions']
 })
 
-function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
+async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
     const store = { ...experimentStore.searchForm }
     store[tuple[0]] = tuple[1]
     experimentStore.searchForm = { ...store }
-    handleSubmit()
+    experimentStore.resetPagination()
+    await getExperiments()
 }
 
 
-function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
-    const { query, ...otherFields } = experimentStore.searchForm
-    const newQuery = { query: { ...query, ...Object.fromEntries(list) } }
-    experimentStore.searchForm = { ...otherFields, ...newQuery }
-
-    handleSubmit()
+async function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
+    const { query } = experimentStore.searchForm
+    const newQuery = Object.fromEntries(list)
+    if (newQuery) {
+        experimentStore.searchForm.query = { ...query, ...Object.fromEntries(list) }
+    }
+    experimentStore.resetPagination()
+    await getExperiments()
 }
 
 function updateShowFields(updatedShowFields: { show: boolean, value: string }[]) {
@@ -105,22 +109,17 @@ const isLoading = ref(false)
 const offset = ref(1 + experimentStore.pagination.offset)
 
 onMounted(async () => {
-    await handleSubmit()
+    await getExperiments()
 })
 
-
-async function handleSubmit() {
-    experimentStore.resetPagination()
-    offset.value = 1
-    const { query, ...fields } = experimentStore.searchForm
-    // console.log(query)
-    const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
-    await getExperiments({ ...validFilters, ...fields, ...experimentStore.pagination })
+async function handleLimit(limit: number) {
+    experimentStore.pagination.limit = limit
+    await getExperiments()
 }
 
 async function handlePagination(value: number) {
     experimentStore.pagination.offset = value - 1
-    await getExperiments({ ...experimentStore.searchForm, ...experimentStore.pagination })
+    await getExperiments()
 }
 
 function editExperiment(index: number) {
@@ -128,6 +127,19 @@ function editExperiment(index: number) {
     experimentStore.showForm = !experimentStore.showForm
 }
 
+function parseQuery() {
+    let q = { ...experimentStore.pagination }
+    const { query, ...fields } = experimentStore.searchForm
+    const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
+    if (Object.keys(validFilters).length) {
+        q = { ...q, ...validFilters }
+    }
+    if (Object.entries(fields).filter(([k, v]) => v).length) {
+        q = { ...q, ...fields }
+    }
+    return q
+
+}
 async function deleteExperiment(index: number) {
     try {
         const expToDelete = experiments.value[index]
@@ -145,10 +157,11 @@ async function reset() {
     offset.value = 1
     experimentStore.resetSeachForm()
     experimentStore.resetPagination()
-    await handleSubmit()
+    await getExperiments()
 }
 
-async function getExperiments(query: Record<string, any>) {
+async function getExperiments() {
+    const query = parseQuery()
     try {
         const { data } = await ExperimentService.getExperiments(schemaStore.schema.project_id, query)
         experiments.value = [...data.data]
