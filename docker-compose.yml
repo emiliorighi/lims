@@ -2,7 +2,7 @@ version: '3'
 
 services:
 
-  DB_LIMS:
+  lims_db:
     image: mongo:5.0.9
     container_name: "${DB_HOST}"
     env_file:
@@ -19,7 +19,6 @@ services:
     container_name: "${API_HOST}"
     volumes:
       - ./projects:/server/projects
-      - ./project-spec.json:/server/project-spec.json
     restart: always
     env_file:
       - .env
@@ -32,7 +31,6 @@ services:
     restart: always
     volumes:
       - node_modules:/client/node_modules
-      - ./project-spec.json:/client/public/project-spec.json
 
     environment:
       - API_PORT=${API_PORT}

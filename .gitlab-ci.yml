@@ -1,0 +1,22 @@
+variables:
+    APP_NAME_FRONT: lims_from
+    APP_NAME_BACK: lims_back
+
+stages:          # List of stages for jobs, and their order of execution
+  - build
+
+build-containers:
+  tags:
+  - docker
+  - monstre       
+  stage: build
+  image: docker:latest
+  only:
+    - main
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
+  script:
+    - docker build --build-arg BASE_PATH="$BASE_PATH" -t gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_FRONT ./client
+    - docker push gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_FRONT
+    - docker build -t gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_BACK ./server
+    - docker push gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_BACK
