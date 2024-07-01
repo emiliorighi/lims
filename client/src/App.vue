@@ -17,4 +17,7 @@ import NewLayout from './layouts/NewLayout.vue';
   body {
     margin: 0;
   }
+  .va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper{
+    z-index: 101!important;
+  }
 </style>
