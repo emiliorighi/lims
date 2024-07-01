@@ -1,51 +1,37 @@
 <template>
-    <VaCard>
-        <VaCardContent class="va-h4">
-            Project information
-        </VaCardContent>
-        <VaCardContent class="va-text-secondary">Define a name and a version of the project. The project identifier will
-            be generated combining
-            the name
-            and
-            the
-            version
-        </VaCardContent>
-        <VaDivider />
-        <VaCardContent class="row">
-            <VaCard class="flex lg12 md12 sm12 xs12" stripe stripe-color="danger" v-if="projectStore.projectExists">
-                <VaCardContent class="row">
-                    <div class="flex">
-                        <p>A project with id: {{ mergedId }} already exists! Use it as a template but change the
-                            version
-                        </p>
-                    </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <VaButton @click="setIncomingProject(existingProject)">Use project as template</VaButton>
-                </VaCardContent>
-            </VaCard>
-            <VaCard stripe stripe-color="warning" class="flex lg12 md12 sm12 xs12"
-                v-if="projectStore.draftProjectExists">
-                <VaCardContent>
-                    A draft project with id: {{ mergedId }} already exists!
-                </VaCardContent>
-                <VaCardActions>
-                    <VaButton @click="setIncomingProject(existingDraftProject)">Upload Draft Project</VaButton>
-                </VaCardActions>
-            </VaCard>
-            <va-input class="flex lg4 md4 sm12 xs12" placeholder="Type a name of at least 3 characters (required)"
-                :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters', !projectStore.projectExists || 'Project Id already exists!']"
-                label="name (required)" v-model="projectStore.currentProject.name" />
-            <va-input class="flex lg4 md4 sm12 xs12" placeholder="example: 1.0.0 or 1.2 (required)"
-                label="version (required)" v-model="projectStore.currentProject.version"
-                :rules="[(v: string) => v.length > 0 || 'version is mandatory', !projectStore.projectExists || 'Project Id already exists!']" />
-            <va-input class="flex lg4 md4 sm12 xs12" label="Project Identifier" placeholder="Type a name and a version"
-                :loading="isIdValidationLoading" readonly v-model="mergedId"
-                :rules="[!projectStore.projectExists || 'Project Id already exists!']"></va-input>
-            <va-input class="flex lg6 md6 sm12 xs12" placeholder="Description of the project (optional)"
-                label="Project description (optional)" v-model="projectStore.currentProject.description" />
-        </VaCardContent>
-    </VaCard>
+    <div class="row">
+        <VaCard class="flex lg12 md12 sm12 xs12" stripe stripe-color="danger" v-if="projectStore.projectExists">
+            <VaCardContent class="row">
+                <div class="flex">
+                    <p>A project with id: {{ mergedId }} already exists! Use it as a template but change the
+                        version
+                    </p>
+                </div>
+            </VaCardContent>
+            <VaCardContent>
+                <VaButton @click="setIncomingProject(existingProject)">Use project as template</VaButton>
+            </VaCardContent>
+        </VaCard>
+        <VaCard stripe stripe-color="warning" class="flex lg12 md12 sm12 xs12" v-if="projectStore.draftProjectExists">
+            <VaCardContent>
+                A draft project with id: {{ mergedId }} already exists!
+            </VaCardContent>
+            <VaCardActions>
+                <VaButton @click="setIncomingProject(existingDraftProject)">Upload Draft Project</VaButton>
+            </VaCardActions>
+        </VaCard>
+        <va-input class="flex lg4 md4 sm12 xs12" placeholder="Type a name of at least 3 characters (required)"
+            :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters', !projectStore.projectExists || 'Project Id already exists!']"
+            label="name (required)" v-model="projectStore.currentProject.name" />
+        <va-input class="flex lg4 md4 sm12 xs12" placeholder="example: 1.0.0 or 1.2 (required)"
+            label="version (required)" v-model="projectStore.currentProject.version"
+            :rules="[(v: string) => v.length > 0 || 'version is mandatory', !projectStore.projectExists || 'Project Id already exists!']" />
+        <va-input class="flex lg4 md4 sm12 xs12" label="Project Identifier" placeholder="Type a name and a version"
+            :loading="isIdValidationLoading" readonly v-model="mergedId"
+            :rules="[!projectStore.projectExists || 'Project Id already exists!']"></va-input>
+        <va-input class="flex lg6 md6 sm12 xs12" placeholder="Description of the project (optional)"
+            label="Project description (optional)" v-model="projectStore.currentProject.description" />
+    </div>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
@@ -104,10 +90,16 @@ async function fetchProjectData(fetchFn: (id: string) => Promise<any>, id: strin
 }
 
 function setIncomingProject(project: SchemaForm | null) {
-    if (project) {
+    if (!project) return
+
+    if (project.created) {
+        const { created, ...d } = project
+        projectStore.incomingProject = { ...d }
+    } else {
         projectStore.incomingProject = { ...project }
-        projectStore.switchConfirm()
     }
+    projectStore.switchConfirm()
+
 }
 
 

@@ -1,10 +1,9 @@
 <template>
-    <div>
-        <Header :title="title" :description="description"></Header>
-        <DraftActions />
-        <VaDivider />
-        <VaInnerLoading :loading="isLoading">
-            <div style="min-height: 100vh">
+    <h1 class="va-h1">{{ title }}</h1>
+    <DraftActions />
+    <VaCard>
+        <VaCardContent>
+            <VaInnerLoading :loading="isLoading">
                 <VaForm ref="schemaForm">
                     <VaStepper @finish="submitProject" linear v-model="currentStep" :steps="steps">
                         <template #step-content-0>
@@ -24,10 +23,10 @@
                         </template>
                     </VaStepper>
                 </VaForm>
-            </div>
-        </VaInnerLoading>
-        <ConfirmOverwriteModal />
-    </div>
+            </VaInnerLoading>
+        </VaCardContent>
+    </VaCard>
+    <ConfirmOverwriteModal />
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';
@@ -56,19 +55,19 @@ const currentStep = ref(0)
 
 const steps = ref(defineVaStepperSteps([
     {
-        label: 'Project Info', beforeLeave: (step) => { step.hasError = !validate() }
+        label: 'Project Information', beforeLeave: (step) => { step.hasError = !validate() }
     },
     {
-        label: 'Model filters', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
+        label: 'Filters Creation', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
     },
     {
-        label: 'Sample Info', beforeLeave: (step) => { step.hasError = !isValidSample.value }
+        label: 'Sample Identifier', beforeLeave: (step) => { step.hasError = !isValidSample.value }
     },
     {
-        label: 'Experiment Info', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
+        label: 'Experiment Identifier', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
     },
     {
-        label: 'Review project', beforeLeave: async () => await submitProject()
+        label: 'Project Resume', beforeLeave: async () => await submitProject()
     }
 ]))
 

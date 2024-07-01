@@ -1,7 +1,7 @@
 <template>
     <VaDataTable sticky-header height="500px" :items="attributeStore.attributes" :columns="columns">
         <template #header(actions)>
-            <VaButton @click="attributeStore.initAttribute" icon="add">New Filter
+            <VaButton color="success" @click="attributeStore.initAttribute" icon="add">Filter
             </VaButton>
         </template>
         <template #cell(type)="{ rowData }">
@@ -10,7 +10,11 @@
     }}</VaChip>
         </template>
         <template #cell(model)="{ rowData }">
-            <VaSelect placeholder="Select model" v-model="rowData.model" :options="['sample', 'experiment']"></VaSelect>
+            <VaSelect placeholder="Select model" v-model="rowData.model" :options="['sample', 'experiment']">
+                <template #prependInner>
+                    <VaIcon v-if="rowData.model" :name="rowData.model === 'sample' ? 'fa-vial' : 'fa-dna'" />
+                </template>
+            </VaSelect>
         </template>
         <template #cell(actions)="{ rowIndex }">
             <VaButton preset="plain" icon="edit" @click="editAttribute(rowIndex)" />

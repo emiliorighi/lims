@@ -6,77 +6,83 @@
                     TSV Upload
                 </VaCardTitle>
                 <VaCardContent>
-                    <div class="row align-center">
-                        <div class="flex p-0">
-                            <VaSelect :disabled="validOpts.length === 1" v-model="model" :options="validOpts">
-                                <template #prepend>
+                    <div class="row">
+                        <div class="flex lg4 md4 sm12 xs12">
+                            <VaSelect class="mb-4" :disabled="validOpts.length === 1" v-model="model"
+                                :options="validOpts">
+                                <template #prependInner>
                                     <VaIcon style="margin-right: 5px;"
                                         :color="model === 'sample' ? 'success' : 'primary'"
                                         :name="model === 'sample' ? 'fa-vial' : 'fa-dna'" />
                                 </template>
                             </VaSelect>
                         </div>
-                        <div class="flex p-0">
-                            <VaFileUpload style="z-index: 0" v-model="tsv" file-types=".tsv" type="single" undo
-                                :uploadButtonText="`Upload ${model}s`" />
-                        </div>
-                        <div class="flex p-0">
-                            <VaSelect v-model="behaviour" :options="['SKIP', 'UPDATE']">
+                        <div class="flex lg4 md4 sm12 xs12">
+                            <VaSelect :messages="['SKIP or UPDATE existing records']" v-model="behaviour"
+                                :options="['SKIP', 'UPDATE']">
                             </VaSelect>
                         </div>
                     </div>
+                    <VaFileUpload dropzone class="mb-4" style="z-index: 0" v-model="tsv" file-types=".tsv" type="single"
+                        undo :uploadButtonText="`Upload ${model}s`" />
                 </VaCardContent>
                 <VaCardContent>
+                    <div v-if="requiredFields.length" class="row align-center">
+                        <div class="flex">
+                            <VaIcon name="error" color="warning" /> Required Fields:
+                        </div>
+                        <div v-for="f in requiredFields" class="flex">
+                            <VaChip icon="error" color="warning">
+                                {{ f.key
+                                }}</VaChip>
+                        </div>
+                    </div>
+                    <div class="row align-center">
+                        <div class="flex">
+                            <VaIcon name="build_circle" :color="idMapped ? 'success' : 'danger'" />{{ model }} ID:
+                        </div>
+                        <div class="flex">
+                            <VaChip icon="build_circle" :color="idMapped ? 'success' : 'danger'">
+                                {{ idMapped ? idMapped :
+                                schemaStore.schema[model].id_format.join('_') }}</VaChip>
+                        </div>
+                    </div>
+                    <div v-if="duplicates.length" class="row align-center">
+                        <div class="flex">
+                            <VaIcon name="difference" color="danger" /> Duplicated Fields:
+                        </div>
+                        <div v-for="d in duplicates" class="flex">
+                            <VaChip icon="difference" color="danger">{{ d }}
+                            </VaChip>
+                        </div>
+                    </div>
+
+
+                </VaCardContent>
+                <VaCardContent>
+                    <VaInput clearable class="mb-4" placeholder="Search a column.." v-model="filter" />
                     <VaInnerLoading :loading="isLoading">
-                        <div class="row align-center justify">
-                            <div v-if="requiredFields.length" class="flex">
-                                <VaChip icon="error" color="warning">
-                                    Missing
-                                    Fields: {{
-                                requiredFields.length }}
-                                </VaChip>
-                            </div>
-                            <div class="flex">
-                                <VaChip icon="build_circle" :color="idMapped ? 'success' : 'danger'">
-                                    {{ idMapped ? idMapped :
-                                'MappedID' }}</VaChip>
-                            </div>
-                            <div v-if="duplicates.length" class="flex">
-                                <VaChip icon="difference" color="danger">
-                                    Duplicated fields: {{ duplicates.length }}</VaChip>
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="flex lg12 md12 sm12 xs12">
-                                <div class="row">
-                                    <VaInput clearable class="flex lg4 md6 sm12 xs12" placeholder="Search a column.."
-                                        v-model="filter" />
-                                </div>
-                                <VaForm ref="itemsUpload">
-                                    <VaDataTable striped class="table-inline" :items="mappedFields"
-                                        :columns="['tsv_column', 'field_key']" :filter="filter"
-                                        :filter-method="customFilteringFn">
-                                        <template #cell(tsv_column)="{ value, row }">
-                                            <VaInput :model-value="value" read-only />
+                        <VaForm ref="itemsUpload">
+                            <VaDataTable striped class="table-inline" :items="mappedFields"
+                                :columns="['tsv_column', 'field_key']" :filter="filter"
+                                :filter-method="customFilteringFn">
+                                <template #cell(tsv_column)="{ value, row }">
+                                    <VaInput :model-value="value" read-only />
+                                </template>
+                                <template #cell(field_key)="{ value, row }">
+                                    <VaSelect
+                                        :class="duplicates.includes(value) ? 'va-input-wrapper--error' : value ? 'va-input-wrapper--success' : ''"
+                                        clearable searchable highlight-matched-text track-by="text" value-by="text"
+                                        text-by="text" :options="fieldOptions" :model-value="value"
+                                        @update:modelValue="(v: string) => row.rowData.field_key = v">
+                                        <template #prepend>
+                                            <VaIcon v-if="duplicates.includes(value)" name="warning" color="danger" />
+                                            <VaIcon v-else-if="!!value" name="check_circle" color="success" />
                                         </template>
-                                        <template #cell(field_key)="{ value, row }">
-                                            <VaSelect
-                                                :class="duplicates.includes(value) ? 'va-input-wrapper--error' : value ? 'va-input-wrapper--success' : ''"
-                                                clearable searchable highlight-matched-text track-by="text"
-                                                value-by="text" text-by="text" :options="fieldOptions"
-                                                :model-value="value"
-                                                @update:modelValue="(v: string) => row.rowData.field_key = v">
-                                                <template #prepend>
-                                                    <VaIcon v-if="duplicates.includes(value)" name="warning"
-                                                        color="danger" />
-                                                    <VaIcon v-else-if="!!value" name="check_circle" color="success" />
-                                                </template>
-                                            </VaSelect>
-                                        </template>
-                                    </VaDataTable>
-                                </VaForm>
-                            </div>
-                        </div>
+                                    </VaSelect>
+                                </template>
+                            </VaDataTable>
+                        </VaForm>
                     </VaInnerLoading>
                 </VaCardContent>
                 <VaCardActions align="between">
@@ -284,7 +290,7 @@ async function handleSubmit() {
     }
 }
 
-function reset(){
+function reset() {
     tsv.value = undefined
     model.value = 'sample'
     behaviour.value = 'SKIP'

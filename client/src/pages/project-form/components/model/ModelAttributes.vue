@@ -1,55 +1,47 @@
 <template>
-    <VaCard>
-        <VaCardContent class="va-h4">
-            Model filters
-        </VaCardContent>
-        <VaCardContent class="va-text-secondary">
-            Create a list of filters that will be used to define samples and experiments. Optionally, upload a tsv
-            file to generate the list of attributes
-        </VaCardContent>
-        <VaDivider />
-        <VaCardContent class="row">
-            <div class="flex lg12 md12 sm12 xs12">
-                <VaSplit class="split-demo">
-                    <template #start>
-                        <div class="row">
-                            <div class="flex lg12 md12 sm12 xs12">
-                                <VaCard square outlined>
-                                    <VaCardTitle>Attributes list</VaCardTitle>
-                                    <VaCardContent>
-                                        <UploadTSV />
-                                    </VaCardContent>
-                                    <VaCardContent>
-                                        <AttributeList />
-                                    </VaCardContent>
-                                </VaCard>
-                            </div>
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+            <UploadTSV />
+            <AttributeList />
+            <!-- <VaSplit class="split-demo">
+                <template #start>
+                    <div class="row">
+                        <div class="flex lg12 md12 sm12 xs12">
+                            <VaCard square outlined>
+                                <VaCardTitle>Attributes list</VaCardTitle>
+                                <VaCardContent>
+                                    <UploadTSV />
+                                </VaCardContent>
+                                <VaCardContent>
+                                    <AttributeList />
+                                </VaCardContent>
+                            </VaCard>
                         </div>
-                    </template>
-                    <template #end>
-                        <VaSplit class="split-demo">
-                            <template #start>
-                                <div class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <ModelAttributeList :columns="modelColumns" :items="sampleAttributes"
-                                            title="sample filters" />
-                                    </div>
+                    </div>
+                </template>
+                <template #end>
+                    <VaSplit class="split-demo">
+                        <template #start>
+                            <div class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <ModelAttributeList :columns="modelColumns" :items="sampleAttributes"
+                                        title="sample filters" />
                                 </div>
-                            </template>
-                            <template #end>
-                                <div class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <ModelAttributeList :columns="modelColumns" :items="experimentAttributes"
-                                            title="experiment filters" />
-                                    </div>
+                            </div>
+                        </template>
+                        <template #end>
+                            <div class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <ModelAttributeList :columns="modelColumns" :items="experimentAttributes"
+                                        title="experiment filters" />
                                 </div>
-                            </template>
-                        </VaSplit>
-                    </template>
-                </VaSplit>
-            </div>
-        </VaCardContent>
-    </VaCard>
+                            </div>
+                        </template>
+                    </VaSplit>
+                </template>
+            </VaSplit> -->
+        </div>
+    </div>
     <AttributeFormModal />
 </template>
 <script setup lang="ts">

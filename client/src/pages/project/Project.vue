@@ -1,17 +1,17 @@
 <template>
-    <div>
-        <h1 class="va-h1 mb-2">
-            {{ projectId }}
-        </h1>
-        <VaTabs @update:modelValue="pushRoute" v-model="value">
-            <template #tabs>
-                <VaTab v-for="tab in validTabs" :name="tab.name" :key="tab.label" :label="tab.label" :icon="tab.icon">
-                </VaTab>
-            </template>
-        </VaTabs>
-        <VaDivider style="margin-top:0" />
-        <router-view v-if="showProject"></router-view>
-    </div>
+    <h1 class="va-h1">
+        {{ projectId }}
+    </h1>
+    <VaTabs @update:modelValue="pushRoute" v-model="value">
+        <template #tabs>
+            <VaTab v-for="tab in validTabs" :name="tab.name" :key="tab.label" :label="tab.label" :icon="tab.icon">
+            </VaTab>
+        </template>
+    </VaTabs>
+    <VaDivider style="margin-top:0" />
+
+    <router-view v-if="showProject"></router-view>
+
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
@@ -38,7 +38,12 @@ watch(() => route.name, () => {
     }
 })
 
-onMounted(() => {
+onMounted(async () => {
+    if (!schemaStore.schema.project_id) await getProject()
+
+    if (!schemaStore.schema.experiment.id_format.length) {
+        validTabs.value = [...tabs.filter(({ label }) => label !== 'Experiments')]
+    }
     if (route.name) value.value = route.name as string
 })
 
@@ -77,15 +82,7 @@ const tabs = [
 
 const value = ref('')
 
-const validTabs = computed(() => {
-    if (schemaStore.schema.experiment.id_format.length) {
-        return [...tabs]
-    }
-    return tabs.filter(({ label }) => label !== 'Experiments')
-})
-onMounted(async () => {
-    if (!schemaStore.schema.project_id) await getProject()
-})
+const validTabs = ref([...tabs])
 
 async function getProject() {
     try {
