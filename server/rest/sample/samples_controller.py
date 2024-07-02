@@ -15,7 +15,7 @@ class SamplesApi(Resource):
     
 class SampleByProjectApi(Resource):
     def get(self, project_id, sample_id):
-        sample = samples_service.get_sample(project_id,sample_id)
+        sample = samples_service.get_samples_by_project(project_id,sample_id)
         return Response(sample.to_json(), mimetype="application/json", status=200)
     
     def put(self, project_id,sample_id):
