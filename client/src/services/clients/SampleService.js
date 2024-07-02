@@ -25,6 +25,9 @@ class SampleService {
     getTsv(projectId, params) {
         return download.get(`/projects/${projectId}/samples`, { params: params })
     }
+    getAllSamples(params){
+        return base.get('/samples', {params:params})
+    }
 }
 
 export default new SampleService();

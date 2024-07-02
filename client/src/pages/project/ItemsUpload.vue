@@ -22,9 +22,11 @@
                                 :options="['SKIP', 'UPDATE']">
                             </VaSelect>
                         </div>
+                        <div class="flex lg4 md4 sm12 xs12">
+                            <VaFileUpload dropzone class="mb-4" style="z-index: 0" v-model="tsv" file-types=".tsv"
+                                type="single" undo :uploadButtonText="`Upload ${model}s`" />
+                        </div>
                     </div>
-                    <VaFileUpload dropzone class="mb-4" style="z-index: 0" v-model="tsv" file-types=".tsv" type="single"
-                        undo :uploadButtonText="`Upload ${model}s`" />
                 </VaCardContent>
                 <VaCardContent>
                     <div v-if="requiredFields.length" class="row align-center">

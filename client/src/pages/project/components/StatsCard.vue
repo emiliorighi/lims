@@ -23,7 +23,6 @@ const props = defineProps<{
     chart: {
         type: ChartTypes
         data: Record<string, number>
-        model: 'sample' | 'experiment',
     }
     index: number,
     label: string

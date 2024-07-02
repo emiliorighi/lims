@@ -9,7 +9,27 @@ from ..helpers import data
 
 FIELDS_TO_EXCLUDE=['id']
 
-def get_samples(project_id, args):
+def get_samples(args):
+    
+    filter = get_filter(args.get('filter'))
+
+    tsv_fields = ['sample_id','project']
+
+    selected_fields = [f"metadata.{v}" for k, v in args.items(multi=True) if k.startswith('fields[]')]
+
+    if selected_fields:
+        
+        tsv_fields.extend(selected_fields)
+
+    return data.get_items(args, 
+                                 Sample, 
+                                 FIELDS_TO_EXCLUDE, 
+                                 filter,
+                                 tsv_fields,
+                                 None)
+
+
+def get_samples_by_project(project_id, args):
     
     project = Project.objects(project_id=project_id).first()
     
@@ -34,6 +54,8 @@ def get_samples(project_id, args):
                                  filter,
                                  tsv_fields,
                                  project_id)
+
+
 
 def get_filter(filter):
     if filter:

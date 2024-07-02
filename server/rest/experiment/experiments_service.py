@@ -9,7 +9,27 @@ from ..helpers import data
 
 FIELDS_TO_EXCLUDE=['id']
 
-def get_experiments(project_id, args):
+def get_experiments(args):
+    
+    filter = get_filter(args.get('filter'))
+
+    tsv_fields = ['experiment_id','sample_id', 'project']
+
+    selected_fields = [f"metadata.{v}" for k, v in args.items(multi=True) if k.startswith('fields[]')]
+
+    if selected_fields:
+        
+        tsv_fields.extend(selected_fields)
+
+    return data.get_items(args, 
+                                 Experiment, 
+                                 FIELDS_TO_EXCLUDE, 
+                                 filter,
+                                 tsv_fields,
+                                 None)
+
+
+def get_experiments_by_project(project_id, args):
     
     project = Project.objects(project_id=project_id).first()
     

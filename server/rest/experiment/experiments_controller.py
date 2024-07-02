@@ -7,8 +7,8 @@ from . import experiments_service
 FIELDS_TO_EXCLUDE = ['id','created']
 
 class ExperimentsApi(Resource):
-    def get(self, project_id):
-        response, mimetype, status = experiments_service.get_experiments(project_id, request.args)
+    def get(self):
+        response, mimetype, status = experiments_service.get_experiments(request.args)
         return Response(response, mimetype=mimetype, status=status)
     
     def post(self, project_id):
@@ -16,7 +16,17 @@ class ExperimentsApi(Resource):
         messages, status = experiments_service.create_experiment(project_id,data)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
 
-class ExperimentApi(Resource):
+class ExperimentsByProjectApi(Resource):
+    def get(self, project_id):
+        response, mimetype, status = experiments_service.get_experiments_by_project(project_id, request.args)
+        return Response(response, mimetype=mimetype, status=status)
+    
+    def post(self, project_id):
+        data = request.json if request.is_json else request.form
+        messages, status = experiments_service.create_experiment(project_id,data)
+        return Response(json.dumps(messages), mimetype="application/json", status=status)
+
+class ExperimentByProjectApi(Resource):
     def get(self, project_id, experiment_id):
         sample = experiments_service.get_experiment(project_id, experiment_id)
         return Response(json.dumps(sample), mimetype="application/json", status=200)

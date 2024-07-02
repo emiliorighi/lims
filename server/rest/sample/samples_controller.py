@@ -4,16 +4,16 @@ import json
 from . import samples_service
 
 class SamplesApi(Resource):
-    def get(self, project_id):
-        response, mimetype, status = samples_service.get_samples(project_id, request.args)
+    def get(self):
+        response, mimetype, status = samples_service.get_samples(request.args)
         return Response(response, mimetype=mimetype, status=status)
         
     def post(self, project_id):
         data = request.json if request.is_json else request.form
         messages, status = samples_service.create_sample(project_id,data)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
-
-class SampleApi(Resource):
+    
+class SampleByProjectApi(Resource):
     def get(self, project_id, sample_id):
         sample = samples_service.get_sample(project_id,sample_id)
         return Response(sample.to_json(), mimetype="application/json", status=200)
@@ -27,7 +27,18 @@ class SampleApi(Resource):
         messages, status = samples_service.delete_sample(project_id,sample_id)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
 
-class SamplesUploadApi(Resource):
+class SamplesByProjectApi(Resource):
+    def get(self, project_id):
+        response, mimetype, status = samples_service.get_samples(project_id, request.args)
+        return Response(response, mimetype=mimetype, status=status)
+        
+    def post(self, project_id):
+        data = request.json if request.is_json else request.form
+        messages, status = samples_service.create_sample(project_id,data)
+        return Response(json.dumps(messages), mimetype="application/json", status=status)
+
+
+class SamplesByProjectUploadApi(Resource):
     def post(self, project_id):
         data = request.json if request.is_json else request.form
         messages, status = samples_service.upload_samples(project_id,request.files,data)

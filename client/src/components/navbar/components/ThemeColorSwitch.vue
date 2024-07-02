@@ -1,12 +1,10 @@
 <template>
-    <div class="row" style="width: min-content;">
-        <div class="flex lg12 md12 sm12 xs12">
-            Primary color:
+    <div class="row align-center justify-end">
+        <div class="flex">
             <VaColorPalette class="mt-2 mb-2" v-model="colors.primary" :palette="palette" />
         </div>
-        <div class="flex lg12 md12 sm12 xs12">
-            Dark mode:
-            <VaSwitch class="mt-2 mb-2" v-model="switchValue" true-value="dark" false-value="light" size="small" />
+        <div class="flex">
+            <VaSwitch class="mt-2 mb-2" v-model="switchValue"  true-value="dark" false-value="light" size="small" />
         </div>
     </div>
 </template>

@@ -7,7 +7,6 @@ from werkzeug.exceptions import NotFound
 import csv
 from io import StringIO
 from werkzeug.exceptions import BadRequest, NotFound
-from pymongo.errors import DuplicateKeyError
 from mongoengine.errors import NotUniqueError
 from ..sample.samples_service import update_sample
 from ..experiment.experiments_service import update_experiment

@@ -25,6 +25,9 @@ class ExperimentService {
     getTsv(projectId, params) {
         return download.get(`/projects/${projectId}/experiments`, { params: params })
     }
+    getAllExperiments(params){
+        return base.get('/experiments', {params:params})
+    }
 }
 
 export default new ExperimentService();

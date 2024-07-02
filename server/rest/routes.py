@@ -2,6 +2,8 @@ from .project import projects_controller
 from .experiment import experiments_controller
 from .sample import samples_controller
 from .draft_project import draft_projects_controller
+from .stats import stats_controller
+
 def initialize_routes(api):
 
 	##ADMIN
@@ -26,13 +28,21 @@ def initialize_routes(api):
 	api.add_resource(projects_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
 
 	###PROJECT SAMPLES
-	api.add_resource(samples_controller.SamplesApi, '/api/projects/<project_id>/samples')
-	api.add_resource(samples_controller.SamplesUploadApi, '/api/projects/<project_id>/samples/upload')
-	api.add_resource(samples_controller.SampleApi, '/api/projects/<project_id>/samples/<sample_id>')
+	api.add_resource(samples_controller.SamplesByProjectApi, '/api/projects/<project_id>/samples')
+	api.add_resource(samples_controller.SampleByProjectApi, '/api/projects/<project_id>/samples/<sample_id>')
 
 	###PROJECT EXPERIMENTS
-	api.add_resource(experiments_controller.ExperimentsApi, '/api/projects/<project_id>/experiments')
-	api.add_resource(experiments_controller.ExperimentApi, '/api/projects/<project_id>/experiments/<experiment_id>')
+	api.add_resource(experiments_controller.ExperimentsByProjectApi, '/api/projects/<project_id>/experiments')
+	api.add_resource(experiments_controller.ExperimentByProjectApi, '/api/projects/<project_id>/experiments/<experiment_id>')
+
+	##STATS
+	api.add_resource(stats_controller.ModelStatsApi, '/api/statistics/<model>/<field>')
+
+	##SAMPLES
+	api.add_resource(samples_controller.SamplesApi, '/api/samples')
+
+	##EXPERIMENTS
+	api.add_resource(experiments_controller.ExperimentsApi, '/api/experiments')
 
 	# api.add_resource(experiments_controller.ExperimentsBySampleApi, '/api/projects/<project_id>/samples/<sample_id>/experiments')
 
