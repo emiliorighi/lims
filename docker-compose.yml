@@ -40,6 +40,7 @@ services:
       - "traefik.http.routers.lims_client.rule=Host(`genome.crg.es`) && Path(`/lims`)"
       - "traefik.http.routers.lims_client.tls=true"
       - "traefik.http.routers.lims_client.entrypoints=web_https"
+      - "traefik.http.middlewares.test-stripprefix.stripprefix.prefixes=/lims"
 
     environment:
       - API_PORT=${API_PORT}
