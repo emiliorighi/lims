@@ -12,7 +12,6 @@ COPY . .
 
 ENV VITE_BASE_PATH=${BASE_PATH}
 
-
 RUN npm run build
 
 # production stage
