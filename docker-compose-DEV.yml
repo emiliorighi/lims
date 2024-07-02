@@ -17,6 +17,8 @@ services:
   lims_server:
     build: ./server
     container_name: "${API_HOST}"
+    volumes:
+      - ./project-spec.json:/server/project-spec.json
     restart: always
     env_file:
       - .env

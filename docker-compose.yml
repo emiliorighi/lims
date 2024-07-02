@@ -20,6 +20,8 @@ services:
     image: gitlab.linux.crg.es:5005/monstre/lims/lims_server
     container_name: ${API_HOST}
     restart: always
+    volumes:
+      - ./project-spec.json:/server/project-spec.json
     env_file:
       - .env
     networks:
