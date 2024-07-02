@@ -40,6 +40,7 @@ services:
       - "traefik.http.routers.lims_client.rule=Host(`genome.crg.es`) && PathPrefix(`/lims`)"
       - "traefik.http.routers.lims_client.tls=true"
       - "traefik.http.routers.lims_client.entrypoints=web_https"
+      - "traefik.http.services.lims_client.loadBalancer.server.port=80"
       - "traefik.http.middlewares.test-stripprefix.stripprefix.prefixes=/lims"
 
     environment:
