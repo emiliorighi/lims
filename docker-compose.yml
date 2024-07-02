@@ -42,7 +42,7 @@ services:
       - "traefik.http.routers.lims_client.entrypoints=web_https"
       - "traefik.http.services.lims_client.loadBalancer.server.port=80"
       - "traefik.http.middlewares.test-stripprefix.stripprefix.prefixes=/lims"
-      - "traefik.http.routers.lims-client.middlewares=test-stripprefix"
+      - "traefik.http.routers.lims_client.middlewares=test-stripprefix"
 
     environment:
       - API_PORT=${API_PORT}
