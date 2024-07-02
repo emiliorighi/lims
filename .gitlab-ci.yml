@@ -6,14 +6,16 @@ stages: # List of stages for jobs, and their order of execution
   - build
   - deploy
 
-build-containers:
+build_containers:
+  only:
+    - master
+
   tags:
     - docker
     - monstre
   stage: build
   image: docker:latest
-  only:
-    - master
+
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
@@ -22,7 +24,7 @@ build-containers:
     - docker build -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK ./server
     - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK
 
-deploy-containers:
+deploy_containers:
   stage: deploy # It only runs when *both* jobs in the test stage complete successfully.
   tags:
     - shell
@@ -31,7 +33,3 @@ deploy-containers:
     - cat $ENV_FILE > .env
     - docker-compose -f docker-compose.yml down -v
     - docker-compose -f docker-compose.yml up -d
-  rules:
-    - if: $APP_TO_DEPLOY
-      when: always
-    - when: never
