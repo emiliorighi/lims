@@ -91,15 +91,20 @@ const allData = reactive<{
     projects: 0
 })
 onMounted(async () => {
-    const sampleData = await getStats('samples')
-    const experimentData = await getStats('experiments')
-    chartData.value = createChartData(sampleData, experimentData)
-    const projectResp = await ProjectService.getProjects({})
-    const sampleResp = await SampleService.getAllSamples({})
-    const expResp = await ExperimentService.getAllExperiments({})
-    allData.projects = projectResp.data.total
-    allData.samples = sampleResp.data.total
-    allData.experiments = expResp.data.total
+    try {
+        const sampleData = await getStats('samples')
+        const experimentData = await getStats('experiments')
+        chartData.value = createChartData(sampleData, experimentData)
+        const projectResp = await ProjectService.getProjects({})
+        const sampleResp = await SampleService.getAllSamples({})
+        const expResp = await ExperimentService.getAllExperiments({})
+        allData.projects = projectResp.data.total
+        allData.samples = sampleResp.data.total
+        allData.experiments = expResp.data.total
+    } catch (err) {
+        console.log(err)
+    }
+
 })
 
 const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#c9cbcf', '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
