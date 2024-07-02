@@ -13,6 +13,8 @@ services:
 
     ports:
       - "27013:${DB_PORT}"
+    networks:
+      - monstre
 
   lims_server:
     build: ./server
@@ -22,6 +24,8 @@ services:
     restart: always
     env_file:
       - .env
+    networks:
+      - monstre
 
   lims_client:
     build:
@@ -31,13 +35,25 @@ services:
     restart: always
     volumes:
       - node_modules:/client/node_modules
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.lims_client.rule=Host(`genome.crg.es`) && Path(`/lims`)"
+      - "traefik.http.routers.lims_client.tls=true"
+      - "traefik.http.routers.lims_client.entrypoints=web_https"
 
     environment:
       - API_PORT=${API_PORT}
       - API_HOST=${API_HOST}
-    ports:
-        - "93:${API_PORT}"
+
+    networks:
+      - monstre
 
 volumes:
   mongodb-data:
   node_modules:
+
+
+networks:
+  monstre:
+    external:
+      name: monstre

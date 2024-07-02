@@ -1,14 +1,15 @@
 variables:
-    APP_NAME_FRONT: lims_from
-    APP_NAME_BACK: lims_back
+  APP_NAME_FRONT: lims_client
+  APP_NAME_BACK: lims_server
 
-stages:          # List of stages for jobs, and their order of execution
+stages: # List of stages for jobs, and their order of execution
   - build
+  - deploy
 
 build-containers:
   tags:
-  - docker
-  - monstre       
+    - docker
+    - monstre
   stage: build
   image: docker:latest
   only:
@@ -16,7 +17,21 @@ build-containers:
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build --build-arg BASE_PATH="$BASE_PATH" -t gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_FRONT ./client
-    - docker push gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_FRONT
-    - docker build -t gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_BACK ./server
-    - docker push gitlab.linux.crg.es:5005/monstre/biogenome-portal/$APP_NAME_BACK
+    - docker build -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT ./client
+    - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT
+    - docker build -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK ./server
+    - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK
+
+deploy-containers:
+  stage: deploy # It only runs when *both* jobs in the test stage complete successfully.
+  tags:
+    - shell
+    - monstre
+  script:
+    - cat $ENV_FILE > .env
+    - docker-compose -f docker-compose.yml down -v
+    - docker-compose -f docker-compose.yml up -d
+  rules:
+    - if: $APP_TO_DEPLOY
+      when: always
+    - when: never
