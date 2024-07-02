@@ -8,7 +8,7 @@ export default ({ mode }) => {
   // import.meta.env.VITE_PORT available here with: process.env.VITE_PORT
 
   return defineConfig({
-    base: env.VITE_BASE_PATH ? env.VITE_BASE_PATH : '/',
+    base: env.VITE_BASE_PATH,
     plugins: [
       vue()],
   })
