@@ -1,6 +1,7 @@
 variables:
   APP_NAME_FRONT: lims_client
   APP_NAME_BACK: lims_server
+  BASE_PATH: /lims/
 
 stages: # List of stages for jobs, and their order of execution
   - build
@@ -19,7 +20,7 @@ build_containers:
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
-    - docker build -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT ./client
+    - docker build --build-arg BASE_PATH="$BASE_PATH" -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT ./client
     - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT
     - docker build -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK ./server
     - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK
