@@ -2,9 +2,9 @@
     <h1 class="va-h1">
         {{ projectId }}
     </h1>
-    <VaTabs @update:modelValue="pushRoute" v-model="value">
+    <VaTabs v-if="validTabs.length" v-model="tab">
         <template #tabs>
-            <VaTab v-for="tab in validTabs" :name="tab.name" :key="tab.label" :label="tab.label" :icon="tab.icon">
+            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label" :icon="tab.icon">
             </VaTab>
         </template>
     </VaTabs>
@@ -31,10 +31,16 @@ const showProject = computed(() => {
     return !!schemaStore.schema.project_id
 })
 
-watch(() => route.name, () => {
-    if (route.name && route.name !== value.value) {
-        const t = tabs.find(({ name }) => route.name === name)
-        if (t) value.value = t.name
+
+const tab = ref('project')
+
+
+watch(() => tab.value, () => {
+    if (route.name && route.name !== tab.value) {
+        const t = tabs.find(({ name }) => name === tab.value)
+        if (t) {
+            router.push(t.to)
+        }
     }
 })
 
@@ -42,9 +48,11 @@ onMounted(async () => {
     if (!schemaStore.schema.project_id) await getProject()
 
     if (!schemaStore.schema.experiment.id_format.length) {
-        validTabs.value = [...tabs.filter(({ label }) => label !== 'Experiments')]
+        validTabs.value = [...tabs.filter(({label}) => label !=='Experiments')]
+    }else{
+        validTabs.value = [...tabs]
     }
-    if (route.name) value.value = route.name as string
+    if (route.name !== tab.value) tab.value = route.name as string
 })
 
 const tabs = [
@@ -77,12 +85,10 @@ const tabs = [
         icon: 'query_stats',
         to: { name: 'statistics' },
         name: 'statistics'
-    },
+    }
 ]
 
-const value = ref('')
-
-const validTabs = ref([...tabs])
+const validTabs = ref<Record<string,any>[]>([])
 
 async function getProject() {
     try {
@@ -94,8 +100,11 @@ async function getProject() {
 }
 
 
-function pushRoute(n: string) {
-    const t = tabs.find(({ name }) => name === n)
-    if (t) router.push(t.to)
-}
+// function pushRoute(n: string) {
+//     const t = tabs.find(({ name }) => name === n)
+//     if (t) {
+//         value.value = t.name
+//         router.push(t.to)
+//     }
+// }
 </script>

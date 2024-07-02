@@ -27,6 +27,8 @@ services:
     build:
       context: ./client
       dockerfile: Dockerfile
+      args:
+        - BASE_PATH=$BASE_PATH
     container_name: "lims_client"
     restart: always
     volumes:
