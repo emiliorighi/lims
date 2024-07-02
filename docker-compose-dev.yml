@@ -9,17 +9,23 @@ services:
       - .env
     volumes:
      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
+     - mongodb-data:${MONGODB_DATA_DIR}
+
     ports:
       - "27013:${DB_PORT}"
 
   lims_server:
-    image: gitlab.linux.crg.es:5005/monstre/lims/lims_server
+    build: ./server
+    container_name: "${API_HOST}"
     restart: always
     env_file:
       - .env
 
   lims_client:
-    image: gitlab.linux.crg.es:5005/monstre/lims/lims_client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: "lims_client"
     restart: always
     volumes:
       - node_modules:/client/node_modules
@@ -27,6 +33,7 @@ services:
     environment:
       - API_PORT=${API_PORT}
       - API_HOST=${API_HOST}
+      - BASE_PATH=${BASE_PATH}
     ports:
         - "93:${API_PORT}"
 
