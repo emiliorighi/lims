@@ -1,10 +1,11 @@
 
 server {
     root /usr/share/nginx/html;
-    
+
     listen ${API_PORT};
 
     location ${BASE_PATH} {
+        rewrite ${BASE_PATH}/(.*) /$1 break;
         root /usr/share/nginx/html;
         try_files $uri $uri/ /index.html;
         client_max_body_size 1000M;
