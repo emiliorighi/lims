@@ -18,6 +18,7 @@ services:
 
   lims_server:
     image: gitlab.linux.crg.es:5005/monstre/lims/lims_server
+    container_name: ${API_HOST}
     restart: always
     env_file:
       - .env

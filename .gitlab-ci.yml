@@ -1,7 +1,7 @@
 variables:
   APP_NAME_FRONT: lims_client
   APP_NAME_BACK: lims_server
-  BASE_PATH: /lims/
+  BASE_PATH: /lims
 
 stages: # List of stages for jobs, and their order of execution
   - build
