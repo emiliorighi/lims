@@ -2,8 +2,7 @@ import csv
 from io import StringIO
 from bson.json_util import dumps, JSONOptions, DatetimeRepresentation
 from mongoengine.queryset.visitor import Q
-from dateutil import parser
-
+from . import filter
 
 def dump_json(response_dict):
     json_options = JSONOptions()
@@ -42,7 +41,7 @@ def get_pagination(args):
 def get_sort(args):
     return args.get('sort_column'), args.get('sort_order', 'desc')
 
-def get_items(args, model, fieldToExclude, q_query, tsvFields, project_id=None):
+def get_items(args, model, fieldToExclude, q_query, tsv_fields, project_id=None):
     mimetype = "application/json"
     ##parse args
     format = args.get('format', 'json')
@@ -63,7 +62,7 @@ def get_items(args, model, fieldToExclude, q_query, tsvFields, project_id=None):
 
     total = items.count()
     if format == 'tsv':
-        assemblies = create_tsv(items.as_pymongo(), tsvFields).encode('utf-8')
+        assemblies = create_tsv(items.as_pymongo(), tsv_fields).encode('utf-8')
         mimetype="text/tab-separated-values"
         return assemblies, mimetype, 200
 
@@ -81,7 +80,7 @@ def create_query(args, q_query):
             #TODO: add multi select field query
 
         if "__gte" in k or "__lte" in k:
-            if validate_number(v):
+            if filter.validate_number(v):
                 query_visitor = {f"metadata__{k.replace('.', '__')}":float(v)}
             q_query = Q(**query_visitor) & q_query if q_query else Q(**query_visitor)
         elif k in ("limit", "offset", "sort_order", "sort_column", "filter", "format", "fields[]"):
@@ -100,18 +99,3 @@ def get_nested_value(dictionary, keys):
     except (KeyError, TypeError):
         return None
     
-
-def validate_date(date_text):
-    try:
-        parser.parse(date_text)
-        return True
-    except Exception as e:
-        print(e)
-        return False
-    
-def validate_number(number):
-    try:
-        float(number)
-        return True
-    except ValueError:
-        return False   

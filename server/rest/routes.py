@@ -3,13 +3,14 @@ from .experiment import experiments_controller
 from .sample import samples_controller
 from .draft_project import draft_projects_controller
 from .stats import stats_controller
-
+from .project_mapper import project_mapper_controller
+from .upload import upload_controller
+from .lookup import lookup_controller
 def initialize_routes(api):
 
 	##ADMIN
 	# api.add_resource(users_controller.LoginApi, '/api/login')
 	# api.add_resource(users_controller.LogoutApi, '/api/logout')
-
 
 	###DRAFT PROJECT
 	api.add_resource(draft_projects_controller.DraftProjectsApi, '/api/draft_projects')
@@ -17,15 +18,14 @@ def initialize_routes(api):
 
 	###PROJECTS
 	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
-	api.add_resource(projects_controller.TsvUploadMapApi, '/api/projects/wrangling')
 	api.add_resource(projects_controller.ValidateProjectApi, '/api/projects/validate')
+	api.add_resource(project_mapper_controller.TsvUploadMapApi, '/api/projects/wrangling')
 
-	###PROJECT
 	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
-	api.add_resource(projects_controller.ProjectStatsApi, '/api/projects/<project_id>/statistics/<model>/<field>')
-	api.add_resource(projects_controller.InferHeaderApi, '/api/projects/<project_id>/match_headers')
-	api.add_resource(projects_controller.TsvUploadApi, '/api/projects/<project_id>/upload')
-	api.add_resource(projects_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
+	api.add_resource(project_mapper_controller.InferHeaderApi, '/api/projects/<project_id>/match_headers')
+	api.add_resource(stats_controller.ProjectStatsApi, '/api/projects/<project_id>/statistics/<model>/<field>')
+	api.add_resource(upload_controller.TsvUploadApi, '/api/projects/<project_id>/upload')
+	api.add_resource(lookup_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
 
 	###PROJECT SAMPLES
 	api.add_resource(samples_controller.SamplesByProjectApi, '/api/projects/<project_id>/samples')

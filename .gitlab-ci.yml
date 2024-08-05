@@ -3,7 +3,7 @@ variables:
   APP_NAME_BACK: lims_server
   BASE_PATH: /lims
 
-stages: # List of stages for jobs, and their order of execution
+stages: 
   - build
   - deploy
 
@@ -26,7 +26,7 @@ build_containers:
     - docker push gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_BACK
 
 deploy_containers:
-  stage: deploy # It only runs when *both* jobs in the test stage complete successfully.
+  stage: deploy
   tags:
     - shell
     - monstre

@@ -6,9 +6,10 @@ export default ({ mode }) => {
 
   // import.meta.env.VITE_NAME available here with: process.env.VITE_NAME
   // import.meta.env.VITE_PORT available here with: process.env.VITE_PORT
+  const basePath = env.VITE_BASE_PATH ? env.VITE_BASE_PATH + '/': undefined
 
   return defineConfig({
-    base: env.VITE_BASE_PATH+'/',
+    base: basePath,
     plugins: [
       vue()],
   })

@@ -36,10 +36,3 @@ class SamplesByProjectApi(Resource):
         data = request.json if request.is_json else request.form
         messages, status = samples_service.create_sample(project_id,data)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
-
-
-class SamplesByProjectUploadApi(Resource):
-    def post(self, project_id):
-        data = request.json if request.is_json else request.form
-        messages, status = samples_service.upload_samples(project_id,request.files,data)
-        return Response(json.dumps(messages), mimetype="application/json", status=status)

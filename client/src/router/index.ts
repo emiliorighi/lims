@@ -20,7 +20,7 @@ const routes: Array<RouteRecordRaw> = [
 
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.VITE_BASE_PATH),
+  history: createWebHistory(import.meta.env.VITE_BASE_PATH ? import.meta.env.VITE_BASE_PATH : import.meta.env.BASE_URL),
   //  mode: process.env.VUE_APP_ROUTER_MODE_HISTORY === 'true' ? 'history' : 'hash',
   routes,
 })
