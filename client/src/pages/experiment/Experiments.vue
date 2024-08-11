@@ -46,7 +46,8 @@
                 </VaCardContent>
             </VaCard>
             <ExperimentFormModal @experiment-edited="reset()" />
-            <ReportModal :model="'sample'" :search-form="experimentStore.searchForm" :show-modal="experimentStore.showReport" />
+            <ReportModal @on-close="experimentStore.showReport = !experimentStore.showReport" :model="'sample'"
+                :search-form="experimentStore.searchForm" :show-modal="experimentStore.showReport" />
         </div>
     </div>
 </template>

@@ -1,12 +1,12 @@
 <template>
-    <va-data-table :items="items" :columns="mapColumns">
+    <VaDataTable :items="items" :columns="mapColumns">
         <template #cell(actions)="{ rowIndex }">
             <VaButton v-if="canBeEdited(items[rowIndex])" preset="plain" icon="edit"
                 @click="$emit('editClicked', rowIndex)" />
             <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
                 @click="triggerDeleteConfirm(rowIndex)" />
         </template>
-    </va-data-table>
+    </VaDataTable>
     <VaModal v-model="confirmDelete" hide-default-actions overlay-opacity="0.2">
         <template #header>
             <h3>Are you sure you want to delete {{ idToDelete }}</h3>

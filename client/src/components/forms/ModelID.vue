@@ -1,5 +1,5 @@
 <template>
-    <VaInput class="flex" readonly label="Unique identifier" v-model="id"
+    <VaInput readonly label="Unique identifier" v-model="id"
         placeholder="The unique identifier will be generated here" :rules="[rules]">
     </VaInput>
 </template>
@@ -14,7 +14,7 @@ import { useToast } from 'vuestic-ui/web-components';
 
 const props = defineProps<{
     model: 'sample' | 'experiment',
-    id: string
+    metadata: Record<string, any>
 }>()
 
 const schemaStore = useSchemaStore()
@@ -36,22 +36,37 @@ const request = computed(() => {
     return SampleService.getSample
 })
 
-watch(() => (props.id), async () => {
-    if (!props.id) return
+const id = computed(() => {
+    const keys = schemaStore.schema[props.model].id_format
+    const values: string[] = [];
 
-    await getModel()
+    for (const key of keys) {
+        if (key in props.metadata) {
+            values.push(String(props.metadata[key]));  // Ensure the value is a string
+        } else {
+            return '';  // Return false if any key is not found in the object
+        }
+    }
+    // Join the values with an underscore
+    return values.join('_');
+})
+
+watch(() => (id.value), async () => {
+    if (!id.value) return
+
+    await getItem(id.value)
 })
 
 
-async function getModel(): Promise<void> {
+async function getItem(id:string): Promise<void> {
 
     try {
         isLoading.value = true
-        const response = await request.value(schemaStore.schema.project_id, props.id);
+        const response = await request.value(schemaStore.schema.project_id, id);
         const { data } = response;
         if (data) modelExists.value = true
         init({
-            message: `${props.model} with ${props.id} already exists`,
+            message: `${props.model} with ${id} already exists`,
             color: 'danger',
         });
     } catch (error) {

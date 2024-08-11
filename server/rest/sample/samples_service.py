@@ -106,9 +106,7 @@ def create_sample(project_id, data):
 def update_sample(project_id,sample_id,data):
 
     project=projects_service.get_project(project_id)
-    
-    sample = get_sample(project_id,sample_id)
-    
+        
     id_fields = project.sample.get('id_format', [])
 
     new_sample_id = schema.create_item_id(id_fields, data)
@@ -129,9 +127,10 @@ def delete_sample(project_id, sample_id):
 
     projects_service.get_project(project_id)
     
-    sample_to_delete = get_sample(project_id,sample_id)
+    sample = Sample.objects(project=project_id, sample_id=sample_id).first()   
     
-    sample_to_delete.delete()
+    sample.delete()
 
+    print(sample)
     return f"Sample {sample_id} successfully deleted", 201
 

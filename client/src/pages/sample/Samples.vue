@@ -1,52 +1,43 @@
 <template>
-    <div class="row row-equal">
-        <div class="flex lg12 md12 sm12 xs12">
-            <VaCard>
-                <VaCardTitle class="va-text-secondary mb-0">Sample List</VaCardTitle>
-                <VaCardContent>
-                    <div class="row justify-space-between">
-                        <div class="flex">
-                            <div class="row">
-                                <div class="flex">
-                                    <TableFilters @on-metadata-update="updateQueryForm"
-                                        @on-search-change="updateSearchForm" :columns="columns"
-                                        :fields="schemaStore.schema.sample.fields.filter(f => !singleId || singleId !== f.key)"
-                                        @on-show-field-change="updateShowFields" />
-                                </div>
-                                <div class="flex">
-                                    <VaButton :disabled="total === 0" preset="primary"
-                                        @click="sampleStore.showReport = !sampleStore.showReport" icon-right="download">
-                                        Report
-                                    </VaButton>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="flex">
-                            <VaButton color="success" icon="add" @click="sampleStore.showForm = !sampleStore.showForm">
-                                Sample
-                            </VaButton>
-                        </div>
-                    </div>
-                    <CRUDTable :items="samples" :columns="columns" @edit-clicked="editSample"
-                        @delete-clicked="deleteSample" />
-                    <div class="row align-center justify-space-between">
-                        <div class="flex">
-                            <b>Total {{ total }}</b>
-                            Results per page
-                            <VaSelect style="width: 100px;" :options="[10, 20, 50]"
-                                v-model="sampleStore.pagination.limit" />
-                        </div>
-                        <div class="flex">
-                            <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
-                                :offset="sampleStore.pagination.offset" :total="total" />
-                        </div>
-                    </div>
-                </VaCardContent>
-            </VaCard>
-            <SampleFormModal @sample-edited="reset" />
-            <ReportModal :model="'sample'" :search-form="sampleStore.searchForm" :show-modal="sampleStore.showReport" />
+    <div class="row justify-space-between align-end">
+        <h1 class="va-h1 flex pt-0">Samples </h1>
+        <div class="flex">
+            <VaButton color="success" icon="add" @click="sampleStore.showForm = !sampleStore.showForm">
+                Sample
+            </VaButton>
         </div>
     </div>
+    <VaCard>
+        <VaCardContent class="row">
+            <div class="flex">
+                <TableFilters @on-metadata-update="updateQueryForm" @on-search-change="updateSearchForm"
+                    :columns="columns"
+                    :fields="schemaStore.schema.sample.fields.filter(f => !singleId || singleId !== f.key)"
+                    @on-show-field-change="updateShowFields" />
+            </div>
+            <div class="flex">
+                <VaButton :disabled="total === 0" preset="primary"
+                    @click="sampleStore.showReport = !sampleStore.showReport" icon-right="download">
+                    Report
+                </VaButton>
+            </div>
+            <CRUDTable :items="samples" :columns="columns" @edit-clicked="editSample" @delete-clicked="deleteSample" />
+            <div class="row align-center justify-space-between">
+                <div class="flex">
+                    <b>Total {{ total }}</b>
+                    Results per page
+                    <VaSelect style="width: 100px;" :options="[10, 20, 50]" v-model="sampleStore.pagination.limit" />
+                </div>
+                <div class="flex">
+                    <Pagination @offset-changed="handlePagination" :limit="sampleStore.pagination.limit"
+                        :offset="sampleStore.pagination.offset" :total="total" />
+                </div>
+            </div>
+        </VaCardContent>
+    </VaCard>
+    <ReportModal @on-close="sampleStore.showReport = !sampleStore.showReport" :model="'sample'"
+        :search-form="sampleStore.searchForm" :show-modal="sampleStore.showReport" />
+    <ModelFormModal @on-cancel="reset" :show-form="sampleStore.showForm" :model="'sample'" :item-to-edit="itemToEdit" />
 </template>
 
 <script setup lang="ts">
@@ -59,13 +50,15 @@ import { useGlobalStore } from '../../stores/global-store';
 import TableFilters from '../../components/filters/TableFilters.vue'
 import CRUDTable from '../../components/tables/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
-import SampleFormModal from './components/SampleFormModal.vue';
 import ReportModal from '../../components/modals/ReportModal.vue'
+import ModelFormModal from '../../components/modals/ModelFormModal.vue'
 
 
 const schemaStore = useSchemaStore()
 const sampleStore = useSampleStore()
 const { toast } = useGlobalStore()
+
+const itemToEdit = ref<SampleModel | undefined>()
 
 const singleId = computed(() => {
     return schemaStore.schema.sample.id_format.length === 1 ? schemaStore.schema.sample.id_format[0] : undefined
@@ -115,7 +108,8 @@ async function handlePagination(value: number) {
 }
 
 function editSample(index: number) {
-    sampleStore.sampleIdToUpdate = samples.value[index].sample_id
+    itemToEdit.value = samples.value[index]
+    // sampleStore.sampleIdToUpdate = samples.value[index].sample_id
     sampleStore.showForm = !sampleStore.showForm
 }
 
@@ -149,6 +143,7 @@ async function deleteSample(index: number) {
 async function reset() {
     offset.value = 1
     sampleStore.resetSeachForm()
+    sampleStore.showForm = false
     sampleStore.resetPagination()
     await getSamples()
 }
@@ -166,6 +161,5 @@ async function getSamples() {
         isLoading.value = false
     }
 }
-
 
 </script>

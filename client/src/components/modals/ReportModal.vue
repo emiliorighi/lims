@@ -1,5 +1,5 @@
 <template>
-    <VaModal max-height="400px" fixed-layout v-model="showModal" hide-default-actions>
+    <VaModal max-height="400px" fixed-layout v-model="showModal" @cancel="emits('onClose')" @ok="downloadData">
         <template #header>
             <h3 class="va-h3">
                 Download Report
@@ -8,9 +8,8 @@
         <VaInnerLoading :loading="isLoading">
             <div class="row">
                 <VaSelect class="flex lg12 md12 sm12 xs12" v-model="downloadFields"
-                    searchPlaceholderText="Type to search" label="Columns"
-                    :options="options" placeholder="Column list" multiple
-                    :messages="['Search fields to use as TSV columns']" />
+                    searchPlaceholderText="Type to search" label="Columns" :options="options" placeholder="Column list"
+                    multiple :messages="['Search fields to use as TSV columns']" />
             </div>
             <div class="row">
                 <div class="flex lg12 md12 sm12 xs12">
@@ -21,9 +20,6 @@
                 </div>
             </div>
         </VaInnerLoading>
-        <template #footer>
-            <VaButton @click="downloadData"> Submit</VaButton>
-        </template>
     </VaModal>
 </template>
 <script setup lang="ts">
@@ -34,6 +30,7 @@ import { AxiosError } from 'axios'
 import { useToast } from 'vuestic-ui/web-components'
 import SampleService from '../../services/clients/SampleService'
 import ExperimentService from '../../services/clients/ExperimentService'
+
 const { init } = useToast()
 const isLoading = ref(false)
 
@@ -45,6 +42,7 @@ const props = defineProps<{
 
 }>()
 
+const emits = defineEmits(['onClose'])
 const schemaStore = useSchemaStore()
 const downloadFields = ref<string[]>([])
 const applyFilters = ref(true)
@@ -59,7 +57,7 @@ const options = computed(() => {
 })
 
 const request = computed(() => {
-    if(props.model === 'experiment') return ExperimentService.getTsv
+    if (props.model === 'experiment') return ExperimentService.getTsv
 
     return SampleService.getTsv
 })
@@ -104,6 +102,7 @@ async function downloadData() {
 
     } finally {
         isLoading.value = false
+        emits('onClose')
     }
 }
 </script>
