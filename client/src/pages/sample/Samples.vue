@@ -44,7 +44,7 @@
                 </VaCardContent>
             </VaCard>
             <SampleFormModal @sample-edited="reset" />
-            <ReportModal />
+            <ReportModal :model="'sample'" :search-form="sampleStore.searchForm" :show-modal="sampleStore.showReport" />
         </div>
     </div>
 </template>
@@ -57,10 +57,10 @@ import { Filter, SampleModel } from '../../data/types';
 import SampleService from '../../services/clients/SampleService';
 import { useGlobalStore } from '../../stores/global-store';
 import TableFilters from '../../components/filters/TableFilters.vue'
-import CRUDTable from '../../components/data/ItemCRUDTable.vue'
+import CRUDTable from '../../components/tables/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
 import SampleFormModal from './components/SampleFormModal.vue';
-import ReportModal from './components/ReportModal.vue'
+import ReportModal from '../../components/modals/ReportModal.vue'
 
 
 const schemaStore = useSchemaStore()

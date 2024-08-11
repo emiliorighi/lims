@@ -1,58 +1,42 @@
 from db.models import Project
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import  NotFound
-from helpers import filter
+from helpers import filter as filter_helper
 from helpers.tsv import generate_tsv_dict_reader,generate_tsv_reader
 
-## guess filter types from tsv
+## map filter types from tsv
 def map_attributes_from_tsv(tsv, data):
-    treshold = int(data.get('treshold', 25))
-    tsvreader = generate_tsv_dict_reader(tsv)
-    mapped_values = {}
-    multi_select_candidates = {}
-    total_rows = 0
 
-    for row in tsvreader:
-        total_rows += 1
-        for key, value in row.items():
-            if value:
-                if key not in mapped_values:
-                    mapped_values[key] = set()
-                if ',' in value:
-                    multi_select_candidates[key] = set()
-                    values = [v.strip() for v in value.split(',') if v.strip()]
-                    mapped_values[key].update(values)
-                    multi_select_candidates[key].update(values)
-                else:
-                    mapped_values[key].add(value)
+    validations = {
+        'date': filter_helper.validate_date,
+        'number': filter_helper.validate_number
+    }
+    min_occurrences = int(data.get('min_occurrences', 2))
+
+    tsvreader = generate_tsv_dict_reader(tsv)
+
+    mapped_values = filter_helper.count_occurences(tsvreader)
 
     attributes = []
-    percentage=treshold*total_rows / 100
-    print(treshold)
-    print(percentage)
-    for attr_key, opts in mapped_values.items():
-        options = list(opts)
-        num_unique_values= len(options)
-        filter = {}
-        if num_unique_values >= percentage:
-            filter['choices'] = options
+    
+    for attr_key, values_occurrences in mapped_values.items():
+
+        filter={}
+
+        filtered_choices = [key for key, count in values_occurrences.items() if count >= min_occurrences]
+
+        if filtered_choices:
+            filter['choices'] = filtered_choices
             filter['multi'] = False
-        # elif num_unique_values <= 10:  # Fewer than or equal to 10 unique values
-        #     filter['choices'] = options
-        #     filter['multi'] = False
-        elif attr_key in multi_select_candidates:  # Check if there are any multi-select candidates
-            multi_select_options = list(multi_select_candidates[attr_key])
-            multi_select_unique_values = len(multi_select_options)
-            if  multi_select_unique_values >= percentage:
-                filter['choices'] = multi_select_options
-                filter['multi'] = True
+
         else:
-            if all(filter.validate_date(option) for option in options if option):
-                filter['input_type'] = 'date'
-            elif all(filter.validate_number(option) for option in options if option):
-                filter['input_type'] = 'number'
+            for input_type, validator in validations.items():
+                if all(validator(option) for option in values_occurrences.keys()):
+                    filter['input_type'] = input_type
+                    break
             else:
                 filter['input_type'] = 'text'
+
 
         attribute = {
             'key': attr_key,

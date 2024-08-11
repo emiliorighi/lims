@@ -2,8 +2,8 @@
     <div>
         <h1 class="va-h1">Dashboard</h1>
         <div class="row row-equal">
-            <div v-if="chartData" class="flex lg8 md8 sm12 xs12">
-                <VaCard>
+            <div class="flex lg8 md8 sm12 xs12">
+                <VaCard v-if="chartData">
                     <VaCardTitle class="va-text-secondary">
                         Data contained in each project
                     </VaCardTitle>
@@ -11,55 +11,22 @@
                         <VaChart type="horizontal-bar" :data="chartData" />
                     </VaCardContent>
                 </VaCard>
+                <VaSkeleton v-else height="400px" />
             </div>
-            <div class="flex lg4 md4 sm12 xs12">
-                <div class="row row-equal">
+            <div class="flex lg4 md4 sm12 xs12 cards-column">
+                <div v-for="(card, index) in Object.values(cards)" :key="index" class="row row-equal card-wrapper">
                     <div class="flex lg12 md12 sm12 xs12">
-                        <VaCard>
+                        <VaCard class="card">
                             <VaCardContent>
                                 <div class="row justify-space-between align-center">
                                     <div class="flex">
-                                        <h4 class="va-h4">
-                                            {{ allData.projects }}
-                                        </h4>
-                                        <p>Projects</p>
+                                        <Counter :duration="2000" :target-value="card.count" />
+                                        <p>
+                                            {{ card.text }}
+                                        </p>
                                     </div>
                                     <div class="flex">
-                                        <VaIcon color="info" name="folder" size="large"></VaIcon>
-                                    </div>
-                                </div>
-                            </VaCardContent>
-                        </VaCard>
-                    </div>
-                    <div class="flex lg12 md12 sm12 xs12">
-                        <VaCard>
-                            <VaCardContent>
-                                <div class="row justify-space-between align-center">
-                                    <div class="flex">
-                                        <h4 class="va-h4">
-                                            {{ allData.samples }}
-                                        </h4>
-                                        <p>Samples</p>
-                                    </div>
-                                    <div class="flex">
-                                        <VaIcon color="success" name="fa-vial" size="large"></VaIcon>
-                                    </div>
-                                </div>
-                            </VaCardContent>
-                        </VaCard>
-                    </div>
-                    <div class="flex lg12 md12 sm12 xs12">
-                        <VaCard>
-                            <VaCardContent>
-                                <div class="row justify-space-between align-center">
-                                    <div class="flex">
-                                        <h4 class="va-h4">
-                                            {{ allData.experiments }}
-                                        </h4>
-                                        <p>Experiments</p>
-                                    </div>
-                                    <div class="flex">
-                                        <VaIcon color="primary" name="fa-dna" size="large"></VaIcon>
+                                        <VaIcon :color="card.color" :name="card.icon" size="large"></VaIcon>
                                     </div>
                                 </div>
                             </VaCardContent>
@@ -71,46 +38,67 @@
     </div>
 </template>
 <script setup lang="ts">
-import { onMounted, reactive, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import StatsService from '../../services/clients/StatsService'
 import VaChart from '../../components/va-charts/VaChart.vue'
-import { TChartData } from '../../data/types'
+import { TChartData, DashboardCard } from '../../data/types'
 import ProjectService from '../../services/clients/ProjectService'
 import SampleService from '../../services/clients/SampleService'
 import ExperimentService from '../../services/clients/ExperimentService'
+import { AxiosResponse } from 'axios'
+import Counter from '../../components/ui/Counter.vue'
 
 const chartData = ref<TChartData>()
 
-const allData = reactive<{
-    samples: number,
-    experiments: number,
-    projects: number
+const cards = ref<{
+    samples: DashboardCard,
+    experiments: DashboardCard,
+    projects: DashboardCard
 }>({
-    samples: 0,
-    experiments: 0,
-    projects: 0
+    samples: {
+        icon: 'fa-vial',
+        text: 'Samples',
+        color: 'success',
+        count: 0
+    },
+    experiments: {
+        icon: 'fa-dna',
+        text: 'Experiments',
+        color: 'primary',
+        count: 0
+    },
+    projects: {
+        icon: 'folder',
+        text: 'Projects',
+        color: 'secondary',
+        count: 0
+    }
 })
+
 onMounted(async () => {
     try {
+
+        // Get stats and create chart
         const sampleData = await getStats('samples')
         const experimentData = await getStats('experiments')
         chartData.value = createChartData(sampleData, experimentData)
-        const projectResp = await ProjectService.getProjects({})
-        const sampleResp = await SampleService.getAllSamples({})
-        const expResp = await ExperimentService.getAllExperiments({})
-        allData.projects = projectResp.data.total
-        allData.samples = sampleResp.data.total
-        allData.experiments = expResp.data.total
+
+        // Get object count
+        cards.value.projects.count = getTotal(await ProjectService.getProjects({}))
+        cards.value.samples.count = getTotal(await SampleService.getAllSamples({}))
+        cards.value.experiments.count = getTotal(await ExperimentService.getAllExperiments({}))
     } catch (err) {
         console.log(err)
     }
 
 })
 
-const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#c9cbcf', '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
-    '#e67e22', '#1abc9c', '#9b59b6', '#34495e', '#95a5a6', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#f39c12',
-    '#d35400', '#2c3e50', '#bdc3c7', '#7f8c8d', '#e74c3c', '#2980b9', '#f1c40f', '#2ecc71', '#9b59b6'
-]
+function getTotal(response: AxiosResponse) {
+    const { data } = response as Record<string, any>
+    const { total } = data
+    return total
+
+}
 
 async function getStats(model: 'samples' | 'experiments') {
     try {
@@ -156,3 +144,21 @@ function createChartData(sampleData: Record<string, number>, experimentData: Rec
 
 
 </script>
+<style scoped>
+.cards-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.card-wrapper {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.card {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+</style>

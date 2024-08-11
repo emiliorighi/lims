@@ -20,6 +20,12 @@ export default {
       zIndex:100,
       fixedLayout:true,
       maxHeight:"500px"
+    },
+    VaInput:{
+      preset:'solid'
+    },
+    VaSelect:{
+      preset:'solid'
     }
   }
 }

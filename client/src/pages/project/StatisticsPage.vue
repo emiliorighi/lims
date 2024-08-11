@@ -29,7 +29,7 @@
 import { computed, ref } from 'vue';
 import ProjectService from '../../services/clients/ProjectService';
 import { useSchemaStore } from '../../stores/schemas-store';
-import StatsCard from './components/StatsCard.vue';
+import StatsCard from '../../components/cards/StatsCard.vue';
 import { useForm } from 'vuestic-ui/web-components';
 
 

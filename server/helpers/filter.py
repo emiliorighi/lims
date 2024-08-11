@@ -71,3 +71,33 @@ def evaluate_choices(choices, value):
             if v.strip() not in choices:
                 errors.append(f"{value} is not in {','.join(choices)}")
     return errors        
+
+def count_occurences(tsvreader):
+    #count how many times a value is encountered
+    mapped_values = {}
+
+    for row in tsvreader:
+        for key, value in row.items():
+
+            #skip empty values
+            if not value:
+                continue
+
+            if key not in mapped_values:
+                mapped_values[key] = dict()
+
+            if ',' in value:
+                values = [v.strip() for v in value.split(',') if v.strip()]
+
+                for v in values:
+                    if v in mapped_values[key]:
+                        mapped_values[key][v] += 1
+                    else:
+                        mapped_values[key][v] = 1
+
+            if value in mapped_values[key]:
+                mapped_values[key][value] += 1
+            else:
+                mapped_values[key][value] = 1
+
+    return mapped_values

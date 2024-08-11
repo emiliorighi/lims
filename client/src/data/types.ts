@@ -80,3 +80,10 @@ export interface SearchForm {
   start_date?: string
   end_date?: string
 }
+
+export type DashboardCard = {
+  icon: string,
+  text: string,
+  color: string,
+  count: number | null
+}

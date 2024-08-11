@@ -1,5 +1,6 @@
 from db.models import User
 from mongoengine.queryset.visitor import Q
+from flask_jwt_extended import create_access_token, set_access_cookies, unset_jwt_cookies
 from errors import NotFound
 
 def get_users(offset=0,limit=20,
@@ -13,11 +14,12 @@ def get_users(offset=0,limit=20,
 def create_user(data):
     if not 'name' in data.keys():
         return 'name is mandatory', 400
+    
     username = data['name']
     ex_user = User.objects(name=username).first()
     if ex_user:
         return f'{username} already exists', 400
-    new_user = User(**data).save()
+    User(**data).save()
     return f'{username} correctly created', 201
 
 def update_user(name,data):
@@ -35,3 +37,10 @@ def delete_user(name):
     name = ex_user.name
     ex_user.delete()
     return f'{name} correctly deleted', 201
+
+def get_user(name,pwd):
+    user = User.objects(name=name, password=pwd).first()
+    if not user:
+        raise NotFound
+    return user
+    

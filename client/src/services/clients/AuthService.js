@@ -27,6 +27,9 @@ auth.interceptors.request.use(
 
 
 class AuthService {
+    check(){
+        return auth.get('/login')
+    }
     login(payload) {
         return base.post('/login', payload)
     }

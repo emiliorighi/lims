@@ -42,7 +42,7 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import MetadataTree from '../../../components/data/MetadataTree.vue';
+import MetadataTree from '../../../components/ui/MetadataTree.vue';
 import { useSchemaStore } from '../../../stores/schemas-store';
 
 

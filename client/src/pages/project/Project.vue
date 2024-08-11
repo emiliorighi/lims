@@ -1,16 +1,29 @@
 <template>
-    <h1 class="va-h1">
-        {{ projectId }}
-    </h1>
-    <VaTabs v-if="validTabs.length" v-model="tab">
-        <template #tabs>
-            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label" :icon="tab.icon">
-            </VaTab>
-        </template>
-    </VaTabs>
-    <VaDivider style="margin-top:0" />
+    <div class="row justify-space-between align-end">
+        <h1 class="va-h1 flex pt-0">{{ projectId }}</h1>
 
-    <router-view v-if="showProject"></router-view>
+        <!-- <div class="flex">
+        </div> -->
+        <div class="flex">
+            
+        </div>
+    </div>
+    <VaCard>
+        <VaTabs v-if="validTabs.length" v-model="tab">
+            <template #tabs>
+                <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
+                    :icon="tab.icon">
+                </VaTab>
+            </template>
+        </VaTabs>
+        <VaDivider style="margin-top:0" />
+        <VaCardContent>
+            <router-view v-if="showProject"></router-view>
+        </VaCardContent>
+
+    </VaCard>
+
+
 
 </template>
 <script setup lang="ts">
@@ -48,8 +61,8 @@ onMounted(async () => {
     if (!schemaStore.schema.project_id) await getProject()
 
     if (!schemaStore.schema.experiment.id_format.length) {
-        validTabs.value = [...tabs.filter(({label}) => label !=='Experiments')]
-    }else{
+        validTabs.value = [...tabs.filter(({ label }) => label !== 'Experiments')]
+    } else {
         validTabs.value = [...tabs]
     }
     if (route.name !== tab.value) tab.value = route.name as string
@@ -88,7 +101,7 @@ const tabs = [
     }
 ]
 
-const validTabs = ref<Record<string,any>[]>([])
+const validTabs = ref<Record<string, any>[]>([])
 
 async function getProject() {
     try {

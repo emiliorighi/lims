@@ -3,7 +3,7 @@
         :left="{ fixed: true, absolute: breakpoints.smDown, order: 2, overlay: breakpoints.smDown && isSidebarVisible }"
         @left-overlay-click="isSidebarVisible = false">
         <template #top>
-            <VaNavbar>
+            <VaNavbar style="height: 85px;">
                 <template #left>
                     <VaButton size="large" preset="secondary" :icon="isSidebarVisible ? 'menu_open' : 'menu'"
                         @click="isSidebarVisible = !isSidebarVisible" />
@@ -12,44 +12,23 @@
                     </VaBreadcrumbs>
                 </template>
                 <template #right>
-                    <!-- <ThemeColorSwitch />
-                      -->
-                    <!-- <VaColorPalette v-model="colors.primary" :palette="palette" /> -->
-                    <VaButton preset="secondary" class="mr-4" color="secondary" target="_blank"
-                        href="https://github.com/emiliorighi/lims/issues/new" icon="github">
-                        Open Issue
-                    </VaButton>
-                    <VaSwitch v-model="switchValue" color="#5123a1" off-color="#ffd300" true-value="dark"
-                        false-value="light" style="--va-switch-checker-background-color: #252723;">
-                        <template #innerLabel>
-                            <div class="va-text-center">
-                                <VaIcon :name="switchValue === 'light' ? 'light_mode' : 'dark_mode'" />
-                            </div>
-                        </template>
-                    </VaSwitch>
-
-
-
-
-                    <!-- <dvi class="row align-center">
+                    <div class="row justify-end align-center" style="gap: 1rem;">
                         <div class="flex">
-                            <VaColorPalette class="mt-2 mb-2" v-model="colors.primary" :palette="palette" />
+                            <VaButton size="large" preset="secondary" color="secondary" target="_blank"
+                                href="https://github.com/emiliorighi/lims/issues/new" icon="github">
+                            </VaButton>
                         </div>
                         <div class="flex">
-                            <VaSwitch class="mt-2 mb-2" v-model="switchValue" true-value="dark" false-value="light"
-                                size="small" />
+                            <VaSwitch v-model="switchValue" color="#5123a1" off-color="#ffd300" true-value="dark"
+                                false-value="light" style="--va-switch-checker-background-color: #252723;">
+                                <template #innerLabel>
+                                    <div class="va-text-center">
+                                        <VaIcon :name="switchValue === 'light' ? 'light_mode' : 'dark_mode'" />
+                                    </div>
+                                </template>
+                            </VaSwitch>
                         </div>
-                        <div class="flex">
-                            <VaIcon color="secondary" name="github" size="large"></VaIcon>
-                        </div>
-                    </dvi> -->
-
-                    <!-- <VaButtonDropdown :closeOnContentClick="false" stickToEdges size="large" style="margin-right: 5px;"
-                        color="secondary" preset="plain" icon="settings">
-                    </VaButtonDropdown> -->
-                    <!-- <VaButtonDropdown style="margin-right: 5px;" :closeOnContentClick="false" stickToEdges size="large"
-                        color="primary" preset="plain" label="Lo" icon="person"></VaButtonDropdown> -->
-                    <!-- <VaIcon size="large" name="github" href="#"></VaIcon> -->
+                    </div>
                 </template>
             </VaNavbar>
             <VaDivider style="margin: 0" />
@@ -57,6 +36,17 @@
 
         <template #left>
             <VaSidebar v-model="isSidebarVisible">
+                <div class="row justify-space-evenly align-center" style="max-height: 85px;">
+                    <div class="flex">
+                        <VaAvatar color="info">
+                            {{ gStore.userName.charAt(0) }}
+                        </VaAvatar>
+                    </div>
+                    <div>
+                        <h5 class="va-h5">{{ gStore.userName }}</h5>
+                    </div>
+                </div>
+                <VaDivider style="margin: 0" />
                 <VaSidebarItem :active="isRouteActive(name)" v-for="{ icon, title, name } in menu" :key="icon"
                     :to="{ name: name }">
                     <VaSidebarItemContent>
@@ -68,7 +58,6 @@
                 </VaSidebarItem>
             </VaSidebar>
         </template>
-
         <template #content>
             <main>
                 <div class="layout fluid va-gutter-5">
@@ -88,10 +77,10 @@ import { computed, ref, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useBreakpoint } from 'vuestic-ui'
 import { useColors } from "vuestic-ui";
+import { useGlobalStore } from "../stores/global-store"
 
-const { applyPreset, currentPresetName, colors } = useColors();
-
-const palette = ["#2c82e0", "#ef476f", "#ffd166", "#06d6a0", "#8338ec"];
+const gStore = useGlobalStore()
+const { applyPreset, currentPresetName } = useColors();
 
 const switchValue = computed({
     get() { return currentPresetName.value },

@@ -8,7 +8,18 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'home',
     path: '/',
-    component: Dashboard
+    component: Dashboard,
+    meta: {
+      layout: 'default',
+    },
+  },
+  {
+    name: 'login',
+    path: '/login',
+    component: () => import('../pages/auth/login/Login.vue'),
+    meta: {
+      layout: 'default',
+    },
   },
   {
     path: '/:catchAll(.*)',

@@ -46,7 +46,7 @@
                 </VaCardContent>
             </VaCard>
             <ExperimentFormModal @experiment-edited="reset()" />
-            <ReportModal />
+            <ReportModal :model="'sample'" :search-form="experimentStore.searchForm" :show-modal="experimentStore.showReport" />
         </div>
     </div>
 </template>
@@ -58,11 +58,11 @@ import { ExperimentModel, Filter } from '../../data/types';
 import ExperimentService from '../../services/clients/ExperimentService';
 import { useGlobalStore } from '../../stores/global-store';
 import TableFilters from '../../components/filters/TableFilters.vue'
-import CRUDTable from '../../components/data/ItemCRUDTable.vue'
+import CRUDTable from '../../components/tables/ItemCRUDTable.vue'
 import Pagination from '../../components/filters/Pagination.vue'
 import { useExperimentStore } from '../../stores/experiment-store';
 import ExperimentFormModal from './components/ExperimentFormModal.vue';
-import ReportModal from './components/ReportModal.vue'
+import ReportModal from '../../components/modals/ReportModal.vue'
 
 const schemaStore = useSchemaStore()
 const experimentStore = useExperimentStore()

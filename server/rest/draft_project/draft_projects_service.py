@@ -1,6 +1,5 @@
 from db.models import ProjectDraft,Project
 from mongoengine.queryset.visitor import Q
-from ..utils import utils
 from werkzeug.exceptions import NotFound
 
 

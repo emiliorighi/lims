@@ -19,7 +19,7 @@ import SampleService from '../../services/clients/SampleService';
 import { useToast } from 'vuestic-ui/web-components';
 import { AxiosError } from 'axios';
 import { SampleModel } from '../../data/types';
-import MetadataTree from '../../components/data/MetadataTree.vue';
+import MetadataTree from '../../components/ui/MetadataTree.vue';
 
 
 const schemaStore = useSchemaStore()

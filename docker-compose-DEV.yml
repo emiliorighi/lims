@@ -2,7 +2,7 @@ version: '3'
 
 services:
 
-  DB_LIMS:
+  lims_db:
     image: mongo
     container_name: "${DB_HOST}"
     env_file:
@@ -18,6 +18,8 @@ services:
     build: ./server
     container_name: "${API_HOST}"
     restart: always
+    volumes:
+      - ./project-spec.json:/server/project-spec.json
     env_file:
       - .env
 

@@ -1,56 +1,40 @@
 <template>
-  <form @submit.prevent="onsubmit">
-    <va-input
-      v-model="email"
-      class="mb-3"
-      type="email"
-      :label="t('auth.email')"
-      :error="!!emailErrors.length"
-      :error-messages="emailErrors"
-    />
-
-    <va-input
-      v-model="password"
-      class="mb-3"
-      type="password"
-      :label="t('auth.password')"
-      :error="!!passwordErrors.length"
-      :error-messages="passwordErrors"
-    />
-
-    <div class="auth-layout__options d-flex align-center justify-space-between">
-      <va-checkbox v-model="keepLoggedIn" class="mb-0" :label="t('auth.keep_logged_in')" />
-      <router-link class="ml-1 va-link" :to="{ name: 'recover-password' }">{{
-        t('auth.recover_password')
-      }}</router-link>
-    </div>
-
-    <div class="d-flex justify-center mt-3">
-      <va-button class="my-0" @click="onsubmit">{{ t('auth.login') }}</va-button>
-    </div>
-  </form>
+  <VaForm tag="form" style="width: 300px" @submit.prevent="handleSubmit">
+    <VaInput v-model="GlobalStore.userName" class="mt-3" label="username"> </VaInput>
+    <VaInput v-model="GlobalStore.userPassword" class="mt-3" label="password" :type="inputType">
+      <template #appendInner>
+        <va-icon :name="inputType === 'password' ? 'visibility' : 'visibility_off'"
+          @click="inputType === 'password' ? (inputType = 'text') : (inputType = 'password')" />
+      </template>
+    </VaInput>
+    <VaButton :disabled="!GlobalStore.userName || !GlobalStore.userPassword" class="mt-3" type="submit">
+      Login
+    </VaButton>
+  </VaForm>
 </template>
-
 <script setup lang="ts">
-  import { computed, ref } from 'vue'
-  import { useRouter } from 'vue-router'
+import { useGlobalStore } from '../../../stores/global-store'
+import AuthService from '../../../services/clients/AuthService'
+import { ref } from 'vue'
+import { useToast } from 'vuestic-ui'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
+const { init } = useToast()
+const GlobalStore = useGlobalStore()
 
-  const email = ref('')
-  const password = ref('')
-  const keepLoggedIn = ref(false)
-  const emailErrors = ref<string[]>([])
-  const passwordErrors = ref<string[]>([])
-  const router = useRouter()
+const inputType = ref('password')
 
-  const formReady = computed(() => !emailErrors.value.length && !passwordErrors.value.length)
-
-  function onsubmit() {
-    if (!formReady.value) return
-
-    emailErrors.value = email.value ? [] : ['Email is required']
-    passwordErrors.value = password.value ? [] : ['Password is required']
-
-    router.push({ name: 'dashboard' })
+async function handleSubmit() {
+  try {
+    const { data } = await AuthService.login({ name: GlobalStore.userName, password: GlobalStore.userPassword })
+    GlobalStore.isAuthenticated = true
+    GlobalStore.userRole = data.role
+    if (data.projects) GlobalStore.userProjects = [...data.projects]
+    init({ message: `Welcome ${GlobalStore.userName}`, color: 'success' })
+    router.push('/cms-dashboard')
+  } catch (error) {
+    init({ message: 'Bad user or password', color: 'danger' })
   }
+}
 </script>

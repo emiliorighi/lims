@@ -1,6 +1,14 @@
 <template>
-    <h1 class="va-h1">{{ title }}</h1>
-    <DraftActions />
+    <div class="row justify-space-between align-end">
+        <h1 class="va-h1 flex pt-0">{{ title }}</h1>
+        <div class="flex">
+            <div class="row">
+                <div v-for="c in actionsComponents" class="flex">
+                    <component :is="c"></component>
+                </div>
+            </div>
+        </div>
+    </div>
     <VaCard>
         <VaCardContent>
             <VaInnerLoading :loading="isLoading">
@@ -34,18 +42,21 @@ import { defineVaStepperSteps, useForm, useToast } from 'vuestic-ui'
 import { useProjectStore } from '../../stores/project-store'
 import ProjectService from '../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
-import Header from '../../components/ui/Header.vue'
-import DraftActions from './components/actions/DraftActions.vue';
-import StepSlot from './components/StepSlot.vue'
-import ResumeSlot from './components/ResumeSlot.vue'
-import ProjectAttributes from './components/attributes/ProjectAttributes.vue';
-import ModelAttributes from './components/model/ModelAttributes.vue';
+import SaveDraftProject from '../../components/buttons/SaveDraftProject.vue';
+import UploadDraftProject from '../../components/buttons/UploadDraftProject.vue';
+import UploadProject from '../../components/buttons/UploadProject.vue';
+import DownloadYAML from '../../components/buttons/DownloadYAMLProject.vue';
+
+import StepSlot from './steps/StepSlot.vue'
+import ResumeSlot from './steps/ResumeSlot.vue'
+import ProjectAttributes from './steps/ProjectAttributes.vue';
+import ModelAttributes from './steps/ModelAttributes.vue';
 import { useRouter } from 'vue-router';
-import ConfirmOverwriteModal from './components/ConfirmOverwriteModal.vue'
+import ConfirmOverwriteModal from '../../components/modals/ConfirmOverwriteModal.vue'
 
-const title = 'Project form'
-const description = 'Fill all the steps to create a new project, save it to draft at any moment'
+const title = 'Project Creation'
 
+const actionsComponents = [SaveDraftProject, UploadDraftProject, UploadProject, DownloadYAML]
 const { init } = useToast()
 const isLoading = ref(false)
 const projectStore = useProjectStore()
@@ -55,19 +66,19 @@ const currentStep = ref(0)
 
 const steps = ref(defineVaStepperSteps([
     {
-        label: 'Project Information', beforeLeave: (step) => { step.hasError = !validate() }
+        label: 'Project', icon: 'folder', beforeLeave: (step) => { step.hasError = !validate() }
     },
     {
-        label: 'Filters Creation', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
+        label: 'Filters', icon: 'filter_list', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
     },
     {
-        label: 'Sample Identifier', beforeLeave: (step) => { step.hasError = !isValidSample.value }
+        label: 'Sample', icon: 'fa-vial', beforeLeave: (step) => { step.hasError = !isValidSample.value }
     },
     {
-        label: 'Experiment Identifier', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
+        label: 'Experiment', icon: 'fa-dna', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
     },
     {
-        label: 'Project Resume', beforeLeave: async () => await submitProject()
+        label: 'Resume', icon: 'check_circle', beforeLeave: async () => await submitProject()
     }
 ]))
 

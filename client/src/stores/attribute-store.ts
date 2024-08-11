@@ -25,8 +25,8 @@ export const useAttributeStore = defineStore('attribute', {
             this.attribute = null
             this.attributeId = null
         },
-        initAttribute(){
-            this.attribute = {...defaultItem}
+        initAttribute() {
+            this.attribute = { ...defaultItem }
         }
 
     }

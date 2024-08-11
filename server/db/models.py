@@ -121,5 +121,6 @@ class User(db.Document):
     role=db.EnumField(Roles, required=True)
     projects = db.ListField(db.StringField())
     created = db.DateTimeField(default=datetime.now())
+    avatar = db.StringField()
 
 

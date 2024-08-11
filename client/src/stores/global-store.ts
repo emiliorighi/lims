@@ -6,7 +6,11 @@ export const useGlobalStore = defineStore('global', {
   state: () => {
     return {
       isSidebarMinimized: true,
-      userName: 'User',
+      userName: '',
+      userRole:'',
+      userPassword:'',
+      userProjects:[] as string[],
+      isAuthenticated:false,
       toast: init
     }
   },
