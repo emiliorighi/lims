@@ -1,21 +1,21 @@
 <template>
-    <VaCard>
-        <VaCardTitle>
-            <div class="row justify-space-between">
-                <div class="flex p-0">{{ label }}</div>
-                <div class="flex p-0 a-text-secondary">
-                    <VaButton size="small" @click="emits('onDelete', index)" icon="delete" color="danger" />
-                </div>
-            </div>
-        </VaCardTitle>
-        <VaCardContent>
-            <VaChart :type="chart.type" :data="createChartData(chart.data)" />
+    <VaCard color="background-element">
+        <VaCardActions align="between">
+            <VaButton preset="primary" @click="downloadCanvasAsPNG(chartId, `${chartId}.png`)">Download</VaButton>
+            <VaButton preset="primary" @click="emits('onDelete', index)" color="danger">
+                Delete
+            </VaButton>
+        </VaCardActions>
+        <VaCardContent style="height: 400px;">
+
+            <VaChart :chart-id="chartId" :type="chart.type" :options="chartOptions"
+                :data="createChartData(chart.data)" />
         </VaCardContent>
+
     </VaCard>
 </template>
 <script setup lang="ts">
 import VaChart from '../va-charts/VaChart.vue';
-
 const emits = defineEmits(['onDelete'])
 type ChartTypes = "line" | "bar" | "bubble" | "doughnut" | "pie" | "horizontal-bar"
 
@@ -26,6 +26,7 @@ const props = defineProps<{
     }
     index: number,
     label: string
+    chartId: string
 }>()
 
 const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#c9cbcf', '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
@@ -33,6 +34,22 @@ const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384'
     '#d35400', '#2c3e50', '#bdc3c7', '#7f8c8d', '#e74c3c', '#2980b9', '#f1c40f', '#2ecc71', '#9b59b6'
 ]
 
+const chartOptions = {
+    plugins: {
+        title: {
+            text: props.label,
+            display: true,
+            align: 'center'
+        },
+        datalabels: {
+            color: '#ffffff',
+            font: {
+                size: '18'
+            }
+        }, legend: { position: 'top', align: 'start', display: false }
+    },
+
+}
 function createChartData(data: Record<string, number>) {
     const entries = Object.entries(data)
 
@@ -43,12 +60,33 @@ function createChartData(data: Record<string, number>) {
         datasets: [
             {
                 backgroundColor: colors,
-                label: props.label,
                 data: Object.values(data),
+                label: ''
             },
         ],
     }
 }
 
+function downloadCanvasAsPNG(canvasId: string, filename: string) {
+    // Get the canvas element
+    const canvas = document.getElementById(canvasId) as HTMLCanvasElement;
+
+    // Ensure the canvas exists
+    if (!canvas) {
+        console.error('Canvas element not found!');
+        return;
+    }
+
+    // Convert canvas to data URL
+    const dataURL = canvas.toDataURL('image/png');
+
+    // Create a download link
+    const link = document.createElement('a');
+    link.href = dataURL;
+    link.download = filename;
+
+    // Trigger the download by simulating a click
+    link.click();
+}
 
 </script>

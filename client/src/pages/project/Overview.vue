@@ -5,13 +5,6 @@
         <div class="flex">
 
         </div>
-        <div class="flex">
-            <VaCard outlined square>
-                <VaCardContent style="overflow: scroll;max-height: 400px;">
-                    <MetadataTree :metadata="Object.entries(schemaStore.schema)" />
-                </VaCardContent>
-            </VaCard>
-        </div>
     </div>
 
     <!-- 

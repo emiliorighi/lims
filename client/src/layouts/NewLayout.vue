@@ -52,7 +52,14 @@ const breakpoints = useBreakpoint()
 
 const route = useRoute()
 const router = useRouter()
-
+const menu = [
+    { "icon": "dashboard", "title": "Dashboard", name: 'home' },
+    { "icon": "folder", "title": "Projects", name: 'projects' },
+    { "icon": "edit", "title": "Project Form", name: 'project-form' },
+    // { "icon": "drafts", "title": "Draft Projects",name:'projects' },
+    //     { "icon": "fa-vial", "title": "Samples" },
+    //     { "icon": "fa-dna", "title": "Experiments" }
+]
 const isSidebarVisible = ref(breakpoints.mdUp)
 
 watchEffect(() => {

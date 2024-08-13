@@ -5,7 +5,17 @@
             <span style="margin-left: 3px;" class="va-text-secondary">{{ schemaStore.schema.version }}</span>
         </div>
         <div class="flex">
-            <DownloadYAMLProject :project="schemaStore.schema" />
+            <div class="row">
+                <div class="flex">
+                    <VaButton preset="primary" @click="schemaStore.showSchema = !schemaStore.showSchema">
+                        View Schema
+                    </VaButton>
+                </div>
+                <div class="flex">
+                    <DownloadYAMLProject :project="schemaStore.schema" />
+                </div>
+
+            </div>
         </div>
     </div>
     <VaCard>
@@ -14,7 +24,6 @@
                 <template #tabs>
                     <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
                         :icon="tab.icon">
-                        <!-- <VaButton block preset="secondary" border-color="primary" :icon="tab.icon">{{ tab.label }}</VaButton> -->
                     </VaTab>
                 </template>
             </VaTabs>
@@ -28,53 +37,7 @@
 
         </VaCardContent>
     </VaCard>
-    <!-- <div class="row">
-        <div class="flex lg6 md8 sm12 xs12">
-            <VaTabs v-if="validTabs.length" v-model="tab">
-                <template #tabs>
-                    <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
-                        :icon="tab.icon">
-                    </VaTab>
-                </template>
-</VaTabs>
-<VaButtonToggle v-if="validTabs.length" v-model="tab" preset="secondary" border-color="primary" :options="validTabs"
-    valueBy="name" trackBy="name" textBy="label" />
-</div>
-<div class="flex"></div>
-</div> -->
-
-
-
-
-    <!-- <div class="row justify-space-between">
-        <div class="flex">
-
-        </div>
-        <div class="flex">
-        </div>
-    </div> -->
-
-    <!-- <VaTabs v-if="validTabs.length" v-model="tab">
-        <template #tabs>
-            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label" :icon="tab.icon">
-            </VaTab>
-        </template>
-</VaTabs> -->
-    <!-- <VaDivider style="margin:0" /> -->
-    <!-- <VaCard>
-        <VaCardContent>
-            <router-view v-if="showProject"></router-view>
-
-        </VaCardContent>
-    </VaCard> -->
-
-
-
-
-
-    <!-- <VaDivider style="margin-top:0" /> -->
-
-
+    <ProjectDetailsModal />
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
@@ -82,6 +45,7 @@ import { useSchemaStore } from '../../stores/schemas-store';
 import ProjectService from '../../services/clients/ProjectService';
 import { useRoute, useRouter } from 'vue-router';
 import DownloadYAMLProject from '../../components/buttons/DownloadYAMLProject.vue';
+import ProjectDetailsModal from '../../components/modals/ProjectDetailsModal.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -163,12 +127,8 @@ async function getProject() {
     }
 }
 
+function showProjectDetails() {
+    schemaStore.showSchema = true
+}
 
-// function pushRoute(n: string) {
-//     const t = tabs.find(({ name }) => name === n)
-//     if (t) {
-//         value.value = t.name
-//         router.push(t.to)
-//     }
-// }
 </script>

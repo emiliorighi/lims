@@ -1,5 +1,5 @@
 from datetime import datetime
-from .enums import Roles, Actions, Model
+from .enums import Roles, Actions, Model,ChartSize,ChartType
 import mongoengine as db
 
 def handler(event):
@@ -134,6 +134,15 @@ class ActionLogs(db.Document):
         ],
         'strict': False
     }
+
+
+class Chart(db.Document):
+    user = db.StringField(required=True)
+    project = db.StringField(required=True)
+    model = db.EnumField(Model, default=Model.SAMPLE)
+    field= db.StringField(required=True)
+    chart_type = db.EnumField(ChartType, default=ChartType.HORIZONTAL_BAR)
+    size=db.EnumField(ChartSize, default=ChartSize.TWO)
 
 class User(db.Document):
     name=db.StringField(unique=True,required=True)

@@ -16,11 +16,19 @@
     }}</VaChip>
         </template>
     </VaDataTable>
-    <VaModal v-model="confirmDelete" hide-default-actions overlay-opacity="0.2">
+    <VaModal v-model="confirmDelete" hide-default-actions>
         <template #header>
-            <h3>Are you sure you want to delete {{ idToDelete }}</h3>
+            <div class="row align-center justify-space-between">
+                <div class="flex">
+                    <h3 class="va-h3">
+                        Deleting {{ idToDelete }}? </h3>
+                    <p class="va-text-secondary">
+                        This will permanently delete the object
+                    </p>
+                </div>
+            </div>
         </template>
-        <div>This will permanently delete the object</div>
+        <VaDivider />
         <template #footer>
             <VaButton @click="$emit('deleteClicked', indexToDelete); confirmDelete = !confirmDelete" color="danger">
                 Confirm </VaButton>

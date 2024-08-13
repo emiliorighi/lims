@@ -35,7 +35,7 @@
 
         <ReportModal :search-form="itemStore().searchForm" />
 
-        <ItemDetailsModal v-if="item" :item="item" />
+        <ItemDetailsModal v-if="item" :id="itemID" :icon="itemIcon" :metadata="item.metadata" />
 
     </div>
 </template>
@@ -72,6 +72,8 @@ const { toast } = useGlobalStore();
 
 const items = ref<SampleModel[] | ExperimentModel[]>([]);
 const item = ref<SampleModel | ExperimentModel>()
+const itemID = ref('')
+const itemIcon = ref<'fa-vial' | 'fa-dna'>('fa-vial')
 const total = ref(0);
 const itemToEdit = ref<SampleModel | ExperimentModel | undefined>()
 const errorMessage = ref('');
@@ -122,11 +124,14 @@ function updateShowFields(updatedShowFields: { show: boolean, value: string }[])
 }
 
 async function showSampleDetails(id: string) {
+    itemID.value = id
+    itemIcon.value = 'fa-vial'
     await fetchItem(schemaStore.schema.project_id, id, 'sample')
 }
 
-
 async function showExperimentDetails(id: string) {
+    itemID.value = id
+    itemIcon.value = 'fa-dna'
     await fetchItem(schemaStore.schema.project_id, id, 'experiment')
 }
 async function handleLimit(limit: number) {
@@ -186,7 +191,6 @@ function showForm() {
 }
 
 async function reset() {
-    console.log('HELLO')
     pagination.value.offset = 0;
     store.searchForm.query = {};
     await fetchItems();

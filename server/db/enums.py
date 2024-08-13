@@ -28,3 +28,16 @@ class Actions(Enum):
 class Model(Enum):
     SAMPLE='sample'
     EXPERIMENT='experiment'
+
+class ChartType(Enum):
+    BAR="bar"
+    LINE="line"
+    DOUGHNUT="doughnut"
+    PIE="pie"
+    HORIZONTAL_BAR="horizontal-bar"
+
+class ChartSize(Enum):
+    ONE="1"
+    TWO="2"
+    THREE="3"
+    FOUR="4"

@@ -88,3 +88,13 @@ export type DashboardCard = {
   count: number | null
 }
 
+export type ChartTypes = "line" | "bar" | "doughnut" | "pie" | "horizontal-bar"
+export type VaChartItem = {
+    type: ChartTypes
+    data: Record<string, number>
+    model: 'sample' | 'experiment',
+    field: string
+    size: ColumnSizes
+}
+
+export type ColumnSizes = '1' |'2' | '3' | '4'

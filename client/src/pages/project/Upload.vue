@@ -1,7 +1,7 @@
 <template>
     <h4 class="va-h4">Upload</h4>
     <p class="va-text-secondary mb-4">Upload a TSV file and map its columns to a set of model attributes</p>
-    <VaAccordion v-model="accordionState" class="max-w-sm" multiple>
+    <VaAccordion v-model="accordionState" multiple>
 
         <!-- TSV Upload Section -->
         <VaCollapse icon="upload_file" header="TSV Upload">

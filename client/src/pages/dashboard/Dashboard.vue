@@ -5,12 +5,13 @@
         </div>
         <div class="row row-equal">
             <div class="flex lg8 md8 sm12 xs12">
-                <VaCard v-if="chartData">
-                    <VaCardTitle class="va-text-secondary">
+                <VaCard v-if="expData && sampleData">
+                    <!-- <VaCardTitle class="va-text-secondary">
                         Data contained in each project
-                    </VaCardTitle>
+                    </VaCardTitle> -->
                     <VaCardContent style="height: 400px;">
-                        <VaChart type="horizontal-bar" :data="chartData" />
+                        <VaChart :options="chartOptions" type="horizontal-bar"
+                            :data="createChartData(sampleData, expData)" />
                     </VaCardContent>
                 </VaCard>
                 <VaSkeleton v-else height="400px" />
@@ -43,14 +44,14 @@
 import { onMounted, ref } from 'vue'
 import StatsService from '../../services/clients/StatsService'
 import VaChart from '../../components/va-charts/VaChart.vue'
-import { TChartData, DashboardCard } from '../../data/types'
+import { DashboardCard } from '../../data/types'
 import ProjectService from '../../services/clients/ProjectService'
 import ItemService from '../../services/clients/ItemService'
 import { AxiosResponse } from 'axios'
 import Counter from '../../components/ui/Counter.vue'
 
-const chartData = ref<TChartData>()
-
+const expData = ref<Record<string, number> | undefined>()
+const sampleData = ref<Record<string, number> | undefined>()
 const cards = ref<{
     samples: DashboardCard,
     experiments: DashboardCard,
@@ -75,15 +76,29 @@ const cards = ref<{
         count: 0
     }
 })
+const chartOptions = {
+    plugins: {
+        title: {
+            text: 'Number of Samples and Experiments by Project',
+            display: true,
+            align: 'start'
+        },
+        datalabels: {
+            color: '#ffffff',
+            font: {
+                size: '18'
+            }
+        },
+        legend: { position: 'bottom', align: 'center' }
+    },
 
+}
 onMounted(async () => {
     try {
 
         // Get stats and create chart
-        const sampleData = await getStats('samples')
-        const experimentData = await getStats('experiments')
-        chartData.value = createChartData(sampleData, experimentData)
-
+        sampleData.value = { ...await getStats('samples') }
+        expData.value = { ...await getStats('experiments') }
         // Get object count
         cards.value.projects.count = getTotal(await ProjectService.getProjects({}))
         cards.value.samples.count = getTotal(await ItemService.getAllItems('sample', {}))

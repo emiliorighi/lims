@@ -33,6 +33,7 @@ export const useSchemaStore = defineStore('schema', {
       showReport: false,
       showForm: false,
       showDetails: false,
+      showSchema:false,
       model: 'sample' as ModelType,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
