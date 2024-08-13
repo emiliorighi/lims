@@ -1,11 +1,10 @@
 <template>
-    <div>
-        <h2 class="va-h2"> Resume of {{ projectStore.currentProject.project_id }}
-        </h2>
-        <div class="row row-equal">
-            <div class="flex lg12 md12 sm12 xs12">
-                <ProjectOverviewCard :metadata="projectStore.currentProject" />
-            </div>
+    <h4 class="va-h4"> Resume of {{ projectStore.currentProject.project_id }}
+    </h4>
+    <p class="va-text-secondary">Check the project and submit it</p>
+    <div class="row row-equal">
+        <div class="flex lg12 md12 sm12 xs12">
+            <ProjectOverviewCard :metadata="projectStore.currentProject" />
         </div>
     </div>
 </template>

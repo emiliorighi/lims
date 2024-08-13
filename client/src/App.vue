@@ -1,8 +1,8 @@
 <template>
-  <NewLayout></NewLayout>
+  <AppLayout></AppLayout>
 </template>
 <script setup lang="ts">
-import NewLayout from './layouts/NewLayout.vue';
+import AppLayout from './layouts/AppLayout.vue';
 import ProjectLayout from './layouts/ProjectLayout.vue';
 import AuthService from './services/clients/AuthService'
 import { onMounted } from 'vue'

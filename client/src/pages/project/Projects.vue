@@ -1,35 +1,41 @@
 <template>
-    <div class="row justify-space-between align-end">
-        <h1 class="va-h1 flex pt-0">Projects</h1>
-        <div class="flex">
-            <VaButton :to="{ name: 'project-form' }" icon="add" color="success">
-                Project
-            </VaButton>
+    <h1 class="va-h1">Projects</h1>
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardContent>
+                    <div class="row justify-space-between">
+                        <div class="flex">
+                            <VaInput v-model="searchForm.filter" placeholder="Search project" clearable>
+                                <template #appendInner>
+                                    <VaIcon name="search" />
+                                </template>
+                            </VaInput>
+                        </div>
+                        <div class="flex">
+                            <VaButton :to="{ name: 'project-form' }" icon="add">
+                                Project
+                            </VaButton>
+                        </div>
+                    </div>
+                </VaCardContent>
+                <VaCardContent>
+                    <VaDataTable :items="projects" :columns="['name', 'description', 'version', 'action']">
+                        <template #cell(action)="{ rowData }">
+                            <VaChip size="small" square @click="useProject(rowData as SchemaForm)">
+                                View details
+                            </VaChip>
+                        </template>
+                    </VaDataTable>
+                </VaCardContent>
+                <VaCardContent>
+                    <Pagination @offset-changed="handlePagination" :limit="searchForm.limit" :offset="searchForm.offset"
+                        :total="total" />
+                </VaCardContent>
+            </VaCard>
         </div>
     </div>
 
-    <VaCard>
-        <VaCardContent>
-            <VaInput style="width: 200px;" v-model="searchForm.filter" placeholder="Search project" clearable><template
-                    #appendInner>
-                    <VaIcon name="search" />
-                </template>
-            </VaInput>
-        </VaCardContent>
-        <VaCardContent>
-            <VaDataTable :items="projects" :columns="['name', 'description', 'version', 'action']">
-                <template #cell(action)="{ rowData }">
-                    <VaChip size="small" square @click="useProject(rowData as SchemaForm)">
-                        View details
-                    </VaChip>
-                </template>
-            </VaDataTable>
-        </VaCardContent>
-        <VaCardContent>
-            <Pagination @offset-changed="handlePagination" :limit="searchForm.limit" :offset="searchForm.offset"
-                :total="total" />
-        </VaCardContent>
-    </VaCard>
 </template>
 <script setup lang="ts">
 import { reactive, ref, watchEffect } from 'vue';

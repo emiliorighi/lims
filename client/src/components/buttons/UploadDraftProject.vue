@@ -1,6 +1,6 @@
 <template>
     <div>
-        <VaButton icon="book" @click="triggerGet" color="info" :loading="isLoading">
+        <VaButton preset="primary" icon="book" @click="triggerGet" color="info" :loading="isLoading">
             Load Draft
         </VaButton>
         <VaModal v-model="show" hide-default-actions>

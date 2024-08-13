@@ -1,13 +1,14 @@
 <template>
     <div class="row justify-space-between align-end">
-        <h2 class="va-h2 flex pt-0">Filters creation</h2>
+        <h4 class="va-h4 flex pt-0">Filters creation</h4>
+        <p class="va-text-secondary">Create or import filters and map them to a model</p>
         <div class="flex">
             <div class="row">
                 <div class="flex">
                     <UploadTSV />
                 </div>
                 <div class="flex">
-                    <VaButton color="success" @click="attributeStore.initAttribute" icon="add">
+                    <VaButton @click="attributeStore.initAttribute" icon="add">
                         Filter
                     </VaButton>
                 </div>

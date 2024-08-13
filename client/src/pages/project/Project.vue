@@ -1,5 +1,8 @@
 <template>
-    <div class="row justify-space-between align-end">
+    <h1 class="va-h1">{{ schemaStore.schema.name }}</h1>
+    <p class="va-text-secondary">{{ schemaStore.schema.version }}</p>
+    <p class="va-text-secondary">{{ schemaStore.schema.description }}</p>
+    <!-- <div class="row justify-space-between align-end">
         <div class="flex">
             <h1 style="display: inline;" class="va-h1 pt-0">{{ schemaStore.schema.name }}</h1>
             <span style="margin-left: 3px;" class="va-text-secondary">{{ schemaStore.schema.version }}</span>
@@ -17,26 +20,32 @@
 
             </div>
         </div>
+    </div> -->
+    <div class="row">
+
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardContent style="padding: 0;padding-top: 5px;">
+                    <VaTabs v-if="validTabs.length" v-model="tab">
+                        <template #tabs>
+                            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
+                                :icon="tab.icon">
+                            </VaTab>
+                        </template>
+                    </VaTabs>
+
+                </VaCardContent>
+                <VaDivider style="margin: 0;" />
+
+                <VaCardContent>
+
+                    <router-view v-if="showProject"></router-view>
+
+                </VaCardContent>
+            </VaCard>
+        </div>
     </div>
-    <VaCard>
-        <VaCardContent style="padding: 0;padding-top: 5px;">
-            <VaTabs v-if="validTabs.length" v-model="tab">
-                <template #tabs>
-                    <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
-                        :icon="tab.icon">
-                    </VaTab>
-                </template>
-            </VaTabs>
 
-        </VaCardContent>
-        <VaDivider style="margin: 0;" />
-
-        <VaCardContent>
-
-            <router-view v-if="showProject"></router-view>
-
-        </VaCardContent>
-    </VaCard>
     <ProjectDetailsModal />
 </template>
 <script setup lang="ts">

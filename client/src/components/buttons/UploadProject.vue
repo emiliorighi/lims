@@ -1,5 +1,5 @@
 <template>
-    <VaButton icon="upload_file" @click="show = !show" color="secondary">Upload File</VaButton>
+    <VaButton preset="primary" icon="upload_file" @click="show = !show" color="secondary">Upload File</VaButton>
     <VaModal v-model="show" hide-default-actions>
         <template #header>
             <h2 class="va-h2"> Project upload</h2>

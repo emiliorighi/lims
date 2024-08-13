@@ -1,11 +1,11 @@
 <template>
-    <div class="row justify-space-between">
+    <div class="row justify-space-between align-center">
         <div class="flex p-0">
             <h4 class="va-h4">Statistics</h4>
             <p class="va-text-secondary mb-4">Create and save customized charts</p>
         </div>
         <div class="flex">
-            <VaButton size="large" icon="add" @click="show = !show" />
+            <VaButton icon="add" @click="show = !show"> Chart</VaButton>
         </div>
     </div>
     <div>
@@ -13,9 +13,6 @@
             <div v-for="ch, index in vaCharts" :class="mapSize(ch.size)">
                 <StatsCard :chart="ch" :index="index" @on-delete="deleteChart" :label="`${ch.model}s by ${ch.field} `"
                     :chartId="`${ch.field}_${ch.model}_${ch.type}`" />
-            </div>
-            <div class="flex lg3 md3 sm12 xs12">
-                <VaButton size="large" icon="add" @click="show = !show" />
             </div>
         </div>
         <VaModal v-model="show" hide-default-actions>
@@ -53,7 +50,7 @@ import ProjectService from '../../services/clients/ProjectService';
 import { useSchemaStore } from '../../stores/schemas-store';
 import StatsCard from '../../components/cards/StatsCard.vue';
 import { useForm } from 'vuestic-ui/web-components';
-import { VaChartItem, ChartTypes, ColumnSizes, ModelType } from '../../data/types'
+import { VaChartItem, ChartTypes, ColumnSizes } from '../../data/types'
 
 const { validate } = useForm('chartForm')
 

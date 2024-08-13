@@ -16,6 +16,8 @@
 </template>
 <script setup lang="ts">
 import VaChart from '../va-charts/VaChart.vue';
+import { computed } from 'vue'
+
 const emits = defineEmits(['onDelete'])
 type ChartTypes = "line" | "bar" | "bubble" | "doughnut" | "pie" | "horizontal-bar"
 
@@ -34,22 +36,27 @@ const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384'
     '#d35400', '#2c3e50', '#bdc3c7', '#7f8c8d', '#e74c3c', '#2980b9', '#f1c40f', '#2ecc71', '#9b59b6'
 ]
 
-const chartOptions = {
-    plugins: {
-        title: {
-            text: props.label,
-            display: true,
-            align: 'center'
-        },
-        datalabels: {
-            color: '#ffffff',
-            font: {
-                size: '18'
-            }
-        }, legend: { position: 'top', align: 'start', display: false }
-    },
 
-}
+const chartOptions = computed(() => {
+    const displayLegend = props.chart.type === 'doughnut' || props.chart.type === 'pie'
+    const opts = {
+        plugins: {
+            title: {
+                text: props.label,
+                display: true,
+                align: 'center'
+            },
+            datalabels: {
+                color: '#ffffff',
+                font: {
+                    size: '18'
+                }
+            }, legend: { position: 'bottom', align: 'center', display: displayLegend }
+        },
+
+    }
+    return opts
+})
 function createChartData(data: Record<string, number>) {
     const entries = Object.entries(data)
 

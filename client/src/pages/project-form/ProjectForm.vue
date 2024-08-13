@@ -1,42 +1,46 @@
 <template>
-    <div class="row justify-space-between align-end">
-        <h1 class="va-h1 flex pt-0">{{ title }}</h1>
-        <div class="flex">
-            <div class="row">
-                <div v-for="c in actionsComponents" class="flex">
-                    <component :is="c"></component>
-                </div>
-                <div class="flex">
-                    <DownloadYAML :project="projectStore.currentProject" />
-                </div>
-            </div>
+    <h1 class="va-h1">{{ title }}</h1>
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardContent>
+                    <div class="row justify-end">
+                        <div v-for="c in actionsComponents" class="flex">
+                            <component :is="c"></component>
+                        </div>
+                        <div class="flex">
+                            <DownloadYAML :project="projectStore.currentProject" />
+                        </div>
+                    </div>
+                </VaCardContent>
+                <VaDivider style="margin: 0;" />
+                <VaCardContent>
+                    <VaInnerLoading :loading="isLoading">
+                        <VaForm ref="schemaForm">
+                            <VaStepper @finish="submitProject" linear v-model="currentStep" :steps="steps">
+                                <template #step-content-0>
+                                    <ProjectAttributes />
+                                </template>
+                                <template #step-content-1>
+                                    <ModelAttributes />
+                                </template>
+                                <template #step-content-2>
+                                    <StepSlot :model="'sample'" />
+                                </template>
+                                <template #step-content-3>
+                                    <StepSlot :model="'experiment'" />
+                                </template>
+                                <template #step-content-4>
+                                    <ResumeSlot />
+                                </template>
+                            </VaStepper>
+                        </VaForm>
+                    </VaInnerLoading>
+                </VaCardContent>
+            </VaCard>
         </div>
     </div>
-    <VaCard>
-        <VaCardContent>
-            <VaInnerLoading :loading="isLoading">
-                <VaForm ref="schemaForm">
-                    <VaStepper @finish="submitProject" linear v-model="currentStep" :steps="steps">
-                        <template #step-content-0>
-                            <ProjectAttributes />
-                        </template>
-                        <template #step-content-1>
-                            <ModelAttributes />
-                        </template>
-                        <template #step-content-2>
-                            <StepSlot :model="'sample'" />
-                        </template>
-                        <template #step-content-3>
-                            <StepSlot :model="'experiment'" />
-                        </template>
-                        <template #step-content-4>
-                            <ResumeSlot />
-                        </template>
-                    </VaStepper>
-                </VaForm>
-            </VaInnerLoading>
-        </VaCardContent>
-    </VaCard>
+
     <ConfirmOverwriteModal />
 </template>
 <script setup lang="ts">
@@ -69,19 +73,19 @@ const currentStep = ref(0)
 
 const steps = ref(defineVaStepperSteps([
     {
-        label: 'Project', icon: 'folder', beforeLeave: (step) => { step.hasError = !validate() }
+        label: 'Project', beforeLeave: (step) => { step.hasError = !validate() }
     },
     {
-        label: 'Filters', icon: 'filter_list', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
+        label: 'Filters', beforeLeave: (step) => { step.hasError = !projectStore.currentProject.sample.fields.length }
     },
     {
-        label: 'Sample', icon: 'fa-vial', beforeLeave: (step) => { step.hasError = !isValidSample.value }
+        label: 'Sample', beforeLeave: (step) => { step.hasError = !isValidSample.value }
     },
     {
-        label: 'Experiment', icon: 'fa-dna', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
+        label: 'Experiment', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
     },
     {
-        label: 'Resume', icon: 'check_circle', beforeLeave: async () => await submitProject()
+        label: 'Resume',  beforeLeave: async () => await submitProject()
     }
 ]))
 

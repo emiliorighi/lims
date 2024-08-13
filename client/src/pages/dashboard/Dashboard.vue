@@ -1,40 +1,22 @@
 <template>
-    <div>
-        <div class="row justify-space-between align-end">
-            <h1 class="va-h1 flex pt-0 mb-0">Dashboard</h1>
-        </div>
-        <div class="row row-equal">
-            <div class="flex lg8 md8 sm12 xs12">
-                <VaCard v-if="expData && sampleData">
-                    <!-- <VaCardTitle class="va-text-secondary">
+    <h1 class="va-h1">Dashboard</h1>
+    <div class="row row-equal">
+        <div class="flex lg8 md8 sm12 xs12">
+            <VaCard v-if="expData && sampleData">
+                <!-- <VaCardTitle class="va-text-secondary">
                         Data contained in each project
                     </VaCardTitle> -->
-                    <VaCardContent style="height: 400px;">
-                        <VaChart :options="chartOptions" type="horizontal-bar"
-                            :data="createChartData(sampleData, expData)" />
-                    </VaCardContent>
-                </VaCard>
-                <VaSkeleton v-else height="400px" />
-            </div>
-            <div class="flex lg4 md4 sm12 xs12 cards-column">
-                <div v-for="(card, index) in Object.values(cards)" :key="index" class="row row-equal card-wrapper">
-                    <div class="flex lg12 md12 sm12 xs12">
-                        <VaCard class="card">
-                            <VaCardContent>
-                                <div class="row justify-space-between align-center">
-                                    <div class="flex">
-                                        <Counter :duration="2000" :target-value="card.count" />
-                                        <p>
-                                            {{ card.text }}
-                                        </p>
-                                    </div>
-                                    <div class="flex">
-                                        <VaIcon :color="card.color" :name="card.icon" size="large"></VaIcon>
-                                    </div>
-                                </div>
-                            </VaCardContent>
-                        </VaCard>
-                    </div>
+                <VaCardContent style="height: 400px;">
+                    <VaChart :options="chartOptions" type="horizontal-bar"
+                        :data="createChartData(sampleData, expData)" />
+                </VaCardContent>
+            </VaCard>
+            <VaSkeleton v-else height="400px" />
+        </div>
+        <div class="flex lg4 md4 sm12 xs12 cards-column">
+            <div v-for="(card, index) in Object.values(cards)" :key="index" class="row row-equal card-wrapper">
+                <div class="flex lg12 md12 sm12 xs12">
+                    <ModelCountCard :card="card" />
                 </div>
             </div>
         </div>
@@ -48,7 +30,7 @@ import { DashboardCard } from '../../data/types'
 import ProjectService from '../../services/clients/ProjectService'
 import ItemService from '../../services/clients/ItemService'
 import { AxiosResponse } from 'axios'
-import Counter from '../../components/ui/Counter.vue'
+import ModelCountCard from '../../components/cards/ModelCountCard.vue'
 
 const expData = ref<Record<string, number> | undefined>()
 const sampleData = ref<Record<string, number> | undefined>()
@@ -172,9 +154,4 @@ function createChartData(sampleData: Record<string, number>, experimentData: Rec
     flex-direction: column;
 }
 
-.card {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-}
 </style>

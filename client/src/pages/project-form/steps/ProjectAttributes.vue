@@ -1,5 +1,6 @@
 <template>
-    <h2 class="va-h2">Project Information</h2>
+    <h4 class="va-h4">Project Information</h4>
+    <p class="va-text-secondary">Insert the basic information of the project</p>
     <ProjectConflictNotificationCard
         :text="`A project with id: ${mergedId} already exists! Use it as a template but change the version`"
         v-if="projectStore.projectExists" :existing-project="existingProject" />

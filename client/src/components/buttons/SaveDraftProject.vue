@@ -1,5 +1,5 @@
 <template>
-        <VaButton color="success" :loading="isLoading" :disabled="!isValid" @click="saveDraft" icon="save">Save
+        <VaButton preset="primary" color="success" :loading="isLoading" :disabled="!isValid" @click="saveDraft" icon="save">Save
             Draft</VaButton>
         <VaModal max-height="500px" size="large" v-model="show" hide-default-actions>
             <h2 class="va-h2">{{
