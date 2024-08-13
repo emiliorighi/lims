@@ -1,14 +1,13 @@
 <template>
-    <VaInput readonly label="Unique identifier" v-model="id"
-        placeholder="The unique identifier will be generated here" :rules="[rules]">
+    <VaInput readonly label="Unique identifier" v-model="id" placeholder="The unique identifier will be generated here"
+        :rules="[rules]">
     </VaInput>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
 import { useSchemaStore } from './../../stores/schemas-store';
 import { AxiosError } from 'axios';
-import SampleService from './../../services/clients/SampleService';
-import ExperimentService from './../../services/clients/ExperimentService';
+import ItemService from './../../services/clients/ItemService';
 import { useToast } from 'vuestic-ui/web-components';
 
 
@@ -18,7 +17,7 @@ const props = defineProps<{
 }>()
 
 const schemaStore = useSchemaStore()
-
+const { model } = schemaStore
 const { init } = useToast()
 
 const modelExists = ref(false)
@@ -27,17 +26,12 @@ const isLoading = ref(false)
 
 const rules = computed(() => {
     return [(v: string) => v.length > 0 || 'Fill the required fields to generate the unique identifier',
-    !modelExists.value || `${props.model} already exists`]
+    !modelExists.value || `${model} already exists`]
 })
 
-const request = computed(() => {
-    if (props.model === 'experiment') return ExperimentService.getExperiment
-
-    return SampleService.getSample
-})
 
 const id = computed(() => {
-    const keys = schemaStore.schema[props.model].id_format
+    const keys = schemaStore.schema[model].id_format
     const values: string[] = [];
 
     for (const key of keys) {
@@ -58,15 +52,15 @@ watch(() => (id.value), async () => {
 })
 
 
-async function getItem(id:string): Promise<void> {
+async function getItem(id: string): Promise<void> {
 
     try {
         isLoading.value = true
-        const response = await request.value(schemaStore.schema.project_id, id);
+        const response = await ItemService.getItem(schemaStore.schema.project_id, id, model);
         const { data } = response;
         if (data) modelExists.value = true
         init({
-            message: `${props.model} with ${id} already exists`,
+            message: `${model} with ${id} already exists`,
             color: 'danger',
         });
     } catch (error) {

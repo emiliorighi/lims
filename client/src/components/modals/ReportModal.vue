@@ -1,5 +1,5 @@
 <template>
-    <VaModal max-height="400px" fixed-layout v-model="showModal" @cancel="emits('onClose')" @ok="downloadData">
+    <VaModal max-height="500px" fixed-layout v-model="schemaStore.showReport" @ok="downloadData">
         <template #header>
             <h3 class="va-h3">
                 Download Report
@@ -28,39 +28,30 @@ import { useSchemaStore } from './../../stores/schemas-store'
 import { Filter, ModelSearchForm } from '../../data/types'
 import { AxiosError } from 'axios'
 import { useToast } from 'vuestic-ui/web-components'
-import SampleService from '../../services/clients/SampleService'
-import ExperimentService from '../../services/clients/ExperimentService'
+import ItemService from '../../services/clients/ItemService'
 
 const { init } = useToast()
 const isLoading = ref(false)
 
 
 const props = defineProps<{
-    showModal: boolean,
-    model: 'sample' | 'experiment'
     searchForm: ModelSearchForm
 
 }>()
 
-const emits = defineEmits(['onClose'])
 const schemaStore = useSchemaStore()
 const downloadFields = ref<string[]>([])
 const applyFilters = ref(true)
 const selectAllColumns = ref(false)
 
 const mappedFields = computed(() => {
-    return schemaStore.schema[props.model].fields.map((f: Filter) => { return { show: f.required, value: f.key } })
+    return schemaStore.schema[schemaStore.model].fields.map((f: Filter) => { return { show: f.required, value: f.key } })
 })
 
 const options = computed(() => {
-    return schemaStore.schema[props.model].fields.map(f => f.key)
+    return schemaStore.schema[schemaStore.model].fields.map(f => f.key)
 })
 
-const request = computed(() => {
-    if (props.model === 'experiment') return ExperimentService.getTsv
-
-    return SampleService.getTsv
-})
 async function downloadData() {
     let fields
     if (selectAllColumns.value) {
@@ -80,11 +71,11 @@ async function downloadData() {
             :
             { ...downloadRequest }
 
-        const response = await request.value(schemaStore.schema.project_id, requestData)
+        const response = await ItemService.getTsv(schemaStore.schema.project_id, schemaStore.model, requestData)
         const data = response.data
         const href = URL.createObjectURL(data);
 
-        const filename = `${props.model}_report.tsv`
+        const filename = `${schemaStore.model}_report.tsv`
         // create "a" HTML element with href to file & click
         const link = document.createElement('a');
         link.href = href;
@@ -102,7 +93,7 @@ async function downloadData() {
 
     } finally {
         isLoading.value = false
-        emits('onClose')
+        schemaStore.showReport = false
     }
 }
 </script>

@@ -6,6 +6,15 @@
             <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
                 @click="triggerDeleteConfirm(rowIndex)" />
         </template>
+        <template #cell(sample_id)="{ rowIndex }">
+            <VaChip @click="emits('showSampleDetails', items[rowIndex].sample_id)" color="textPrimary" flat> {{
+        items[rowIndex].sample_id }}</VaChip>
+        </template>
+        <template #cell(experiment_id)="{ rowIndex }">
+            <VaChip @click="emits('showExperimentDetails', items[rowIndex].experiment_id)" color="textPrimary" flat> {{
+        items[rowIndex].experiment_id
+    }}</VaChip>
+        </template>
     </VaDataTable>
     <VaModal v-model="confirmDelete" hide-default-actions overlay-opacity="0.2">
         <template #header>
@@ -25,7 +34,7 @@ import { computed, ref } from 'vue';
 
 const schemaStore = useSchemaStore()
 
-const emits = defineEmits(['editClicked', 'deleteClicked', 'newClicked'])
+const emits = defineEmits(['editClicked', 'deleteClicked', 'showSampleDetails', 'showExperimentDetails'])
 
 const confirmDelete = ref(false)
 const props = defineProps<{
@@ -35,10 +44,12 @@ const props = defineProps<{
 
 const idToDelete = ref('')
 const indexToDelete = ref(0)
+
 function canBeEdited(rowData: Record<string, any>) {
     let modelType: 'sample' | 'experiment' = rowData.experiment_id ? 'experiment' : 'sample'
-    const { id_format } = schemaStore.schema[modelType]
-    return id_format.length !== Object.keys(rowData.metadata).length
+    const { id_format, fields } = schemaStore.schema[modelType]
+    const optionalFields = fields.filter(f => !f.required)
+    return id_format.length !== Object.keys(rowData.metadata).length || optionalFields.length
 }
 
 

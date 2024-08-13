@@ -1,18 +1,18 @@
 import { defineStore } from 'pinia'
-import { SchemaForm } from '../data/types'
+import { ModelType, SchemaForm } from '../data/types'
 
 const initSchema: SchemaForm = {
   project_id: '',
   name: '',
   description: '',
   version: '',
-  experiment:{
-    id_format:[],
-    fields:[]
+  experiment: {
+    id_format: [],
+    fields: []
   },
   sample: {
-    id_format:[],
-    fields:[]
+    id_format: [],
+    fields: []
   },
 }
 
@@ -30,6 +30,10 @@ export const useSchemaStore = defineStore('schema', {
   state: () => {
     return {
       schema: { ...initSchema },
+      showReport: false,
+      showForm: false,
+      showDetails: false,
+      model: 'sample' as ModelType,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
     }

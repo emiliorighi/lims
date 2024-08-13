@@ -16,9 +16,15 @@ class Roles(Enum):
     PROJECTS_MANAGER = 'project_manager'
     ADMIN = 'admin'
 
-# class AccessRights(Enum):
-#     READ
-#     CREATE
 class SchemaModel(Enum):
     BIOSAMPLE = 'biosample'
     EXPERIMENT = 'experiment'
+
+class Actions(Enum):
+    CREATE= 'created'
+    UPDATE='updated'
+    DELETE='deleted'
+
+class Model(Enum):
+    SAMPLE='sample'
+    EXPERIMENT='experiment'

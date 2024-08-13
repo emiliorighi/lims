@@ -28,8 +28,8 @@ class ExperimentsByProjectApi(Resource):
 
 class ExperimentByProjectApi(Resource):
     def get(self, project_id, experiment_id):
-        sample = experiments_service.get_experiment(project_id, experiment_id)
-        return Response(json.dumps(sample), mimetype="application/json", status=200)
+        exp = experiments_service.get_experiment(project_id, experiment_id)
+        return Response(exp.to_json(), mimetype="application/json", status=200)
     
     def put(self, project_id,experiment_id):
         data = request.json if request.is_json else request.form

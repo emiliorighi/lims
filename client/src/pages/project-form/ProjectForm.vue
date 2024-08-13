@@ -6,6 +6,9 @@
                 <div v-for="c in actionsComponents" class="flex">
                     <component :is="c"></component>
                 </div>
+                <div class="flex">
+                    <DownloadYAML :project="projectStore.currentProject" />
+                </div>
             </div>
         </div>
     </div>
@@ -56,7 +59,7 @@ import ConfirmOverwriteModal from '../../components/modals/ConfirmOverwriteModal
 
 const title = 'Project Creation'
 
-const actionsComponents = [SaveDraftProject, UploadDraftProject, UploadProject, DownloadYAML]
+const actionsComponents = [SaveDraftProject, UploadDraftProject, UploadProject]
 const { init } = useToast()
 const isLoading = ref(false)
 const projectStore = useProjectStore()

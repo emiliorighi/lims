@@ -14,6 +14,6 @@ class TsvUploadMapApi(Resource):
 class InferHeaderApi(Resource):
     def post(self, project_id):
         data = request.json if request.is_json else request.form
-        messages, status = project_mapper_service.infer_fields(project_id, data, request.files)
+        messages, status = project_mapper_service.infer_header(project_id, data, request.files)
         return Response(json.dumps(messages), mimetype="application/json", status=status)
 

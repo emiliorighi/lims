@@ -92,9 +92,9 @@ def upload_tsv(project_id, tsv, data):
         if model == 'experiment':
             sample_id = doc_to_save.get('metadata').get('sample_id')
             if not sample_id:
-                raise BadRequest(description=f"{sample_id} is missing in {model} at row {header+index}")
+                raise BadRequest(description=f"Sample {sample_id} is missing in {model} at row {header+index}")
             elif not Sample.objects(project=project_id, sample_id=sample_id).first():
-                raise BadRequest(description=f"row {header+index}: {sample_id} is not present in the database created it first! ")
+                raise BadRequest(description=f"row {header+index}: Sample {sample_id} is not present in the database created it first! ")
 
             doc_to_save['sample_id'] = sample_id
         try:
@@ -104,6 +104,7 @@ def upload_tsv(project_id, tsv, data):
             id_set.add(obj_id)
 
         except NotUniqueError as e:
+            print(e)
             if behaviour == 'UPDATE':
                 if obj_id in updated_items: continue
                 if model == 'sample':

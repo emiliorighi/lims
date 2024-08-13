@@ -10,7 +10,8 @@
 
     <VaCard>
         <VaCardContent>
-            <VaInput style="width: 200px;" v-model="searchForm.filter" placeholder="Search project" clearable><template #appendInner>
+            <VaInput style="width: 200px;" v-model="searchForm.filter" placeholder="Search project" clearable><template
+                    #appendInner>
                     <VaIcon name="search" />
                 </template>
             </VaInput>
@@ -24,16 +25,9 @@
                 </template>
             </VaDataTable>
         </VaCardContent>
-        <VaCardContent class="row align-center justify-space-between">
-            <div class="flex">
-                <b>Total {{ total }}</b>
-                Results per page
-                <VaSelect style="width: 100px;" :options="[10, 20, 50]" v-model="searchForm.limit" />
-            </div>
-            <div class="flex">
-                <Pagination @offset-changed="handlePagination" :limit="searchForm.limit" :offset="searchForm.offset"
-                    :total="total" />
-            </div>
+        <VaCardContent>
+            <Pagination @offset-changed="handlePagination" :limit="searchForm.limit" :offset="searchForm.offset"
+                :total="total" />
         </VaCardContent>
     </VaCard>
 </template>

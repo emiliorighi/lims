@@ -8,9 +8,7 @@
 
 
 PRIORITIES
-1 IMPROVE TSV ATTRIBUTES INFER ON PROJECT CREATION
 2 IMPROVE PROJECT DETAILS
-3 IMPROVE ITEMS UPLOAD
 4 ADD USERS
     add login and logout logic
     check if user is authenticad in localstorage and refresh token

@@ -20,7 +20,7 @@
                 </div>
             </VaButtonDropdown>
         </div>
-        <div v-if="searchForm.query" class="flex">
+        <div v-if="Object.entries(searchForm.query).length" class="flex">
             <VaBadge style="z-index: 1;" overlap color="info" :text="activeFilters">
                 <VaButtonDropdown :closeOnContentClick="false" icon="filter_list" label="Filters" preset="primary"
                     class="mr-2 mb-2">
@@ -176,8 +176,9 @@ const isRangeField = (filter: Filter['filter']): filter is Range => {
 </script>
 <style scoped>
 .row-drop-down {
-    width: min-content;
     max-height: 400px;
+    max-width: 400px;
+
     overflow: scroll;
     padding: 16px;
 }

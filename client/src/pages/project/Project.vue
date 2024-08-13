@@ -1,28 +1,78 @@
 <template>
     <div class="row justify-space-between align-end">
-        <h1 class="va-h1 flex pt-0">{{ projectId }}</h1>
-
-        <!-- <div class="flex">
-        </div> -->
         <div class="flex">
-            
+            <h1 style="display: inline;" class="va-h1 pt-0">{{ schemaStore.schema.name }}</h1>
+            <span style="margin-left: 3px;" class="va-text-secondary">{{ schemaStore.schema.version }}</span>
+        </div>
+        <div class="flex">
+            <DownloadYAMLProject :project="schemaStore.schema" />
         </div>
     </div>
     <VaCard>
-        <VaTabs v-if="validTabs.length" v-model="tab">
-            <template #tabs>
-                <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
-                    :icon="tab.icon">
-                </VaTab>
-            </template>
-        </VaTabs>
-        <VaDivider style="margin-top:0" />
+        <VaCardContent style="padding: 0;padding-top: 5px;">
+            <VaTabs v-if="validTabs.length" v-model="tab">
+                <template #tabs>
+                    <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
+                        :icon="tab.icon">
+                        <!-- <VaButton block preset="secondary" border-color="primary" :icon="tab.icon">{{ tab.label }}</VaButton> -->
+                    </VaTab>
+                </template>
+            </VaTabs>
+
+        </VaCardContent>
+        <VaDivider style="margin: 0;" />
+
+        <VaCardContent>
+
+            <router-view v-if="showProject"></router-view>
+
+        </VaCardContent>
+    </VaCard>
+    <!-- <div class="row">
+        <div class="flex lg6 md8 sm12 xs12">
+            <VaTabs v-if="validTabs.length" v-model="tab">
+                <template #tabs>
+                    <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
+                        :icon="tab.icon">
+                    </VaTab>
+                </template>
+</VaTabs>
+<VaButtonToggle v-if="validTabs.length" v-model="tab" preset="secondary" border-color="primary" :options="validTabs"
+    valueBy="name" trackBy="name" textBy="label" />
+</div>
+<div class="flex"></div>
+</div> -->
+
+
+
+
+    <!-- <div class="row justify-space-between">
+        <div class="flex">
+
+        </div>
+        <div class="flex">
+        </div>
+    </div> -->
+
+    <!-- <VaTabs v-if="validTabs.length" v-model="tab">
+        <template #tabs>
+            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label" :icon="tab.icon">
+            </VaTab>
+        </template>
+</VaTabs> -->
+    <!-- <VaDivider style="margin:0" /> -->
+    <!-- <VaCard>
         <VaCardContent>
             <router-view v-if="showProject"></router-view>
+
         </VaCardContent>
+    </VaCard> -->
 
-    </VaCard>
 
+
+
+
+    <!-- <VaDivider style="margin-top:0" /> -->
 
 
 </template>
@@ -31,6 +81,7 @@ import { computed, onMounted, ref, watch } from 'vue';
 import { useSchemaStore } from '../../stores/schemas-store';
 import ProjectService from '../../services/clients/ProjectService';
 import { useRoute, useRouter } from 'vue-router';
+import DownloadYAMLProject from '../../components/buttons/DownloadYAMLProject.vue';
 
 const router = useRouter()
 const route = useRoute()
@@ -70,7 +121,7 @@ onMounted(async () => {
 
 const tabs = [
     {
-        label: 'Details',
+        label: 'Overview',
         icon: 'info',
         to: { name: 'project', params: { projectId: props.projectId } },
         name: 'project'

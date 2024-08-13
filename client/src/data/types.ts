@@ -18,7 +18,7 @@ export type SampleModel = {
   sample_id: string,
   metadata: Record<string, any>
 }
-
+export type ModelType = "sample" | "experiment"
 export type ExperimentModel = {
   experiment_id: string,
   sample_id: string,
@@ -69,7 +69,7 @@ export type Filter = {
   key: string
   required: boolean
   value?: string
-  model?: 'sample' | 'experiment'
+  model?: ModelType
 }
 
 export interface SearchForm {
@@ -87,3 +87,4 @@ export type DashboardCard = {
   color: string,
   count: number | null
 }
+

@@ -109,8 +109,11 @@ def update_sample(project_id,sample_id,data):
         
     id_fields = project.sample.get('id_format', [])
 
-    new_sample_id = schema.create_item_id(id_fields, data)
+    sample = Sample.objects(project=project_id, sample_id=sample_id).first()   
+    if not sample:
+        raise NotFound(description=f"Sample: {sample_id} not found")
 
+    new_sample_id = schema.create_item_id(id_fields, data)
     if new_sample_id and sample_id != new_sample_id:
         message = f"Sample ID {sample_id} has changed into {new_sample_id}, the value of the fields {','.join(id_fields)} can't be changed"
         raise BadRequest(description=message)
@@ -118,7 +121,7 @@ def update_sample(project_id,sample_id,data):
     evaluation_errors = filter.evaluate_fields(project, data)
     if evaluation_errors:
         raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
-    
+
     sample.update(metadata=data)
 
     return [f"Sample {sample_id} successfully updated"], 201

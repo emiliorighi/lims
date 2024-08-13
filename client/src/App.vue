@@ -73,10 +73,21 @@ body {
   padding: 0;
 }
 
-.p-6{
+.p-6 {
   padding: 6px;
 }
+
 .va-dropdown__content.va-select-dropdown__content.va-dropdown__content-wrapper {
   z-index: 101 !important;
+}
+
+.nav-h {
+  height: 85px;
+}
+
+.row-equal .flex {
+  .va-card {
+    height: 100%;
+  }
 }
 </style>

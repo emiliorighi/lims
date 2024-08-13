@@ -1,6 +1,8 @@
 <template>
     <div>
-        <h1 class="va-h1">Dashboard</h1>
+        <div class="row justify-space-between align-end">
+            <h1 class="va-h1 flex pt-0 mb-0">Dashboard</h1>
+        </div>
         <div class="row row-equal">
             <div class="flex lg8 md8 sm12 xs12">
                 <VaCard v-if="chartData">
@@ -43,8 +45,7 @@ import StatsService from '../../services/clients/StatsService'
 import VaChart from '../../components/va-charts/VaChart.vue'
 import { TChartData, DashboardCard } from '../../data/types'
 import ProjectService from '../../services/clients/ProjectService'
-import SampleService from '../../services/clients/SampleService'
-import ExperimentService from '../../services/clients/ExperimentService'
+import ItemService from '../../services/clients/ItemService'
 import { AxiosResponse } from 'axios'
 import Counter from '../../components/ui/Counter.vue'
 
@@ -85,8 +86,8 @@ onMounted(async () => {
 
         // Get object count
         cards.value.projects.count = getTotal(await ProjectService.getProjects({}))
-        cards.value.samples.count = getTotal(await SampleService.getAllSamples({}))
-        cards.value.experiments.count = getTotal(await ExperimentService.getAllExperiments({}))
+        cards.value.samples.count = getTotal(await ItemService.getAllItems('sample', {}))
+        cards.value.experiments.count = getTotal(await ItemService.getAllItems('experiment', {}))
     } catch (err) {
         console.log(err)
     }

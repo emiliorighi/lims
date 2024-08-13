@@ -42,7 +42,7 @@ export const projects: Array<RouteRecordRaw> = [
       {
         path: '',
         name: 'project',
-        component: () => import('../pages/project/components/Details.vue')
+        component: () => import('../pages/project/Overview.vue')
       },
       {
         path: 'statistics',
@@ -52,17 +52,17 @@ export const projects: Array<RouteRecordRaw> = [
       {
         path: 'upload',
         name: 'upload',
-        component: () => import('../pages/project/ItemsUpload.vue'),
+        component: () => import('../pages/project/Upload.vue'),
       },
       {
         path: 'samples',
         name: 'samples',
-        component: () => import('../pages/sample/Samples.vue'),
+        component: () => import('../pages/project/Samples.vue'),
       },
       {
         path: 'experiments',
         name: 'experiments',
-        component: () => import('../pages/experiment/Experiments.vue'),
+        component: () => import('../pages/project/Experiments.vue'),
       },
     ]
   }

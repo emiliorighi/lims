@@ -1,22 +1,25 @@
 <template>
-    <VaButton color="secondary" :disabled="!projectStore.currentProject.project_id"
-        @click="createAndDownloadYaml" icon="download">
-        Download YAML
+    <VaButton border-color="primary" preset="secondary" :disabled="!project.project_id" @click="createAndDownloadYaml"
+        icon="download">
+        YAML Schema
     </VaButton>
 </template>
 <script setup lang="ts">
-import { useProjectStore } from './../../stores/project-store';
+import { SchemaForm } from '../../data/types'
 import * as YAML from 'yaml';
 
-const projectStore = useProjectStore()
+
+const props = defineProps<{
+    project: SchemaForm
+}>()
 
 function createAndDownloadYaml() {
-    const yaml = YAML.stringify(projectStore.currentProject)
+    const yaml = YAML.stringify(props.project)
     const blob = new Blob([yaml], { type: 'text/yaml' });
     const link = document.createElement('a');
     const url = URL.createObjectURL(blob);
     link.href = url;
-    link.download = projectStore.currentProject.project_id + '.yaml';
+    link.download = props.project.project_id + '.yaml';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

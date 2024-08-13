@@ -1,5 +1,5 @@
 from datetime import datetime
-from .enums import Roles
+from .enums import Roles, Actions, Model
 import mongoengine as db
 
 def handler(event):
@@ -109,6 +109,26 @@ class Sample(db.Document):
             'sample_id',
             {
                 'fields': ['project', 'sample_id'],
+                'unique': True  # This enforces uniqueness
+            }
+        ],
+        'strict': False
+    }
+
+class ActionLogs(db.Document):
+    created = db.DateTimeField(default=datetime.now())
+    user = db.StringField(required=True)
+    project = db.StringField(required=True)
+    action = db.EnumField(Actions, required=True)
+    model = db.EnumField(Model, required=True)
+    item_id = db.StringField(required=True)
+    meta = {
+        'indexes': [
+            'project',
+            'item_id',
+            'user',
+            {
+                'fields': ['project', 'item_id', 'user'],
                 'unique': True  # This enforces uniqueness
             }
         ],

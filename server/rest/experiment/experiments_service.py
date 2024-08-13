@@ -113,7 +113,9 @@ def update_experiment(project_id,experiment_id,data):
     
     project =projects_service.get_project(project_id)
     
-    experiment = get_experiment(project_id, experiment_id)
+    experiment = Experiment.objects(project=project_id,experiment_id=experiment_id).first()
+    if not experiment:
+        raise NotFound(description=f"Experiment: {experiment_id} not found")
     
     id_fields = project.experiment.get('id_format', [])
     new_experiment_id = schema.create_item_id(id_fields, data)
@@ -133,7 +135,9 @@ def delete_experiment(project_id, experiment_id):
     
     projects_service.get_project(project_id)
     
-    exp_to_delete = get_experiment(project_id,experiment_id)
+    exp_to_delete = Experiment.objects(project=project_id,experiment_id=experiment_id).first()
     
     exp_to_delete.delete()
+
     return f"Experiment {experiment_id} successfully deleted", 201
+

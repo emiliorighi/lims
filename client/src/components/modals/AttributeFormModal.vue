@@ -74,7 +74,7 @@
 </template>
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import { Input, Select, Range, fieldTypes, Filter } from './../../data/types'
+import { Input, Select, Range, Filter } from './../../data/types'
 import { useForm } from 'vuestic-ui'
 import { useAttributeStore } from './../../stores/attribute-store'
 
