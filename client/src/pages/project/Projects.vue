@@ -1,5 +1,5 @@
 <template>
-    <h1 class="va-h1">Projects</h1>
+    <Header :title="title" />
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
@@ -44,7 +44,11 @@ import { useRouter } from 'vue-router';
 import { useSchemaStore } from '../../stores/schemas-store';
 import { SchemaForm } from '../../data/types';
 import Pagination from '../../components/filters/Pagination.vue';
+import Header from '../../components/ui/Header.vue'
 
+const props = defineProps<{
+    title: string
+}>()
 const projects = ref<Record<string, any>[]>([])
 const router = useRouter()
 const schemaStore = useSchemaStore()

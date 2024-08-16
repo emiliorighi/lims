@@ -1,4 +1,6 @@
 <template>
+    <Header :title="title" />
+
     <div class="row justify-space-between align-center">
         <div class="flex p-0">
             <h4 class="va-h4">Statistics</h4>
@@ -46,12 +48,16 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import ProjectService from '../../services/clients/ProjectService';
-import { useSchemaStore } from '../../stores/schemas-store';
-import StatsCard from '../../components/cards/StatsCard.vue';
+import ProjectService from '../../../services/clients/ProjectService';
+import { useSchemaStore } from '../../../stores/schemas-store';
+import StatsCard from '../../../components/cards/StatsCard.vue';
 import { useForm } from 'vuestic-ui/web-components';
-import { VaChartItem, ChartTypes, ColumnSizes } from '../../data/types'
+import { VaChartItem, ChartTypes, ColumnSizes } from '../../../data/types'
+import Header from '../../../components/ui/Header.vue'
 
+const props = defineProps<{
+    title: string
+}>()
 const { validate } = useForm('chartForm')
 
 const schemaStore = useSchemaStore()

@@ -7,11 +7,11 @@
                 @click="triggerDeleteConfirm(rowIndex)" />
         </template>
         <template #cell(sample_id)="{ rowIndex }">
-            <VaChip @click="emits('showSampleDetails', items[rowIndex].sample_id)" color="textPrimary" flat> {{
+            <VaChip @click="emits('showItemDetails', items[rowIndex].sample_id, 'sample')" color="textPrimary" flat> {{
         items[rowIndex].sample_id }}</VaChip>
         </template>
         <template #cell(experiment_id)="{ rowIndex }">
-            <VaChip @click="emits('showExperimentDetails', items[rowIndex].experiment_id)" color="textPrimary" flat> {{
+            <VaChip @click="emits('showItemDetails', items[rowIndex].experiment_id, 'experiment')" color="textPrimary" flat> {{
         items[rowIndex].experiment_id
     }}</VaChip>
         </template>
@@ -42,7 +42,7 @@ import { computed, ref } from 'vue';
 
 const schemaStore = useSchemaStore()
 
-const emits = defineEmits(['editClicked', 'deleteClicked', 'showSampleDetails', 'showExperimentDetails'])
+const emits = defineEmits(['editClicked', 'deleteClicked', 'showItemDetails'])
 
 const confirmDelete = ref(false)
 const props = defineProps<{

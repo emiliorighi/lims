@@ -3,13 +3,11 @@
 </template>
 <script setup lang="ts">
 import AppLayout from './layouts/AppLayout.vue';
-import ProjectLayout from './layouts/ProjectLayout.vue';
 import AuthService from './services/clients/AuthService'
 import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useGlobalStore } from './stores/global-store'
 import { AxiosError } from 'axios'
-import { computed } from 'vue';
 import { useRoute } from 'vue-router';
 
 
@@ -17,14 +15,7 @@ const gStore = useGlobalStore()
 
 const router = useRouter()
 
-const route = useRoute();
-// const layoutKey = computed(() => route.meta.layout || 'default');
-// const layout = computed(() => {
-//   if (route.meta.layout === 'project') {
-//     return ProjectLayout;
-//   }
-//   return NewLayout;
-// });
+
 onMounted(async () => {
 
   await checkUserisLoggedIn()

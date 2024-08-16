@@ -1,11 +1,14 @@
 <template>
-    <VaModal max-height="500px" fixed-layout v-model="schemaStore.showReport" @ok="downloadData">
+    <VaModal max-height="500px" fixed-layout v-model="itemStore.showReport" @ok="downloadData">
         <template #header>
-            <h3 class="va-h3">
-                Download Report
-            </h3>
+            <div class="row align-center justify-space-between">
+                <h3 class=" flex va-h3">
+                    Download Report
+                </h3>
+                <VaIcon color="primary" size="large" class="flex" :name="icon" />
+            </div>
         </template>
-        <VaInnerLoading :loading="isLoading">
+        <VaInnerLoading :loading="itemStore.isLoading">
             <div class="row">
                 <VaSelect class="flex lg12 md12 sm12 xs12" v-model="downloadFields"
                     searchPlaceholderText="Type to search" label="Columns" :options="options" placeholder="Column list"
@@ -25,31 +28,26 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useSchemaStore } from './../../stores/schemas-store'
-import { Filter, ModelSearchForm } from '../../data/types'
-import { AxiosError } from 'axios'
-import { useToast } from 'vuestic-ui/web-components'
-import ItemService from '../../services/clients/ItemService'
-
-const { init } = useToast()
-const isLoading = ref(false)
-
+import { Filter, ModelType } from '../../data/types'
+import { useItemStore } from '../../stores/item-store'
 
 const props = defineProps<{
-    searchForm: ModelSearchForm
-
+    icon: string
+    model: ModelType
 }>()
 
+const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
+
 const downloadFields = ref<string[]>([])
 const applyFilters = ref(true)
 const selectAllColumns = ref(false)
 
 const mappedFields = computed(() => {
-    return schemaStore.schema[schemaStore.model].fields.map((f: Filter) => { return { show: f.required, value: f.key } })
+    return schemaStore.schema[props.model].fields.map((f: Filter) => { return { show: f.required, value: f.key } })
 })
-
 const options = computed(() => {
-    return schemaStore.schema[schemaStore.model].fields.map(f => f.key)
+    return schemaStore.schema[props.model].fields.map(f => f.key)
 })
 
 async function downloadData() {
@@ -60,40 +58,15 @@ async function downloadData() {
         fields = [...downloadFields.value]
     }
     const downloadRequest = { format: "tsv", fields: fields }
-    try {
-        isLoading.value = true
-        const requestData = applyFilters.value ? {
-            filter: props.searchForm.filter,
-            sort_column: props.searchForm.sort_column, sort_order: props.searchForm.sort_order,
-            ...props.searchForm.query,
-            ...downloadRequest
-        }
-            :
-            { ...downloadRequest }
-
-        const response = await ItemService.getTsv(schemaStore.schema.project_id, schemaStore.model, requestData)
-        const data = response.data
-        const href = URL.createObjectURL(data);
-
-        const filename = `${schemaStore.model}_report.tsv`
-        // create "a" HTML element with href to file & click
-        const link = document.createElement('a');
-        link.href = href;
-        link.setAttribute('download', filename); //or any other extension
-        document.body.appendChild(link);
-        link.click();
-        // clean up "a" element & remove ObjectURL
-        document.body.removeChild(link);
-        URL.revokeObjectURL(href);
-
-    } catch (e) {
-
-        const axiosError = e as AxiosError
-        init({ message: axiosError.message, color: 'danger' })
-
-    } finally {
-        isLoading.value = false
-        schemaStore.showReport = false
+    const requestData = applyFilters.value ? {
+        filter: itemStore.searchForm.filter,
+        sort_column: itemStore.searchForm.sort_column, sort_order: itemStore.searchForm.sort_order,
+        ...itemStore.searchForm.query,
+        ...downloadRequest
     }
+        :
+        { ...downloadRequest }
+
+    await itemStore.downloadData(requestData, schemaStore.schema.project_id, props.model)
 }
 </script>

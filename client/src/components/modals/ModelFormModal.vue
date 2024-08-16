@@ -1,12 +1,16 @@
 <template>
-    <VaModal hide-default-actions max-height="500px" fixed-layout v-model="schemaStore.showForm">
+    <VaModal hide-default-actions max-height="500px" fixed-layout v-model="itemStore.showForm">
+
         <template #header>
-            <h3 class="va-h3">
-                {{ idToUpdate ? `Update ${idToUpdate}` : `Create ${schemaStore.model}` }}
-            </h3>
+            <div class="row align-center justify-space-between">
+                <h3 class=" flex va-h3">
+                    {{ idToUpdate ? `Update ${idToUpdate}` : `Create ${model}` }}
+                </h3>
+                <VaIcon color="primary" size="large" class="flex" :name="icon" />
+            </div>
         </template>
         <VaDivider />
-        <VaInnerLoading :loading="isLoading">
+        <VaInnerLoading :loading="itemStore.isLoading">
             <VaForm ref="modelForm">
                 <div v-if="!idToUpdate">
                     <div>
@@ -24,7 +28,7 @@
                         <div class="row">
                             <VaSelect class="flex lg6 md6 sm12 xs12 mb-2"
                                 :rules="[(v: string) => !!v || 'Sample is mandatory']" @update:search="handleSearch"
-                                v-model="metadata.sample_id" :options="samples" label="Sample" :loading="isLoading"
+                                v-model="metadata.sample_id" :options="samples" label="Sample" :loading="selectLoading"
                                 dropdownIcon="search" searchable highlight-matched-text
                                 searchPlaceholderText="Type to search" noOptionsText="No sample found">
                             </VaSelect>
@@ -52,59 +56,50 @@
 </template>
 <script setup lang="ts">
 import { useSchemaStore } from '../../stores/schemas-store';
-import { useForm, useToast } from 'vuestic-ui/web-components';
+import { useForm } from 'vuestic-ui/web-components';
 import { computed, ref } from 'vue';
 import MetadataForm from '../forms/MetadataForm.vue'
 import ModelID from '../forms/ModelID.vue'
-import { ExperimentModel, Filter, SampleModel } from '../../data/types';
+import { ItemModel, Filter, ModelType } from '../../data/types';
 import ItemService from '../../services/clients/ItemService';
 import { AxiosError } from 'axios';
+import { useItemStore } from '../../stores/item-store'
 
-const props = defineProps<{
-    itemToEdit: SampleModel | ExperimentModel | undefined,
-}>()
-
-const emits = defineEmits(['itemEdited'])
-
+const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
-const { init } = useToast()
 const { validate } = useForm('modelForm')
 const samples = ref<string[]>([])
+const selectLoading = ref(false)
+const props = defineProps<{
+    model: ModelType
+    icon: string
 
-const isLoading = ref(false)
+}>()
 const metadata = ref<Record<string, any>>({})
 
 const existingMetadata = computed(() => {
-    if (props.itemToEdit) return Object.entries(props.itemToEdit.metadata)
+    if (itemStore.item) return Object.entries(itemStore.item.metadata)
     return []
 })
 
 async function handleSearch(v: string) {
     if (v.length < 2) return
-    isLoading.value = true
+    selectLoading.value = true
     try {
         const { data } = await ItemService.getItems(schemaStore.schema.project_id, 'sample', { filter: v })
-        samples.value = [...data.data.map((d: SampleModel) => d.sample_id)]
+        samples.value = [...data.data.map((d: ItemModel) => d.sample_id)]
     } catch (error) {
         const axiosError = error as AxiosError
-        init({ message: axiosError.message, color: 'danger' })
+        itemStore.toast({ message: axiosError.message, color: 'danger' })
     } finally {
-        isLoading.value = false
+        selectLoading.value = false
     }
 }
 
 const idToUpdate = computed(() => {
-    if (!props.itemToEdit) return undefined
+    if (!itemStore.item) return undefined
 
-    let itemID
-    if (schemaStore.model === 'experiment') {
-        const item = props.itemToEdit as ExperimentModel
-        itemID = item.experiment_id
-    } else {
-        const item = props.itemToEdit as SampleModel
-        itemID = item.sample_id
-    }
-    return itemID
+    return itemStore.item.experiment_id ? itemStore.item.experiment_id : itemStore.item.sample_id
 
 })
 
@@ -113,10 +108,10 @@ const fields = computed(() => {
     const requiredFields = [] as Filter[]
     const optionalFields = [] as Filter[]
     const idFields = [] as Filter[]
-    for (const f of schemaStore.schema[schemaStore.model].fields) {
-        if (schemaStore.schema[schemaStore.model].id_format.includes(f.key) && !idToUpdate.value) {
+    for (const f of schemaStore.schema[props.model].fields) {
+        if (schemaStore.schema[props.model].id_format.includes(f.key) && !idToUpdate.value) {
             idFields.push(f)
-        } else if (f.required && !schemaStore.schema[schemaStore.model].id_format.includes(f.key)) {
+        } else if (f.required && !schemaStore.schema[props.model].id_format.includes(f.key)) {
             requiredFields.push(f)
         } else if (!f.required) {
             optionalFields.push(f)
@@ -150,12 +145,12 @@ async function submit() {
     const allMetadata = { ...Object.fromEntries(existingMetadata.value), ...metadata.value }
     try {
 
-        isLoading.value = true
+        itemStore.isLoading = true
         if (idToUpdate.value) {
             const response = await ItemService.updateItem(schemaStore.schema.project_id, idToUpdate.value, schemaStore.model, allMetadata as FormData);
             const { data } = response;
 
-            init({
+            itemStore.toast({
                 color: 'success',
                 message: Array.isArray(data) ? data.join(', ') : `${schemaStore.model} ${idToUpdate.value} edited successfully`,
             });
@@ -164,7 +159,7 @@ async function submit() {
             const response = await ItemService.createItem(schemaStore.schema.project_id, schemaStore.model, allMetadata as FormData);
             const { data } = response;
 
-            init({
+            itemStore.toast({
                 color: 'success',
                 message: Array.isArray(data) ? data.join(', ') : `${schemaStore.model} created successfully`,
             });
@@ -178,15 +173,17 @@ async function submit() {
         if (error instanceof AxiosError) {
             message = error.response?.data?.message || message;
         }
-        init({
+        itemStore.toast({
             color: 'danger',
             message,
         });
     } finally {
-        isLoading.value = false
+        itemStore.isLoading = false
         metadata.value = {}
-        emits('itemEdited')
-        schemaStore.showForm = false
+        itemStore.resetPagination()
+        itemStore.resetSearchForm()
+        await itemStore.fetchItems(schemaStore.schema.project_id, props.model)
+        itemStore.showForm = false
     }
 }
 

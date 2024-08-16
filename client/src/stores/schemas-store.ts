@@ -41,7 +41,7 @@ export const useSchemaStore = defineStore('schema', {
   },
 
   actions: {
-    resetSeachForm() {
+    resetSearchForm() {
       this.searchForm = { ...initSearchForm }
     },
     resetPagination() {

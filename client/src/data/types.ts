@@ -14,16 +14,15 @@ export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDo
 
 export type FieldType = "input" | "select" | "range";
 
-export type SampleModel = {
-  sample_id: string,
-  metadata: Record<string, any>
-}
+export type Theme = "light" | "dark"
 export type ModelType = "sample" | "experiment"
-export type ExperimentModel = {
-  experiment_id: string,
+
+export type ItemModel = {
+  experiment_id?: string,
   sample_id: string,
   metadata: Record<string, any>
 }
+
 export const fieldTypes = ['input', 'select', 'range']
 
 export type Input = {
@@ -90,11 +89,11 @@ export type DashboardCard = {
 
 export type ChartTypes = "line" | "bar" | "doughnut" | "pie" | "horizontal-bar"
 export type VaChartItem = {
-    type: ChartTypes
-    data: Record<string, number>
-    model: 'sample' | 'experiment',
-    field: string
-    size: ColumnSizes
+  type: ChartTypes
+  data: Record<string, number>
+  model: 'sample' | 'experiment',
+  field: string
+  size: ColumnSizes
 }
 
-export type ColumnSizes = '1' |'2' | '3' | '4'
+export type ColumnSizes = '1' | '2' | '3' | '4'

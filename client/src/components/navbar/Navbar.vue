@@ -51,7 +51,9 @@ export interface INavigationRoute {
 const breakpoints = useBreakpoint()
 
 const route = useRoute()
+
 const router = useRouter()
+router.currentRoute
 const isSidebarVisible = ref(breakpoints.mdUp)
 
 watchEffect(() => {

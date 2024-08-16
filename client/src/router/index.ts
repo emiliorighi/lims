@@ -9,6 +9,9 @@ const routes: Array<RouteRecordRaw> = [
     name: 'home',
     path: '/',
     component: Dashboard,
+    props: {
+      title: 'Dashboard'
+    },
     meta: {
       layout: 'default',
     },
@@ -16,6 +19,9 @@ const routes: Array<RouteRecordRaw> = [
   {
     name: 'login',
     path: '/login',
+    props: {
+      title: 'Login'
+    },
     component: () => import('../pages/auth/login/Login.vue'),
     meta: {
       layout: 'default',

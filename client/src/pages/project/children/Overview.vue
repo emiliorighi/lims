@@ -1,6 +1,23 @@
 <template>
-    <h4 class="va-h4">Overview</h4>
-    <p class="va-text-secondary mb-4">Project Overview</p>
+    <Header :title="title" />
+    <div class="row justify-space-between align-center">
+        <div class="flex p-0">
+            <h4 class="va-h4">Overview</h4>
+            <p class="va-text-secondary mb-4">Project Overview</p>
+        </div>
+        <div class="flex">
+            <div class="row">
+                <div class="flex">
+                    <VaButton preset="primary" @click="schemaStore.showSchema = !schemaStore.showSchema">
+                        View Schema
+                    </VaButton>
+                </div>
+                <div class="flex">
+                    <DownloadYAMLProject :project="schemaStore.schema" />
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row justify-space-between row-equal">
         <div class="flex">
 
@@ -58,10 +75,16 @@
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import MetadataTree from '../../components/ui/MetadataTree.vue';
-import { useSchemaStore } from '../../stores/schemas-store';
-import ProjectService from '../../services/clients/ProjectService'
-import VaChart from '../../components/va-charts/VaChart.vue'
+import MetadataTree from '../../../components/ui/MetadataTree.vue';
+import { useSchemaStore } from '../../../stores/schemas-store';
+import ProjectService from '../../../services/clients/ProjectService'
+import VaChart from '../../../components/va-charts/VaChart.vue'
+import DownloadYAMLProject from '../../../components/buttons/DownloadYAMLProject.vue'
+import Header from '../../../components/ui/Header.vue'
+
+const props = defineProps<{
+    title: string
+}>()
 
 type LookupResponse = {
     samples: number

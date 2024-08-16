@@ -1,5 +1,5 @@
 <template>
-    <h1 class="va-h1">{{ title }}</h1>
+    <Header :title="title" />
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
@@ -53,15 +53,17 @@ import SaveDraftProject from '../../components/buttons/SaveDraftProject.vue';
 import UploadDraftProject from '../../components/buttons/UploadDraftProject.vue';
 import UploadProject from '../../components/buttons/UploadProject.vue';
 import DownloadYAML from '../../components/buttons/DownloadYAMLProject.vue';
-
 import StepSlot from './steps/StepSlot.vue'
 import ResumeSlot from './steps/ResumeSlot.vue'
 import ProjectAttributes from './steps/ProjectAttributes.vue';
 import ModelAttributes from './steps/ModelAttributes.vue';
 import { useRouter } from 'vue-router';
 import ConfirmOverwriteModal from '../../components/modals/ConfirmOverwriteModal.vue'
+import Header from '../../components/ui/Header.vue'
 
-const title = 'Project Creation'
+const props = defineProps<{
+    title: string
+}>()
 
 const actionsComponents = [SaveDraftProject, UploadDraftProject, UploadProject]
 const { init } = useToast()
@@ -85,7 +87,7 @@ const steps = ref(defineVaStepperSteps([
         label: 'Experiment', beforeLeave: (step) => { step.hasError = projectStore.currentProject.experiment.fields.length > 0 && !isValidExperiment.value }
     },
     {
-        label: 'Resume',  beforeLeave: async () => await submitProject()
+        label: 'Resume', beforeLeave: async () => await submitProject()
     }
 ]))
 

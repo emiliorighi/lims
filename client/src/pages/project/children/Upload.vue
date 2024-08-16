@@ -1,6 +1,5 @@
 <template>
-    <h4 class="va-h4">Upload</h4>
-    <p class="va-text-secondary mb-4">Upload a TSV file and map its columns to a set of model attributes</p>
+    <Header :title="title" />
     <VaAccordion v-model="accordionState" multiple>
 
         <!-- TSV Upload Section -->
@@ -84,11 +83,15 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useSchemaStore } from '../../stores/schemas-store';
+import { useSchemaStore } from '../../../stores/schemas-store';
 import { useToast } from 'vuestic-ui/web-components';
-import ProjectService from '../../services/clients/ProjectService';
+import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
+import Header from '../../../components/ui/Header.vue'
 
+const props = defineProps<{
+    title: string
+}>()
 const schemaStore = useSchemaStore();
 const isLoading = ref(false);
 const tsv = ref();

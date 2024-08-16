@@ -1,23 +1,29 @@
-import { RouteRecordRaw } from 'vue-router';
+import { RouteRecordRaw, RouteLocationNormalizedLoaded } from 'vue-router';
 import { useGlobalStore } from '../stores/global-store'
+import { useSchemaStore } from '../stores/schemas-store';
+import { title } from 'process';
+
+
 
 function isAdmin() {
-    const { userRole } = useGlobalStore()
-    if (userRole !== 'Admin') {
-      return { name: 'unauthorized' }
-    }
+  const { userRole } = useGlobalStore()
+  if (userRole !== 'Admin') {
+    return { name: 'unauthorized' }
   }
-  
-  function isAuthenticated() {
-    const { isAuthenticated } = useGlobalStore()
-    if (!isAuthenticated) return { name: 'login' }
-  }
-  
+}
+
+function isAuthenticated() {
+  const { isAuthenticated } = useGlobalStore()
+  if (!isAuthenticated) return { name: 'login' }
+}
+
 export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects',
     name: 'projects',
-    props: true,
+    props: {
+      title: 'Projects'
+    },
     component: () => import('../pages/project/Projects.vue'),
     meta: {
       layout: 'default',
@@ -26,6 +32,9 @@ export const projects: Array<RouteRecordRaw> = [
   {
     path: '/project-form',
     name: 'project-form',
+    props: {
+      title: 'Project Form'
+    },
     component: () => import('../pages/project-form/ProjectForm.vue'),
     meta: {
       layout: 'default',
@@ -34,7 +43,7 @@ export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects/:projectId',
     props: true,
-    component: () => import('../pages/project/Project.vue'),
+    component: () => import('../layouts/ProjectBypass.vue'),
     meta: {
       layout: 'project',
     },
@@ -42,27 +51,38 @@ export const projects: Array<RouteRecordRaw> = [
       {
         path: '',
         name: 'project',
-        component: () => import('../pages/project/Overview.vue')
+        props: {
+          title: 'Overview'
+        },
+        component: () => import('../pages/project/children/Overview.vue')
       },
       {
         path: 'statistics',
         name: 'statistics',
-        component: () => import('../pages/project/StatisticsPage.vue'),
+        props: {
+          title: 'Statistics'
+        },
+        component: () => import('../pages/project/children/Statistics.vue'),
       },
       {
         path: 'upload',
         name: 'upload',
-        component: () => import('../pages/project/Upload.vue'),
+        props: {
+          title: 'Upload'
+        },
+        component: () => import('../pages/project/children/Upload.vue'),
       },
       {
         path: 'samples',
         name: 'samples',
-        component: () => import('../pages/project/Samples.vue'),
+        props: { model: 'sample', title: 'Samples', icon: 'fa-vial', buttonLabel: 'Add Sample' },
+        component: () => import('../pages/project/children/Items.vue'),
       },
       {
         path: 'experiments',
         name: 'experiments',
-        component: () => import('../pages/project/Experiments.vue'),
+        props: { model: 'experiment', title: 'Experiments', icon: 'fa-dna', buttonLabel: 'Add Experiment' },
+        component: () => import('../pages/project/children/Items.vue'),
       },
     ]
   }

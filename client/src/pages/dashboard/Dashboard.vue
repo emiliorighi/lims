@@ -1,5 +1,5 @@
 <template>
-    <h1 class="va-h1">Dashboard</h1>
+    <Header :title=title />
     <div class="row row-equal">
         <div class="flex lg8 md8 sm12 xs12">
             <VaCard v-if="expData && sampleData">
@@ -31,6 +31,12 @@ import ProjectService from '../../services/clients/ProjectService'
 import ItemService from '../../services/clients/ItemService'
 import { AxiosResponse } from 'axios'
 import ModelCountCard from '../../components/cards/ModelCountCard.vue'
+import Header from '../../components/ui/Header.vue'
+
+const props = defineProps<{
+    title: string
+}>()
+
 
 const expData = ref<Record<string, number> | undefined>()
 const sampleData = ref<Record<string, number> | undefined>()
@@ -153,5 +159,4 @@ function createChartData(sampleData: Record<string, number>, experimentData: Rec
     display: flex;
     flex-direction: column;
 }
-
 </style>
