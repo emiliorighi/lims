@@ -28,26 +28,8 @@
                     </div>
                 </VaCardContent>
                 <VaCardContent>
-                    <VaDataTable :items="itemStore.items" :columns="columns">
-                        <template #cell(actions)="{ rowData }">
-                            <VaButton v-if="canBeEdited(rowData)" preset="plain" icon="edit"
-                                @click="editItem(rowData)" />
-
-                            <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
-                                @click="triggerDelete(rowData)" />
-                        </template>
-                        <template #cell(sample_id)="{ rowData }">
-                            <VaChip @click="showItemDetails(rowData.sample_id, 'sample')" color="textPrimary" flat>
-                                {{ rowData.sample_id }}
-                            </VaChip>
-                        </template>
-                        <template #cell(experiment_id)="{ rowData }">
-                            <VaChip v-if="rowData.experiment_id"
-                                @click="showItemDetails(rowData.experiment_id, 'experiment')" color="textPrimary" flat>
-                                {{ rowData.experiment_id }}
-                            </VaChip>
-                        </template>
-                    </VaDataTable>
+                    <ItemsTable :items="itemStore.items" :columns="columns" :model="model" @edit-item="editItem"
+                        @trigger-delete="triggerDelete" @show-item-details="showItemDetails" />
                     <Pagination @handle-limit="handleLimit" @offset-changed="handlePagination"
                         :limit="itemStore.pagination.limit" :offset="itemStore.pagination.offset"
                         :total="itemStore.total" />
@@ -78,9 +60,9 @@ import Pagination from '../../../components/filters/Pagination.vue'
 import { useItemStore } from '../../../stores/item-store'
 import ConfirmDeleteModal from '../../../components/modals/ConfirmDeleteModal.vue'
 import Header from '../../../components/ui/Header.vue'
+import ItemsTable from '../../../components/tables/ItemsTable.vue'
 
 const itemStore = useItemStore()
-
 const schemaStore = useSchemaStore()
 const { project_id } = schemaStore.schema
 
@@ -92,9 +74,14 @@ const props = defineProps<{
 }>()
 
 const itemType = ref<ModelType>('sample')
+const showFields = ref(
+    schemaStore.schema[props.model].fields.map(f => ({ show: f.required, value: f.key }))
+)
+
 onMounted(async () => {
     await itemStore.fetchItems(schemaStore.schema.project_id, props.model)
 })
+
 watch(() => props.model, async (v) => {
     itemStore.resetPagination()
     itemStore.resetSearchForm()
@@ -112,12 +99,7 @@ const idColumns = computed(() => {
 })
 const filteredFields = computed(() =>
     schemaStore.schema[props.model].fields.filter(f => !singleId.value || singleId.value !== f.key)
-);
-
-const showFields = ref(
-    schemaStore.schema[props.model].fields.map(f => ({ show: f.required, value: f.key }))
-);
-
+)
 const columns = computed(() => {
     return [...idColumns.value, ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`), 'actions'];
 });
@@ -140,12 +122,12 @@ async function updateQueryForm(list: [keyof Record<string, any>, Record<string, 
     await itemStore.fetchItems(project_id, props.model)
 }
 
-
 function updateShowFields(updatedShowFields: { show: boolean, value: string }[]) {
     showFields.value = [...updatedShowFields]
 }
 
-async function showItemDetails(id: string, model: ModelType) {
+async function showItemDetails(payload: { id: string, model: ModelType }) {
+    const { id, model } = payload
     itemType.value = model
     await itemStore.fetchItem(project_id, id, model)
 }
@@ -153,12 +135,6 @@ async function showItemDetails(id: string, model: ModelType) {
 function triggerDelete(rowData: ItemModel) {
     itemStore.idToDelete = rowData.experiment_id ? rowData.experiment_id : rowData.sample_id
     itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
-}
-
-function canBeEdited(rowData: ItemModel) {
-    const { id_format, fields } = schemaStore.schema[props.model]
-    const optionalFields = fields.filter(f => !f.required)
-    return id_format.length !== Object.keys(rowData.metadata).length || optionalFields.length
 }
 
 async function handleLimit(limit: number) {
@@ -171,7 +147,6 @@ async function handlePagination(offset: number) {
     await itemStore.fetchItems(project_id, props.model)
 }
 
-
 function editItem(rowData: ItemModel) {
     itemStore.item = { ...rowData }
     itemStore.showForm = !itemStore.showForm;
@@ -180,12 +155,6 @@ function editItem(rowData: ItemModel) {
 function newItem() {
     itemStore.item = undefined
     itemStore.showForm = !itemStore.showForm;
-}
-
-async function reset() {
-    itemStore.resetPagination()
-    itemStore.resetSearchForm()
-    await itemStore.fetchItems(project_id, props.model)
 }
 
 

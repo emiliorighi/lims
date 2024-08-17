@@ -1,40 +1,15 @@
 <template>
     <VaModal hide-default-actions max-height="500px" fixed-layout v-model="itemStore.showForm">
         <template #header>
-            <div class="row align-center justify-space-between">
-                <h3 class=" flex va-h3">
-                    {{ idToUpdate ? `Update ${idToUpdate}` : `Create ${model}` }}
-                </h3>
-                <VaIcon color="primary" size="large" class="flex" :name="icon" />
-            </div>
+            <Header :title="idToUpdate ? `Update ${idToUpdate}` : `Create ${model}`" :icon="icon" />
         </template>
         <VaDivider />
         <VaInnerLoading :loading="itemStore.isLoading">
             <VaForm ref="modelForm">
                 <div v-if="!idToUpdate">
-                    <div>
-                        <h6 class="va-h6">Generated ID</h6>
-                        <p class="va-text-secondary mb-2">This section displays the generated ID</p>
-                        <div class="row">
-                            <div class="flex lg6 md6 sm12 xs12 mb-2">
-                                <VaInput readonly label="Unique identifier" v-model="id"
-                                    placeholder="The unique identifier will be generated here" :rules="[rules]">
-                                </VaInput>
-                            </div>
-                        </div>
-                    </div>
-                    <div v-if="model === 'experiment'">
-                        <h6 class="va-h6">Sample Linking</h6>
-                        <p class="va-text-secondary mb-2">Link this experiment to a sample </p>
-                        <div class="row">
-                            <VaSelect class="flex lg6 md6 sm12 xs12 mb-2"
-                                :rules="[(v: string) => !!v || 'Sample is mandatory']" @update:search="handleSearch"
-                                v-model="metadata.value.sample_id" :options="samples" label="Sample" :loading="selectLoading"
-                                dropdownIcon="search" searchable highlight-matched-text
-                                searchPlaceholderText="Type to search" noOptionsText="No sample found">
-                            </VaSelect>
-                        </div>
-                    </div>
+                    <ItemID :id="id" :rules="rules" />
+                    <SampleLinking v-if="model === 'experiment'" :model="props.model" :metadata="metadata.value"
+                        :samples="samples" :selectLoading="selectLoading" @update:search="handleSearch" />
                 </div>
                 <div v-for="(f, index) in fields" :key="index">
                     <h6 class="va-h6">{{ f.title }}</h6>
@@ -56,15 +31,22 @@
     </VaModal>
 </template>
 <script setup lang="ts">
-import { useForm } from 'vuestic-ui/web-components';
-import MetadataForm from '../forms/MetadataForm.vue'
-import { ItemModel, Filter, ModelType } from '../../data/types';
-import ItemService from '../../services/clients/ItemService';
 import { AxiosError } from 'axios';
-import { useItemStore } from '../../stores/item-store'
 import { computed, reactive, ref, watch } from 'vue';
+
 import { useSchemaStore } from './../../stores/schemas-store';
-import { useToast } from 'vuestic-ui/web-components';
+import { useToast, useForm } from 'vuestic-ui/web-components';
+import { useItemStore } from '../../stores/item-store'
+
+import { ItemModel, Filter, ModelType } from '../../data/types';
+
+import ItemService from '../../services/clients/ItemService';
+
+import Header from './common/Header.vue'
+
+import MetadataForm from '../forms/MetadataForm.vue'
+import SampleLinking from '../forms/SampleLinking.vue'
+import ItemID from '../forms/ItemID.vue'
 
 const props = defineProps<{
     model: ModelType
@@ -87,6 +69,7 @@ const metadata = reactive<Record<string, any>>({ value: {} })
 const existingMetadata = computed(() => {
     return itemStore.item ? Object.entries(itemStore.item.metadata) : [];
 });
+
 const id = computed(() => {
     // Track all keys in metadata by converting it to a string
     const metadataString = JSON.stringify(metadata.value);
@@ -194,8 +177,8 @@ function handleError(error: any, defaultMessage: string) {
 
 function resetForm() {
     metadata.value = {};
-    itemStore.resetPagination();
     itemStore.resetSearchForm();
+    itemStore.resetPagination();
     itemStore.fetchItems(schemaStore.schema.project_id, props.model);
     itemStore.showForm = false;
 }

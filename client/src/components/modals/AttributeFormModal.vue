@@ -2,7 +2,7 @@
     <VaModal max-height="500px" fixed-layout :model-value="!!attributeStore.attribute" @ok="submitAttribute"
         @cancel="resetAttribute()">
         <template #header>
-            <h2 class="va-h2"> Filter editing</h2>
+            <Header title="Filter Editing" />
         </template>
         <VaForm v-if="attributeStore.attribute" ref="attributeForm">
             <div class="row align-end">
@@ -77,6 +77,7 @@ import { ref, watch } from 'vue';
 import { Input, Select, Range, Filter } from './../../data/types'
 import { useForm } from 'vuestic-ui'
 import { useAttributeStore } from './../../stores/attribute-store'
+import Header from './common/Header.vue'
 
 const { validate } = useForm('attributeForm')
 

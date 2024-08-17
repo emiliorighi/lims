@@ -10,7 +10,7 @@
         <template #center>
           <Transition name="fade">
             <h4 v-if=isProjectView class="va-h4">
-              <TypingAnimation :text="schemaStore.schema.project_id" />
+              <TypingAnimation :text="`${schemaStore.schema.name} ${schemaStore.schema.version}`" />
             </h4>
           </Transition>
         </template>
@@ -29,7 +29,7 @@
     <template #left>
       <div style="display: flex; height: 100%;">
         <VaSidebar :minimized="isProjectBarVisible" v-model="isLeftSidebarVisible">
-          <VaSidebarItem :active="isRouteActive(name)" v-for="{ icon, title, name } in menu" :key="icon"
+          <VaSidebarItem :active="isRouteActive(name)" v-for=" { icon, title, name }  in  menu " :key="icon"
             :to="{ name: name }">
             <VaSidebarItemContent>
               <VaIcon :name="icon" />
@@ -38,7 +38,7 @@
               </VaSidebarItemTitle>
             </VaSidebarItemContent>
           </VaSidebarItem>
-          <VaSidebarItem v-for="{ icon, title } in subMenu" :key="icon">
+          <VaSidebarItem v-for=" { icon, title }  in  subMenu " :key="icon">
             <VaSidebarItemContent>
               <VaIcon :name="icon" />
               <VaSidebarItemTitle>
@@ -49,7 +49,7 @@
         </VaSidebar>
         <VaDivider vertical style="margin: 0;" />
         <VaSidebar hoverable minimized-width="64px" v-if="isProjectView" v-model="isProjectBarVisible">
-          <VaSidebarItem :active="isSubRouteActive(m.name)" v-for="m in projectMenu" :key="m.name" :to="m.to">
+          <VaSidebarItem :active="isSubRouteActive(m.name)" v-for=" m  in  projectMenu " :key="m.name" :to="m.to">
             <VaSidebarItemContent>
               <VaIcon :name="m.icon" />
               <VaSidebarItemTitle>

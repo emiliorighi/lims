@@ -1,13 +1,7 @@
 <template>
     <VaModal max-height="500px" fixed-layout v-model="schemaStore.showSchema">
         <template #header>
-            <div class="row align-center justify-space-between">
-                <h3 class=" flex va-h3">
-                    {{ schemaStore.schema.project_id }}
-                </h3>
-                <VaIcon color="primary" size="large" class="flex" name="folder" />
-
-            </div>
+            <Header :title="schemaStore.schema.project_id" icon="folder"/>
         </template>
         <VaDivider />
         <div class="row">
@@ -20,6 +14,7 @@
 <script setup lang="ts">
 import { useSchemaStore } from '../../stores/schemas-store';
 import MetadataTree from '../ui/MetadataTree.vue';
+import Header from './common/Header.vue'
 
 const schemaStore = useSchemaStore()
 

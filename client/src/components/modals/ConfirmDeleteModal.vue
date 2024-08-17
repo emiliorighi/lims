@@ -1,12 +1,7 @@
 <template>
     <VaModal v-model="itemStore.showDeleteConfirm" hide-default-actions>
         <template #header>
-
-            <div class="row align-center justify-space-between">
-                <h3 class=" flex va-h3">
-                    Deleting {{ itemStore.idToDelete }}? </h3>
-                <VaIcon color="primary" size="large" class="flex" :name="icon" />
-            </div>
+            <Header :title="`Deleting ${itemStore.idToDelete }?`" :icon="icon"/>
         </template>
         <VaDivider />
         <div class="row align-center justify-space-between">
@@ -26,6 +21,7 @@
 import { useItemStore } from '../../stores/item-store'
 import { ModelType } from '../../data/types'
 import { useSchemaStore } from '../../stores/schemas-store'
+import Header from './common/Header.vue'
 
 const schemaStore = useSchemaStore()
 const props = defineProps<{

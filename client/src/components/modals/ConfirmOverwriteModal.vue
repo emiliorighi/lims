@@ -1,8 +1,10 @@
 <template>
     <VaModal max-height="500px" size="large" v-model="projectStore.confirmOverwrite" hide-default-actions>
-        <h2 class="va-h2">{{
-        projectStore.incomingProject?.project_id }} </h2>
-        <p class="va-text-secondary">Choose if you want to overwrite or keep the current Form</p>
+        <template #header>
+            <Header :title="projectStore.incomingProject?.project_id"
+                description="Choose if you want to overwrite or keep the current Form" />
+        </template>
+
         <VaDivider />
         <VaCardBlock v-if="projectStore.incomingProject" horizontal>
             <VaCardBlock class="flex-auto">
@@ -22,6 +24,7 @@
 <script setup lang="ts">
 import { useProjectStore } from '../../stores/project-store'
 import ProjectOverviewCard from '../../components/project/ProjectOverviewCard.vue';
+import Header from './common/Header.vue'
 
 const projectStore = useProjectStore()
 

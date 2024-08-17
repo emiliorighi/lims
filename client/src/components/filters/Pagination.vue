@@ -7,14 +7,14 @@
                 @update:modelValue="(v: number) => $emit('handleLimit', v)" />
         </div>
         <div class="flex">
-            <va-pagination v-model="offSet" :page-size="limit" :total="total" :visible-pages="3"
+            <VaPagination v-model="offSet" :page-size="limit" :total="total" :visible-pages="3"
                 buttons-preset="secondary" rounded gapped border-color="primary"
                 @update:model-value="(v: number) => $emit('offsetChanged', v)" />
         </div>
     </div>
 </template>
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 
 
 const props = defineProps<{
@@ -23,7 +23,16 @@ const props = defineProps<{
     total: number
 }>()
 
-const offSet = ref(props.offset + 1)
+// const offSet = ref(props.offset + 1)
+
+const offSet = computed({
+    get() {
+        return props.offset + 1
+    },
+    set(v) { 
+        emits('offsetChanged', v)
+    }
+})
 
 const emits = defineEmits(['offsetChanged', 'handleLimit'])
 

@@ -1,12 +1,7 @@
 <template>
     <VaModal max-height="500px" fixed-layout v-model="itemStore.showItemDetails">
         <template #header>
-            <div class="row align-center justify-space-between">
-                <h3 class=" flex va-h3">
-                    {{ itemId }}
-                </h3>
-                <VaIcon color="primary" size="large" class="flex" :name="icon" />
-            </div>
+            <Header :title="itemId" :icon="icon" />
         </template>
         <VaDivider />
         <div v-if="itemStore.item" class="row">
@@ -20,6 +15,7 @@
 import { useItemStore } from '../../stores/item-store';
 import MetadataTree from '../ui/MetadataTree.vue';
 import { computed } from 'vue'
+import Header from './common/Header.vue'
 
 const props = defineProps<{
     icon: string,

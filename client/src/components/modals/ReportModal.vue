@@ -1,12 +1,7 @@
 <template>
     <VaModal max-height="500px" fixed-layout v-model="itemStore.showReport" @ok="downloadData">
         <template #header>
-            <div class="row align-center justify-space-between">
-                <h3 class=" flex va-h3">
-                    Download Report
-                </h3>
-                <VaIcon color="primary" size="large" class="flex" :name="icon" />
-            </div>
+            <Header title="Download Report" :icon="icon" />
         </template>
         <VaInnerLoading :loading="itemStore.isLoading">
             <div class="row">
@@ -30,6 +25,7 @@ import { computed, ref } from 'vue'
 import { useSchemaStore } from './../../stores/schemas-store'
 import { Filter, ModelType } from '../../data/types'
 import { useItemStore } from '../../stores/item-store'
+import Header from './common/Header.vue'
 
 const props = defineProps<{
     icon: string

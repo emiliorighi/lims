@@ -1,34 +1,36 @@
 <template>
-        <VaButton preset="primary" color="success" :loading="isLoading" :disabled="!isValid" @click="saveDraft" icon="save">Save
-            Draft</VaButton>
-        <VaModal max-height="500px" size="large" v-model="show" hide-default-actions>
-            <h2 class="va-h2">{{
-            projectStore.incomingProject?.project_id }} already exists!</h2>
-            <p class="va-text-secondary">Choose if you want to save the current changes or revert to the database
-                object</p>
-            <VaDivider />
-            <VaCardBlock v-if="projectStore.incomingProject" horizontal>
-                <VaCardBlock class="flex-auto">
-                    <VaButton color="success" @click="updateDraftProject" icon-right="chevron_right"> Save Current
-                        Changes
-                    </VaButton>
-                    <ProjectOverviewCard :metadata="projectStore.currentProject" />
-                </VaCardBlock>
-                <VaDivider vertical />
-                <VaCardBlock class="flex-auto">
-                    <VaButton color="warning" @click="revertProject" icon="chevron_left"> Revert to
-                        Database Object </VaButton>
-                    <ProjectOverviewCard :metadata="projectStore.incomingProject" />
-                </VaCardBlock>
+    <VaButton preset="primary" color="success" :loading="isLoading" :disabled="!isValid" @click="saveDraft" icon="save">
+        Save
+        Draft</VaButton>
+    <VaModal max-height="500px" size="large" v-model="show" hide-default-actions>
+        <h2 class="va-h2">{{
+        projectStore.incomingProject?.project_id }} already exists!</h2>
+        <p class="va-text-secondary">Choose if you want to save the current changes or revert to the database
+            object</p>
+        <VaDivider />
+        <VaCardBlock v-if="projectStore.incomingProject" horizontal>
+            <VaCardBlock class="flex-auto">
+                <VaButton color="success" @click="updateDraftProject" icon-right="chevron_right"> Save Current
+                    Changes
+                </VaButton>
+                <MetadataTree :metadata="Object.entries(projectStore.currentProject)" />
             </VaCardBlock>
-        </VaModal>
+            <VaDivider vertical />
+            <VaCardBlock class="flex-auto">
+                <VaButton color="warning" @click="revertProject" icon="chevron_left"> Revert to
+                    Database Object </VaButton>
+                <MetadataTree :metadata="Object.entries(projectStore.incomingProject) " />
+            </VaCardBlock>
+        </VaCardBlock>
+    </VaModal>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useProjectStore } from './../../stores/project-store'
 import ProjectService from './../../services/clients/ProjectService'
 import { AxiosError } from 'axios'
-import ProjectOverviewCard from './../../components/project/ProjectOverviewCard.vue'
+import MetadataTree from '../ui/MetadataTree.vue'
+
 import { useToast } from 'vuestic-ui/web-components'
 
 const projectStore = useProjectStore()

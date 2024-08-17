@@ -104,7 +104,6 @@ def upload_tsv(project_id, tsv, data):
             id_set.add(obj_id)
 
         except NotUniqueError as e:
-            print(e)
             if behaviour == 'UPDATE':
                 if obj_id in updated_items: continue
                 message, status = update_item(project_id, obj_id, doc_to_save['metadata'])
