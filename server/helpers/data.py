@@ -45,7 +45,6 @@ def get_items(args, model, fieldToExclude, q_query, tsv_fields, project_id=None)
     mimetype = "application/json"
     ##parse args
     format = args.get('format', 'json')
-
     limit, offset = get_pagination(args)     
     sort_column, sort_order = get_sort(args)
     query, q_query =create_query(args, q_query)

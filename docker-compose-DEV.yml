@@ -19,6 +19,7 @@ services:
     container_name: "${API_HOST}"
     restart: always
     volumes:
+      - ./server:/server
       - ./project-spec.json:/server/project-spec.json
     env_file:
       - .env

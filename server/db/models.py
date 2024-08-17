@@ -25,7 +25,7 @@ class Project(db.Document):
     version = db.StringField(required=True)
     experiment = db.DictField(required=True)
     sample = db.DictField(required=True)
-    created = db.DateTimeField(default=datetime.utcnow)
+    created = db.DateTimeField(default=datetime.now())
     meta = {
         'indexes': [
             'project_id',
@@ -42,7 +42,7 @@ class ProjectDraft(db.Document):
     version = db.StringField(required=True)
     experiment = db.DictField()
     sample = db.DictField()
-    created = db.DateTimeField(default=datetime.utcnow)
+    created = db.DateTimeField(default=datetime.now())
     meta = {
         'indexes': [
             'project_id',
@@ -83,7 +83,7 @@ class File(db.Document):
 class Analysis(db.Document):
     id = db.StringField(required=True,unique=True)
     experiment = db.StringField(required=True)
-    created = db.DateTimeField(default=datetime.utcnow)
+    created = db.DateTimeField(default=datetime.now())
     user=db.StringField(required=True)
     project=db.StringField(required=True)
     files=db.ListField(db.StringField)

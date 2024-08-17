@@ -17,7 +17,6 @@ const props = defineProps<{
 }>()
 
 const schemaStore = useSchemaStore()
-const { model } = schemaStore
 const { init } = useToast()
 
 const modelExists = ref(false)
@@ -26,12 +25,12 @@ const isLoading = ref(false)
 
 const rules = computed(() => {
     return [(v: string) => v.length > 0 || 'Fill the required fields to generate the unique identifier',
-    !modelExists.value || `${model} already exists`]
+    !modelExists.value || `${props.model} already exists`]
 })
 
 
 const id = computed(() => {
-    const keys = schemaStore.schema[model].id_format
+    const keys = schemaStore.schema[props.model].id_format
     const values: string[] = [];
 
     for (const key of keys) {
@@ -56,11 +55,11 @@ async function getItem(id: string): Promise<void> {
 
     try {
         isLoading.value = true
-        const response = await ItemService.getItem(schemaStore.schema.project_id, id, model);
+        const response = await ItemService.getItem(schemaStore.schema.project_id, id, props.model);
         const { data } = response;
         if (data) modelExists.value = true
         init({
-            message: `${model} with ${id} already exists`,
+            message: `${props.model} with ${id} already exists`,
             color: 'danger',
         });
     } catch (error) {

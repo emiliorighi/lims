@@ -75,8 +75,9 @@ def evaluate_choices(choices, value):
 def count_occurences(tsvreader):
     #count how many times a value is encountered
     mapped_values = {}
-
+    counter = 0
     for row in tsvreader:
+        counter+=1
         for key, value in row.items():
 
             #skip empty values
@@ -100,4 +101,4 @@ def count_occurences(tsvreader):
             else:
                 mapped_values[key][value] = 1
 
-    return mapped_values
+    return mapped_values, counter

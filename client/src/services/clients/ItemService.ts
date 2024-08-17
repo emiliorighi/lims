@@ -30,16 +30,11 @@ class ItemService {
         return base.delete(this.constructUrl(projectId, model, itemId));
     }
 
-    uploadItemTSV(projectId: string, model: ModelType, data: FormData) {
-        return base.post(this.constructUrl(projectId, model, undefined, '/upload'), data);
-    }
-
     getTsv(projectId: string, model: ModelType, params: Record<string, any>) {
         return download.get(this.constructUrl(projectId, model), { params });
     }
-
-    getAllItems(model: ModelType, params: Record<string, any>) {
-        return base.get(`/${model}s`, { params });
+    getStats(projectId:string,model:ModelType, field:string){
+        return base.get(this.constructUrl(projectId, model, undefined, `/stats/${field}`))
     }
 }
 

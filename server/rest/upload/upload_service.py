@@ -2,8 +2,7 @@ from db.models import Project,Sample,Experiment
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import BadRequest, NotFound
 from mongoengine.errors import NotUniqueError
-from ..sample.samples_service import update_sample
-from ..experiment.experiments_service import update_experiment
+from ..item.items_service import update_item
 from helpers import filter
 from helpers.tsv import generate_tsv_dict_reader
 
@@ -70,6 +69,7 @@ def upload_tsv(project_id, tsv, data):
     updated_items = set()
     id_set = set()
     for index, obj in enumerate(items):
+        message = f'Created: {len(saved_items)}, Skipped:  {len(skipped_items)}, Updated: {len(updated_items)}'
         obj_id = create_model_id(data_model_id_fields, obj)
         
         if not obj_id:
@@ -82,19 +82,19 @@ def upload_tsv(project_id, tsv, data):
                   if req_field not in obj or obj[req_field] in [None, '', [], {}]]
     
         if missing_fields:
-            raise BadRequest(description=f"row {header+index} {', '.join(missing_fields)} is/are mandatory for {model} ")
+            raise BadRequest(description=f"{message}, Error in row {header+index} {', '.join(missing_fields)} is/are mandatory for {model} ")
         
         evaluation_errors = filter.evaluate_fields(project, obj)
         if evaluation_errors:
-            raise BadRequest(description=f"row {header+index} {'; '.join(evaluation_errors)} for {model} ")
+            raise BadRequest(description=f"{message}, Error in row {header+index} {'; '.join(evaluation_errors)} for {model} ")
         
         doc_to_save={f"{model}_id":obj_id, 'project':project_id, 'metadata':obj }
         if model == 'experiment':
             sample_id = doc_to_save.get('metadata').get('sample_id')
             if not sample_id:
-                raise BadRequest(description=f"Sample {sample_id} is missing in {model} at row {header+index}")
+                raise BadRequest(description=f"{message}, Error in row {header+index}: Sample {sample_id} is missing in {model}")
             elif not Sample.objects(project=project_id, sample_id=sample_id).first():
-                raise BadRequest(description=f"row {header+index}: Sample {sample_id} is not present in the database created it first! ")
+                raise BadRequest(description=f"{message}, Error in row {header+index}: Sample {sample_id} is not present in the database created it first! ")
 
             doc_to_save['sample_id'] = sample_id
         try:
@@ -107,10 +107,7 @@ def upload_tsv(project_id, tsv, data):
             print(e)
             if behaviour == 'UPDATE':
                 if obj_id in updated_items: continue
-                if model == 'sample':
-                    message, status = update_sample(project_id, obj_id, doc_to_save['metadata'])
-                else:
-                    message, status = update_experiment(project_id, obj_id, doc_to_save['metadata'])
+                message, status = update_item(project_id, obj_id, doc_to_save['metadata'])
                 if status == 201:
                     updated_items.add(obj_id)
             else:
@@ -118,7 +115,7 @@ def upload_tsv(project_id, tsv, data):
                     skipped_items.add(obj_id)
                 continue
         except Exception as e:
-            raise BadRequest(description=f"row {header+index}: {e}")
+            raise BadRequest(description=f"{message}, Error in row {header+index}: {e}")
 
     return f'Created: {len(saved_items)}, Skipped:  {len(skipped_items)}, Updated: {len(updated_items)}', 200
 

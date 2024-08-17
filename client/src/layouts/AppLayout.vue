@@ -9,7 +9,9 @@
         </template>
         <template #center>
           <Transition name="fade">
-            <h4 v-if=isProjectView class="va-h4">{{ schemaStore.schema.project_id }}</h4>
+            <h4 v-if=isProjectView class="va-h4">
+              <TypingAnimation :text="schemaStore.schema.project_id" />
+            </h4>
           </Transition>
         </template>
         <template #right>
@@ -80,8 +82,8 @@ import { useColors } from "vuestic-ui";
 import { useSchemaStore } from "../stores/schemas-store"
 import { useGlobalStore } from "../stores/global-store"
 import { Theme } from "../data/types"
-
-const { applyPreset, currentPresetName } = useColors();
+import TypingAnimation from "../components/ui/TypingAnimation.vue"
+const { currentPresetName } = useColors();
 
 const schemaStore = useSchemaStore()
 const globalStore = useGlobalStore()

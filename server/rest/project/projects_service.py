@@ -56,18 +56,3 @@ def convert_to_required(data):
             for attr in model.get('fields'):
                 if attr['key'] == id_field:
                     attr['required'] = True
-
-def validate_project(data, format='json'):
-
-    content = data
-    if format == 'yaml':
-        content, error = schema.validate_yaml(data)
-        if error:
-            return error, 400
-    errors = schema.validate_content(content)
-
-    if errors:
-        return errors, 400
-    else:
-        return [f"Project {content.get('project_id')} is valid!"], 200
-    

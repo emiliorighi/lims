@@ -1,84 +1,96 @@
 <template>
     <Header :title="title" />
-    <VaAccordion v-model="accordionState" multiple>
-
-        <!-- TSV Upload Section -->
-        <VaCollapse icon="upload_file" header="TSV Upload">
-
-            <div class="row">
-                <VaSelect class="flex lg6 md6 sm12 xs12" :disabled="validModels.length === 1" v-model="model"
-                    :options="validModels" :messages="['The model in use']">
-                    <template #prependInner>
-                        <VaIcon class="mr-1" :color="model === 'sample' ? 'success' : 'primary'" :name="modelIcon" />
-                    </template>
-                </VaSelect>
-
-                <VaSelect class="flex lg6 md6 sm12 xs12" v-model="behaviour"
-                    :messages="[`SKIP or UPDATE existing ${model}s`]" :options="['SKIP', 'UPDATE']" />
-            </div>
-
-            <div class="row mt-4">
-                <VaFileUpload class="flex lg12 md12 sm12 xs12" v-model="tsv" dropzone style="z-index: 0"
-                    file-types=".tsv" type="single" undo :uploadButtonText="`Upload ${model}s`" />
-            </div>
-
-
-        </VaCollapse>
-
-        <!-- Column Mapping Section -->
-        <VaCollapse :disabled="mappedFields.length === 0" icon="checklist" header="Column Mapping">
-
-
-            <div class="row">
-                <VaInput clearable class="flex lg4 md6 sm12 xs12" placeholder="Search a column..." v-model="filter" />
-                <div v-for="field in fields" :key="field.label" class="flex">
-                    <VaButtonDropdown preset="primary" :color="field.color" :label="field.label">
-                        <ul>
-                            <li class="p-6" v-for="f in field.items" :key="f">{{ f }}</li>
-                        </ul>
-                    </VaButtonDropdown>
-                </div>
-                <div v-if="model === 'experiment' && !sampleId" class="flex">
-                    <VaButton preset="primary" color="danger">{{ 'SampleID is Missing' }}
-                    </VaButton>
-                </div>
-            </div>
-            <div class="row">
-                <div class="flex lg12 md12 sm12 xs12">
-                    <VaDataTable :items="mappedFields" :columns="['tsv_column', 'field_key']" :filter="filter"
-                        :filter-method="customFilteringFn">
-                        <template #cell(tsv_column)="{ value }">
-                            <VaInput :model-value="value" read-only />
-                        </template>
-                        <template #cell(field_key)="{ value, row }">
-                            <VaSelect :class="getFieldClass(value)" clearable searchable highlight-matched-text
-                                track-by="text" value-by="text" text-by="text" :options="fieldOptions"
-                                :model-value="value" @update:modelValue="(v: string) => row.rowData.field_key = v">
-                                <template #prepend>
-                                    <VaIcon v-if="isDuplicate(value)" name="warning" color="danger" />
-                                    <VaIcon v-else-if="!!value" name="check_circle" color="success" />
-                                </template>
-                            </VaSelect>
-                        </template>
-                    </VaDataTable>
-                </div>
-            </div>
-        </VaCollapse>
-    </VaAccordion>
-    <!-- Footer Buttons -->
     <div class="row">
-        <div class="flex">
-            <VaButton color="danger" @click="resetMap">Reset</VaButton>
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaInnerLoading :loading="isLoading">
 
-        </div>
-        <div class="flex">
-            <VaButton @click="handleSubmit" :disabled="isSubmitDisabled">
-                Submit
-            </VaButton>
+                    <VaCardContent>
+
+                        <VaAccordion v-model="accordionState" multiple>
+
+                            <!-- TSV Upload Section -->
+                            <VaCollapse icon="upload_file" header="TSV Upload">
+
+                                <div class="row">
+                                    <VaSelect class="flex lg6 md6 sm12 xs12" :disabled="validModels.length === 1"
+                                        v-model="model" :options="validModels" :messages="['The model in use']">
+                                        <template #prependInner>
+                                            <VaIcon class="mr-1" :color="model === 'sample' ? 'success' : 'primary'"
+                                                :name="modelIcon" />
+                                        </template>
+                                    </VaSelect>
+
+                                    <VaSelect class="flex lg6 md6 sm12 xs12" v-model="behaviour"
+                                        :messages="[`SKIP or UPDATE existing ${model}s`]"
+                                        :options="['SKIP', 'UPDATE']" />
+                                </div>
+
+                                <div class="row mt-4">
+                                    <VaFileUpload class="flex lg12 md12 sm12 xs12" v-model="tsv" dropzone
+                                        style="z-index: 0" file-types=".tsv" type="single" undo
+                                        :uploadButtonText="`Upload ${model}s`" />
+                                </div>
+
+
+                            </VaCollapse>
+
+                            <!-- Column Mapping Section -->
+                            <VaCollapse :disabled="mappedFields.length === 0" icon="checklist" header="Column Mapping">
+
+
+                                <div class="row">
+                                    <VaInput clearable class="flex lg4 md6 sm12 xs12" placeholder="Search a column..."
+                                        v-model="filter" />
+                                    <div v-for="field in fields" :key="field.label" class="flex">
+                                        <VaButtonDropdown preset="primary" :color="field.color" :label="field.label">
+                                            <ul>
+                                                <li class="p-6" v-for="f in field.items" :key="f">{{ f }}</li>
+                                            </ul>
+                                        </VaButtonDropdown>
+                                    </div>
+                                    <div v-if="model === 'experiment' && !sampleId" class="flex">
+                                        <VaButton preset="primary" color="danger">{{ 'SampleID is Missing' }}
+                                        </VaButton>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="flex lg12 md12 sm12 xs12">
+                                        <VaDataTable :items="mappedFields" :columns="['tsv_column', 'field_key']"
+                                            :filter="filter" :filter-method="customFilteringFn">
+                                            <template #cell(tsv_column)="{ value }">
+                                                <VaInput :model-value="value" read-only />
+                                            </template>
+                                            <template #cell(field_key)="{ value, row }">
+                                                <VaSelect :class="getFieldClass(value)" clearable searchable
+                                                    highlight-matched-text track-by="text" value-by="text"
+                                                    text-by="text" :options="fieldOptions" :model-value="value"
+                                                    @update:modelValue="(v: string) => row.rowData.field_key = v">
+                                                    <template #prepend>
+                                                        <VaIcon v-if="isDuplicate(value)" name="warning"
+                                                            color="danger" />
+                                                        <VaIcon v-else-if="!!value" name="check_circle"
+                                                            color="success" />
+                                                    </template>
+                                                </VaSelect>
+                                            </template>
+                                        </VaDataTable>
+                                    </div>
+                                </div>
+                            </VaCollapse>
+                        </VaAccordion>
+                    </VaCardContent>
+                    <VaCardActions align="between">
+                        <VaButton color="danger" @click="resetMap">Reset</VaButton>
+                        <VaButton @click="handleSubmit" :disabled="isSubmitDisabled">
+                            Submit
+                        </VaButton>
+                    </VaCardActions>
+                </VaInnerLoading>
+
+            </VaCard>
         </div>
     </div>
-
-
 </template>
 
 <script setup lang="ts">
@@ -88,6 +100,7 @@ import { useToast } from 'vuestic-ui/web-components';
 import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
 import Header from '../../../components/ui/Header.vue'
+import { ModelType } from '../../../data/types'
 
 const props = defineProps<{
     title: string
@@ -96,7 +109,7 @@ const schemaStore = useSchemaStore();
 const isLoading = ref(false);
 const tsv = ref();
 const behaviour = ref('SKIP');
-const model = ref<'sample' | 'experiment'>('sample');
+const model = ref<ModelType>('sample');
 const filter = ref('');
 const accordionState = ref([true, false]);
 
@@ -108,7 +121,6 @@ type InferMap = {
 };
 
 const mappedFields = ref<InferMap[]>([]);
-const emits = defineEmits(['onMapped', 'onModelChange']);
 
 const ICONS = {
     ADD: 'add_circle',
@@ -199,7 +211,6 @@ watch(() => tsv.value, async () => {
 
 watch(() => model.value, async () => {
     if (tsv.value) await fetchHeaderMap(schemaStore.schema.project_id);
-    emits('onModelChange', model.value);
 });
 
 // Methods

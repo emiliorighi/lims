@@ -5,7 +5,7 @@
         </div>
     </div>
     <VaDivider/> -->
-    <va-tree-view :nodes="currenNodes" :filter="filter" :filter-method="customFilterMethod">
+    <VaTreeView expand-all :nodes="currenNodes" :filter="filter" :filter-method="customFilterMethod">
         <template #content="node">
             <div class="flex items-center">
                 <div class="mr-2">
@@ -21,7 +21,7 @@
                 </div>
             </div>
         </template>
-    </va-tree-view>
+    </VaTreeView>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';

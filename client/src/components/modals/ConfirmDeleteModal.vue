@@ -38,6 +38,10 @@ const itemStore = useItemStore()
 async function deleteItem() {
     const { project_id } = schemaStore.schema
     await itemStore.deleteItem(project_id, props.model)
+    itemStore.resetPagination()
+    itemStore.resetSearchForm()
+    await itemStore.fetchItems(project_id, props.model)
+    itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
 }
 
 </script>

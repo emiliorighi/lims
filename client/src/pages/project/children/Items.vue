@@ -1,61 +1,68 @@
 <template>
     <Header :title="title" />
-    <VaCard>
-        <VaCardContent>
-            <div class="row justify-space-between">
-                <div class="flex">
-                    <TableFilters :key="model" @on-metadata-update="updateQueryForm"
-                        @on-search-change="updateSearchForm" :columns="columns" :fields="filteredFields"
-                        @on-show-field-change="updateShowFields" />
-                </div>
-                <div class="flex">
-                    <div class="row">
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardContent>
+                    <div class="row justify-space-between">
                         <div class="flex">
-                            <VaButton :disabled="itemStore.total === 0" preset="primary"
-                                @click="itemStore.showReport = !itemStore.showReport" icon-right="download">
-                                Report
-                            </VaButton>
+                            <TableFilters :key="model" @on-metadata-update="updateQueryForm"
+                                @on-search-change="updateSearchForm" :columns="columns" :fields="filteredFields"
+                                @on-show-field-change="updateShowFields" />
                         </div>
                         <div class="flex">
-                            <VaButton icon="add" @click="newItem">
-                                {{ buttonLabel }}
-                            </VaButton>
+                            <div class="row">
+                                <div class="flex">
+                                    <VaButton :disabled="itemStore.total === 0" preset="primary"
+                                        @click="itemStore.showReport = !itemStore.showReport" icon-right="download">
+                                        Report
+                                    </VaButton>
+                                </div>
+                                <div class="flex">
+                                    <VaButton icon="add" @click="newItem">
+                                        {{ buttonLabel }}
+                                    </VaButton>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
-        </VaCardContent>
-        <VaCardContent>
-            <VaDataTable :items="itemStore.items" :columns="columns">
-                <template #cell(actions)="{ rowData }">
-                    <VaButton v-if="canBeEdited(rowData)" preset="plain" icon="edit" @click="editItem(rowData)" />
+                </VaCardContent>
+                <VaCardContent>
+                    <VaDataTable :items="itemStore.items" :columns="columns">
+                        <template #cell(actions)="{ rowData }">
+                            <VaButton v-if="canBeEdited(rowData)" preset="plain" icon="edit"
+                                @click="editItem(rowData)" />
 
-                    <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
-                        @click="triggerDelete(rowData)" />
-                </template>
-                <template #cell(sample_id)="{ rowData }">
-                    <VaChip @click="showItemDetails(rowData.sample_id, 'sample')" color="textPrimary" flat>
-                        {{ rowData.sample_id }}
-                    </VaChip>
-                </template>
-                <template #cell(experiment_id)="{ rowData }">
-                    <VaChip v-if="rowData.experiment_id" @click="showItemDetails(rowData.experiment_id, 'experiment')"
-                        color="textPrimary" flat>
-                        {{ rowData.experiment_id }}
-                    </VaChip>
-                </template>
-            </VaDataTable>
-            <Pagination @handle-limit="handleLimit" @offset-changed="handlePagination"
-                :limit="itemStore.pagination.limit" :offset="itemStore.pagination.offset" :total="itemStore.total" />
-        </VaCardContent>
-    </VaCard>
+                            <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
+                                @click="triggerDelete(rowData)" />
+                        </template>
+                        <template #cell(sample_id)="{ rowData }">
+                            <VaChip @click="showItemDetails(rowData.sample_id, 'sample')" color="textPrimary" flat>
+                                {{ rowData.sample_id }}
+                            </VaChip>
+                        </template>
+                        <template #cell(experiment_id)="{ rowData }">
+                            <VaChip v-if="rowData.experiment_id"
+                                @click="showItemDetails(rowData.experiment_id, 'experiment')" color="textPrimary" flat>
+                                {{ rowData.experiment_id }}
+                            </VaChip>
+                        </template>
+                    </VaDataTable>
+                    <Pagination @handle-limit="handleLimit" @offset-changed="handlePagination"
+                        :limit="itemStore.pagination.limit" :offset="itemStore.pagination.offset"
+                        :total="itemStore.total" />
+                </VaCardContent>
+            </VaCard>
+        </div>
+    </div>
+
     <ReportModal :model="model" :icon="icon" />
 
     <ConfirmDeleteModal :model="model" :icon="icon" />
 
     <ModelFormModal :model="model" :icon="icon" />
 
-    <ItemDetailsModal :icon="icon" />
+    <ItemDetailsModal :icon="itemType === 'sample' ? 'fa-vial' : 'fa-dna'" />
 
 </template>
 
@@ -84,6 +91,7 @@ const props = defineProps<{
     icon: string
 }>()
 
+const itemType = ref<ModelType>('sample')
 onMounted(async () => {
     await itemStore.fetchItems(schemaStore.schema.project_id, props.model)
 })
@@ -138,6 +146,7 @@ function updateShowFields(updatedShowFields: { show: boolean, value: string }[])
 }
 
 async function showItemDetails(id: string, model: ModelType) {
+    itemType.value = model
     await itemStore.fetchItem(project_id, id, model)
 }
 

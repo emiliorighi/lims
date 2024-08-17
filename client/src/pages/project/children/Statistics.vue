@@ -1,6 +1,9 @@
 <template>
     <Header :title="title" />
-
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+        </div>
+    </div>
     <div class="row justify-space-between align-center">
         <div class="flex p-0">
             <h4 class="va-h4">Statistics</h4>
@@ -54,6 +57,7 @@ import StatsCard from '../../../components/cards/StatsCard.vue';
 import { useForm } from 'vuestic-ui/web-components';
 import { VaChartItem, ChartTypes, ColumnSizes } from '../../../data/types'
 import Header from '../../../components/ui/Header.vue'
+import ItemService from '../../../services/clients/ItemService'
 
 const props = defineProps<{
     title: string
@@ -78,6 +82,9 @@ const chartType = ref<ChartTypes>('horizontal-bar')
 const size = ref<ColumnSizes>('1')
 const selected = ref('')
 
+const queryField = computed(() => {
+    return `metadata.${selected.value}`
+})
 const fieldValues = computed(() => {
     if (!schemaStore.schema.project_id) return []
     return schemaStore.schema[model.value].fields.map(({ key }) => key)
@@ -93,7 +100,7 @@ async function createChart() {
     const s = size.value
 
     try {
-        const { data } = await ProjectService.getProjectStats(schemaStore.schema.project_id, model.value, selected.value)
+        const { data } = await ItemService.getStats(schemaStore.schema.project_id, model.value, queryField.value)
         const ch =
         {
             data: data,

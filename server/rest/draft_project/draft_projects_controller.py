@@ -23,3 +23,17 @@ class DraftProjectApi(Resource):
         data = request.json if request.is_json else request.form
         message,status = draft_projects_service.update_draft_project(project_id,data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
+
+class ValidateProjectApi(Resource):
+    def post(self):
+        format = 'json'
+        if request.headers['Content-Type'] == 'application/x-yaml':
+            format = 'yaml'
+        messages, status = draft_projects_service.validate_project(request.data,format)
+        return Response(json.dumps(messages), mimetype="application/json", status=status)
+
+class TsvUploadMapApi(Resource):
+    def post(self):
+        data = request.json if request.is_json else request.form
+        attributes = draft_projects_service.map_attributes_from_tsv(request.files.get('tsv'),data)
+        return Response(json.dumps(attributes), mimetype="application/json", status=200)

@@ -11,7 +11,7 @@ class ProjectService {
     return base.get(`/projects/${id}`)
   }
   getProjectStats(id, model, field) {
-    return base.get(`/projects/${id}/statistics/${model}/${field}`)
+    return base.get(`/projects/${id}/${model}/stats/${field}`)
   }
   lookupProject(id) {
     return base.get(`/projects/${id}/lookup`)
@@ -20,20 +20,21 @@ class ProjectService {
     return base.post('/projects', data)
   }
   validateYAMLProject(data) {
-    return yaml.post('/projects/validate', data)
+    return yaml.post('/draft_projects/validate', data)
   }
   validateJSONProject(data) {
-    return base.post('/projects/validate', data)
+    return base.post('/draft_projects/validate', data)
   }
   inferAttributesProject(data) {
-    return base.post('/projects/wrangling', data)
+    return base.post('/draft_projects/map_attributes', data)
   }
   inferHeadersFromTSV(projectId, data) {
-    return base.post(`/projects/${projectId}/match_headers`, data)
+    return base.post(`/projects/${projectId}/map_header`, data)
   }
   uploadTSV(projectId, data) {
-    return base.post(`/projects/${projectId}/upload`, data)
+    return base.post(`/projects/${projectId}/upload_tsv`, data)
   }
+
   getDraftProjects(params) {
     return base.get('/draft_projects', { params: params })
   }

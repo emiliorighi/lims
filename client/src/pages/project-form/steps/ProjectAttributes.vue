@@ -11,7 +11,7 @@
     <div class="row">
         <VaInput class="flex lg4 md4 sm12 xs12" placeholder="Type a name of at least 3 characters (required)"
             :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters', !projectStore.projectExists || 'Project Id already exists!']"
-            label="name (required)" v-model="projectStore.currentProject.name" />
+            label="name (required)" v-model="maskedValue" />
 
         <VaInput class="flex lg4 md4 sm12 xs12" placeholder="example: 1.0.0 or 1.2 (required)"
             label="version (required)" v-model="projectStore.currentProject.version"
@@ -27,23 +27,29 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import ProjectConflictNotificationCard from '../../../components/cards/ProjectConflictNotificationCard.vue'
 import { useProjectStore } from '../../../stores/project-store';
 import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
 import { SchemaForm } from '../../../data/types';
-import ProjectConflictNotificationCard from '../../../components/cards/ProjectConflictNotificationCard.vue'
 
 const projectStore = useProjectStore()
 const existingProject = ref<SchemaForm | null>(null)
 const existingDraftProject = ref<SchemaForm | null>(null)
 
+const maskedValue = computed({
+    get() { return projectStore.currentProject.name },
+    set(v) {
+        projectStore.currentProject.name = v
+            .trim()
+            .replace(' ', '')
+    }
+})
 const isIdValidationLoading = ref(false)
 const mergedId = computed(() => {
     if (projectStore.currentProject.name && projectStore.currentProject.version) return `${projectStore.currentProject.name}_${projectStore.currentProject.version}`
     return ''
 })
-
-
 
 watch(() => mergedId.value, async () => {
 

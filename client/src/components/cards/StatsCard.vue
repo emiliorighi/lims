@@ -58,12 +58,9 @@ const chartOptions = computed(() => {
     return opts
 })
 function createChartData(data: Record<string, number>) {
-    const entries = Object.entries(data)
-
-    const labels = entries.map(([k, v]) => k)
 
     return {
-        labels: labels,
+        labels: Object.keys(data),
         datasets: [
             {
                 backgroundColor: colors,

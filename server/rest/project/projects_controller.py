@@ -19,12 +19,3 @@ class ProjectApi(Resource):
     def get(self, project_id):
         project = projects_service.get_project(project_id)
         return Response(project.to_json(), mimetype="application/json", status=200)
-
-
-class ValidateProjectApi(Resource):
-    def post(self):
-        format = 'json'
-        if request.headers['Content-Type'] == 'application/x-yaml':
-            format = 'yaml'
-        messages, status = projects_service.validate_project(request.data,format)
-        return Response(json.dumps(messages), mimetype="application/json", status=status)

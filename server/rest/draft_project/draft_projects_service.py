@@ -1,7 +1,7 @@
 from db.models import ProjectDraft,Project
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import NotFound
-
+from helpers import schema,tsv as tsv_helper, filter as filter_helper
 
 def get_draft_project(project_id):
     draft_projects=ProjectDraft.objects(project_id=project_id).exclude('id','created').first()
@@ -57,3 +57,63 @@ def delete_draft_project(project_id):
     project_to_delete.delete()
     message= f"Draft Project with id: {project_id} successfully deleted"
     return [message], 201
+
+
+def validate_project(data, format='json'):
+
+    content = data
+    if format == 'yaml':
+        content, error = schema.validate_yaml(data)
+        if error:
+            return error, 400
+    errors = schema.validate_content(content)
+
+    if errors:
+        return errors, 400
+    else:
+        return [f"Project {content.get('project_id')} is valid!"], 200
+
+def map_attributes_from_tsv(tsv, data):
+
+    validations = {
+        'date': filter_helper.validate_date,
+        'number': filter_helper.validate_number
+    }
+    # min_occurrences = int(data.get('min_occurrences', 100))
+
+    tsvreader = tsv_helper.generate_tsv_dict_reader(tsv)
+
+    mapped_values, counter  = filter_helper.count_occurences(tsvreader)
+
+    attributes = []
+    for attr_key, values_occurrences in mapped_values.items():
+
+        filter={}
+        sum = 0
+        for key, count in values_occurrences.items():
+            sum+=count
+        occ = int(round((sum/counter)*100))
+
+        if occ <= 85:
+            filter['choices'] = list(values_occurrences.keys())
+            filter['multi'] = False
+
+        else:
+            for input_type, validator in validations.items():
+                if all(validator(option) for option in values_occurrences.keys()):
+                    filter['input_type'] = input_type
+                    break
+            else:
+                filter['input_type'] = 'text'
+
+
+        attributes.append(
+            {
+                'key': attr_key,
+                'label': attr_key,
+                'required': False,
+                'filter': filter
+            }
+        )
+
+    return attributes

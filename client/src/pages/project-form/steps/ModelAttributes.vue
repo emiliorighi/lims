@@ -1,21 +1,12 @@
 <template>
-    <div class="row justify-space-between align-end">
-        <h4 class="va-h4 flex pt-0">Filters creation</h4>
-        <p class="va-text-secondary">Create or import filters and map them to a model</p>
-        <div class="flex">
-            <div class="row">
-                <div class="flex">
-                    <UploadTSV />
-                </div>
-                <div class="flex">
-                    <VaButton @click="attributeStore.initAttribute" icon="add">
-                        Filter
-                    </VaButton>
-                </div>
-            </div>
+    <h4 class="va-h4">Filters Creation</h4>
+    <p class="va-text-secondary">Create filters or upload them, then link them to the target model. Filters can be
+        imported by multiple TSVs</p>
+    <div class="row">
+        <div class="flex lg12 md12 sm12 xs12">
+            <AttributesTable />
         </div>
     </div>
-    <AttributesTable />
     <AttributeFormModal />
 </template>
 <script setup lang="ts">
@@ -25,7 +16,6 @@ import { useAttributeStore } from '../../../stores/attribute-store'
 import { useProjectStore } from '../../../stores/project-store'
 import AttributesTable from '../../../components/tables/AttributesTable.vue'
 import AttributeFormModal from '../../../components/modals/AttributeFormModal.vue'
-import UploadTSV from '../../../components/buttons/UploadTSV.vue'
 
 const attributeStore = useAttributeStore()
 const projectStore = useProjectStore()

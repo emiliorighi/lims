@@ -1,11 +1,14 @@
 import http from "../../http";
 
-const { base, yaml } = http
+const { base } = http
 
 class StatsService {
 
     getStats(model, field) {
-        return base.get(`/statistics/${model}/${field}`)
+        return base.get(`/${model}/stats/${field}`)
+    }
+    lookupData() {
+        return base.get('/lookup')
     }
 
 }

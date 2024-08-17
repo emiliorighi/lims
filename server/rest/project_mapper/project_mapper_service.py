@@ -2,53 +2,7 @@ from db.models import Project
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import  NotFound
 from helpers import filter as filter_helper
-from helpers.tsv import generate_tsv_dict_reader,generate_tsv_reader
-
-## map filter types from tsv
-def map_attributes_from_tsv(tsv, data):
-
-    validations = {
-        'date': filter_helper.validate_date,
-        'number': filter_helper.validate_number
-    }
-    min_occurrences = int(data.get('min_occurrences', 2))
-
-    tsvreader = generate_tsv_dict_reader(tsv)
-
-    mapped_values = filter_helper.count_occurences(tsvreader)
-
-    attributes = []
-    
-    for attr_key, values_occurrences in mapped_values.items():
-
-        filter={}
-
-        filtered_choices = [key for key, count in values_occurrences.items() if count >= min_occurrences]
-
-        if filtered_choices:
-            filter['choices'] = filtered_choices
-            filter['multi'] = False
-
-        else:
-            for input_type, validator in validations.items():
-                if all(validator(option) for option in values_occurrences.keys()):
-                    filter['input_type'] = input_type
-                    break
-            else:
-                filter['input_type'] = 'text'
-
-
-        attributes.append(
-            {
-                'key': attr_key,
-                'label': attr_key,
-                'required': False,
-                'filter': filter
-            }
-        )
-
-    return attributes
-
+from helpers.tsv import generate_tsv_reader
 
 def infer_header(project_id, data, files):
 

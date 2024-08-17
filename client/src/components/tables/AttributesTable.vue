@@ -9,6 +9,14 @@
                 </VaButton>
             </VaCardActions>
         </template>
+        <template #header(actions)>
+            <VaCardActions class="p-0" align="center">
+                <UploadTSV />
+                <VaButton @click="attributeStore.initAttribute" icon="add">
+                    Filter
+                </VaButton>
+            </VaCardActions>
+        </template>
         <template #cell(type)="{ rowData }">
             <VaChip :color="fieldTypesInfo.filter(f => f.type === getFieldType(rowData))[0].color">{{
         getFieldType(rowData)
@@ -31,7 +39,7 @@
 import { Filter } from './../../data/types';
 import { useAttributeStore } from './../../stores/attribute-store'
 import { computed } from 'vue'
-
+import UploadTSV from '../buttons/UploadTSV.vue'
 const attributeStore = useAttributeStore()
 const columns = [
     { key: "model", sortable: true },
