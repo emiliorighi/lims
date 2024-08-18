@@ -12,7 +12,7 @@ const props = defineProps<{
 
 const displayedText = ref('');
 const currentIndex = ref(0);
-const speed = props.speed || 100; // Default typing speed in milliseconds
+const speed = props.speed || 50; // Default typing speed in milliseconds
 
 let typingInterval: number | undefined;
 

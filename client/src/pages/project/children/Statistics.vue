@@ -2,52 +2,49 @@
     <Header :title="title" />
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
+            <VaCard>
+                <VaCardContent>
+                    <VaButton icon="add" @click="show = !show">Create Chart</VaButton>
+                </VaCardContent>
+                <VaCardContent>
+                    <div class="row row-equal align-center">
+                        <div v-for="ch, index in vaCharts" :class="mapSize(ch.size)">
+                            <StatsCard :chart="ch" :index="index" @on-delete="deleteChart"
+                                :label="`${ch.model}s by ${ch.field} `"
+                                :chartId="`${ch.field}_${ch.model}_${ch.type}`" />
+                        </div>
+                    </div>
+                </VaCardContent>
+            </VaCard>
         </div>
     </div>
-    <div class="row justify-space-between align-center">
-        <div class="flex p-0">
-            <h4 class="va-h4">Statistics</h4>
-            <p class="va-text-secondary mb-4">Create and save customized charts</p>
-        </div>
-        <div class="flex">
-            <VaButton icon="add" @click="show = !show"> Chart</VaButton>
-        </div>
-    </div>
-    <div>
-        <div class="row row-equal align-center">
-            <div v-for="ch, index in vaCharts" :class="mapSize(ch.size)">
-                <StatsCard :chart="ch" :index="index" @on-delete="deleteChart" :label="`${ch.model}s by ${ch.field} `"
-                    :chartId="`${ch.field}_${ch.model}_${ch.type}`" />
-            </div>
-        </div>
-        <VaModal v-model="show" hide-default-actions>
-            <template #header>
-                <h3 class="va-h3">Chart creation</h3>
-            </template>
-            <VaForm ref="chartForm">
-                <div class="row align-end">
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect :disabled="modelOptions.length === 1" v-model="model" :options="modelOptions"
-                            label="model">
-                        </VaSelect>
-                    </div>
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect v-model="chartType" :options="charts" label="chart type"></VaSelect>
-                    </div>
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect v-model="size" :options="['1', '2', '3', '4']" label="chart size"></VaSelect>
-                    </div>
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect :rules="[(v: string) => !!v || 'Field is mandatory']" v-model="selected"
-                            :options="fieldValues" label="field"></VaSelect>
-                    </div>
+    <VaModal v-model="show" hide-default-actions>
+        <template #header>
+            <h3 class="va-h3">Chart creation</h3>
+        </template>
+        <VaForm ref="chartForm">
+            <div class="row align-end">
+                <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <VaSelect :disabled="modelOptions.length === 1" v-model="model" :options="modelOptions"
+                        label="model">
+                    </VaSelect>
                 </div>
-            </VaForm>
-            <template #footer>
-                <VaButton @click="createChart">Create Chart</VaButton>
-            </template>
-        </VaModal>
-    </div>
+                <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <VaSelect v-model="chartType" :options="charts" label="chart type"></VaSelect>
+                </div>
+                <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <VaSelect v-model="size" :options="['1', '2', '3', '4']" label="chart size"></VaSelect>
+                </div>
+                <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <VaSelect :rules="[(v: string) => !!v || 'Field is mandatory']" v-model="selected"
+                        :options="fieldValues" label="field"></VaSelect>
+                </div>
+            </div>
+        </VaForm>
+        <template #footer>
+            <VaButton @click="createChart">Create Chart</VaButton>
+        </template>
+    </VaModal>
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';

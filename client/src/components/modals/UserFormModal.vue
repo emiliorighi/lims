@@ -75,6 +75,7 @@ const isUpdate = computed(() => {
 // Watchers
 watch(() => (userStore.userForm.name), async (v) => {
     if (isUpdate.value) return
+    if (!v) return
     await getUser(v)
 })
 // Methods
@@ -140,11 +141,11 @@ function handleError(error: any, defaultMessage: string) {
     userStore.toast({ color: 'danger', message });
 }
 
-function resetForm() {
+async function resetForm() {
     userStore.resetUserForm();
     userStore.resetSearchForm()
     userStore.user = undefined
-    userStore.fetchUsers();
+    // await userStore.fetchUsers();
     userStore.showForm = false;
 }
 </script>

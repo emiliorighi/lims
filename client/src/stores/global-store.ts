@@ -19,7 +19,7 @@ const initUserForm = {
 export const useGlobalStore = defineStore('global', {
   state: () => {
     return {
-      isSidebarVisible: false,
+      isSidebarVisible: true,
       user: { ...initUser },
       userForm: { ...initUserForm },
       isAuthenticated: false,

@@ -1,50 +1,12 @@
 <template>
     <Header :title="title" />
     <div class="row">
-        <div class="flex">
+        <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
-                <VaCardTitle class="va-text-secondary">
-                    Project details
-                </VaCardTitle>
                 <VaCardContent>
-                    <ul>
-                        <li v-for="[k, v] in parsedDetails.filter(([k, v]) => v)">
-                            <h4 class="va-h4">{{ v }}</h4>
-                            <p class="va-text-secondary"> {{ k }} </p>
-                        </li>
-                    </ul>
-                    <h3></h3>
-                    <!-- <MetadataTree :metadata="Object.entries(parsedDetails)" /> -->
-                </VaCardContent>
-            </VaCard>
-        </div>
-        <!-- <div class="flex lg8 md8 sm12 xs12">
-            <VaCard v-if="expData && sampleData">
-
-                <VaCardContent style="height: 400px;">
-                    <VaChart :options="chartOptions" type="horizontal-bar"
-                        :data="createChartData(sampleData, expData)" />
-                </VaCardContent>
-            </VaCard>
-            <VaSkeleton v-else height="400px" />
-        </div> -->
-        <div class="flex lg4 md6 sm12 xs12">
-            <VaCard>
-                <VaCardTitle class="va-text-secondary">
-                    Metadata Definitions
-                </VaCardTitle>
-                <VaCardContent>
-                    <div class="row justify-space-between align-center">
+                    <div class="row justify-space-between">
                         <div class="flex">
-                            <VaSwitch :disabled="switchDisabled" v-model="switchValue" color="success"
-                                off-color="primary" true-value="sample" false-value="experiment"
-                                style="--va-switch-checker-background-color: #252723;">
-                                <template #innerLabel>
-                                    <div class="va-text-center">
-                                        <VaIcon :name="switchValue === 'sample' ? 'fa-vial' : 'fa-dna'" />
-                                    </div>
-                                </template>
-                            </VaSwitch>
+                            <h5 class="va-h5">{{ schemaStore.schema.project_id }}</h5>
                         </div>
                         <div class="flex">
                             <div class="row">
@@ -60,18 +22,50 @@
                             </div>
                         </div>
                     </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <VaDataTable sticky-header height="300px" :items="attributes" :columns="columns">
-                        <template #cell(type)="{ rowData }">
-                            <VaChip @click="showFilterDetails(rowData)">{{
-        getFieldType(rowData)
-    }}</VaChip>
-                        </template>
-                    </VaDataTable>
+                    <VaAccordion v-model="accordion" class="max-w-sm">
+                        <VaCollapse header="Project Details" icon="folder">
+                            <div v-for="[k, v] in parsedDetails">
+                                <div class="row">
+                                    <div class="flex">
+                                        <b> {{ k }} </b>
+                                    </div>
+                                    <div class="flex">
+                                        <p>{{ v }}</p>
+                                    </div>
+                                </div>
+                                <VaDivider />
+                            </div>
+                        </VaCollapse>
+                        <VaCollapse v-for="opt in opts" :header="opt.label" :icon="opt.icon">
+                            <VaDataTable :items="schemaStore.schema[opt.value].fields" :columns="columns">
+                                <template #cell(type)="{ rowData }">
+                                    {{ getFieldType(rowData) }}
+                                </template>
+                                <template #cell(actions)="{ rowData }">
+                                    <VaChip @click="showFilterDetails(rowData)">View
+                                    </VaChip>
+                                </template>
+                            </VaDataTable>
+                        </VaCollapse>
+                    </VaAccordion>
                 </VaCardContent>
             </VaCard>
         </div>
+        <!-- 
+        users involved in the project
+        number of users, samples and experiments
+        
+        -->
+        <!-- <div class="flex lg8 md8 sm12 xs12">
+            <VaCard v-if="expData && sampleData">
+
+                <VaCardContent style="height: 400px;">
+                    <VaChart :options="chartOptions" type="horizontal-bar"
+                        :data="createChartData(sampleData, expData)" />
+                </VaCardContent>
+            </VaCard>
+            <VaSkeleton v-else height="400px" />
+        </div> -->
         <!-- <div class="flex lg4 md4 sm12 xs12 cards-column">
             <div v-for="(card, index) in Object.values(cardsToShow)" :key="index" class="row row-equal card-wrapper">
                 <div class="flex lg12 md12 sm12 xs12">
@@ -80,63 +74,7 @@
             </div>
         </div> -->
     </div>
-    <VaCard>
-        <VaCardContent>
-            <div class="row justify-space-between align-center">
-                <div class="flex">
-                    <VaSwitch :disabled="switchDisabled" v-model="switchValue" color="success" off-color="primary"
-                        true-value="sample" false-value="experiment"
-                        style="--va-switch-checker-background-color: #252723;">
-                        <template #innerLabel>
-                            <div class="va-text-center">
-                                <VaIcon :name="switchValue === 'sample' ? 'fa-vial' : 'fa-dna'" />
-                            </div>
-                        </template>
-                    </VaSwitch>
-                </div>
-                <div class="flex">
-                    <div class="row">
-                        <div class="flex">
-                            <VaButton preset="primary" @click="schemaStore.showSchema = !schemaStore.showSchema">
-                                View Schema
-                            </VaButton>
-                        </div>
-                        <div class="flex">
-                            <DownloadYAMLProject :project="schemaStore.schema" />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </VaCardContent>
-        <VaCardContent>
-            <VaDataTable sticky-header height="300px" :items="attributes" :columns="columns">
-                <!-- <template #header(model)>
-                    <VaCardActions class="p-0" align="center">
-                        <VaButton :color="sampleCount > 0 ? 'success' : 'danger'" icon="fa-vial">Sample {{ sampleCount
-                            }}
-                        </VaButton>
-                        <VaButton :color="experimentCount > 0 ? 'info' : 'warning'" icon="fa-dna">Experiment {{
-        experimentCount
-    }}
-                        </VaButton>
-                    </VaCardActions>
-                </template> -->
-                <template #cell(type)="{ rowData }">
-                    <VaChip @click="showFilterDetails(rowData)">{{
-        getFieldType(rowData)
-    }}</VaChip>
-                </template>
-            </VaDataTable>
-        </VaCardContent>
-        <!-- 
-            number of sample and experiments cards
-            project info 
-            charts?
-            sample fields
-            experiment fields
-        
-        -->
-    </VaCard>
+
 
 
     <VaModal v-if="selectedFilter" max-height="500px" fixed-layout v-model="showDetails">
@@ -156,54 +94,8 @@
         </div>
 
     </VaModal>
-    <!-- 
-    bar chart with samples and experiments
-    
-    
-    -->
-    <div class="row">
-        <!-- <div class="flex lg6 md6 sm12 xs12">
-            <VaCardContent style="height: 400px;">
-                <VaChart type="horizontal-bar" :data="chartData" />
-            </VaCardContent>
-            <VaCard>
-                <VaCardTitle class="va-text-secondary mb-0">Project details</VaCardTitle>
-                <VaCardContent>
-                    <MetadataTree :metadata="parsedDetails" />
-                </VaCardContent>
-            </VaCard>
-        </div> -->
-        <!-- <div class="flex lg6 md6 sm12 xs12">
-            <VaCard>
-                <VaCardTitle class="va-text-secondary mb-0">
-                    <div class="row justify-space-between">
-                        <div class="flex p-0"> Sample Definitions</div>
-                        <div class="flex p-0">
-                            <VaIcon name="fa-vial" style="margin-left: 3px;" />
-                        </div>
-                    </div>
-                </VaCardTitle>
-                <VaCardContent>
-                    <MetadataTree :metadata="Object.entries(sample)" />
-                </VaCardContent>
-            </VaCard>
-        </div> -->
-        <!-- <div v-if="experiment.id_format.length" class="flex lg6 md6 sm12 xs12">
-            <VaCard>
-                <VaCardTitle class="va-text-secondary mb-0">
-                    <div class="row justify-space-between">
-                        <div class="flex p-0"> Experiment Definitions</div>
-                        <div class="flex p-0">
-                            <VaIcon name="fa-dna" style="margin-left: 3px;" />
-                        </div>
-                    </div>
-                </VaCardTitle>
-                <VaCardContent>
-                    <MetadataTree :metadata="Object.entries(experiment)" />
-                </VaCardContent>
-            </VaCard>
-        </div> -->
-    </div>
+    <ProjectDetailsModal />
+
 </template>
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue';
@@ -214,11 +106,14 @@ import { Filter, ModelType } from '../../../data/types'
 import ModelCountCard from '../../../components/cards/ModelCountCard.vue'
 import MetadataTree from '../../../components/ui/MetadataTree.vue';
 import ProjectService from '../../../services/clients/ProjectService'
+import ProjectDetailsModal from '../../../components/modals/ProjectDetailsModal.vue'
 
 const props = defineProps<{
     title: string
 }>()
 
+
+const accordion = ref([false, false, false])
 const switchValue = ref<ModelType>('sample')
 const showDetails = ref(false)
 const lookupData = ref<LookupResponse>({ samples: 0, experiments: 0 })
@@ -277,10 +172,20 @@ const parsedDetails = computed(() => {
 })
 const columns = [
     { key: "key", sortable: true },
-    { key: "required", sortable: true },
-    { key: "type", width: 120 },
+    { key: "label", sortable: true },
+    { key: "required" },
+    { key: "type" },
+    { key: "actions" }
+]
+const collapseOptions = [
+    { label: 'Sample Definitions', value: 'sample' as ModelType, icon: 'fa-vial' },
+    { label: 'Experiment Definitions', value: 'experiment' as ModelType, icon: 'fa-dna' }
 ]
 
+const opts = computed(() => {
+    if (schemaStore.schema.experiment.fields.length > 0) return collapseOptions
+    return collapseOptions.filter(f => f.value !== 'experiment')
+})
 function getFieldType(item: Filter): 'input' | 'select' | 'range' {
     const filterKeys = Object.keys(item.filter)
     if (filterKeys.includes('input_type')) return 'input'
