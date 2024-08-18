@@ -1,8 +1,7 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
 import { projects } from './project'
+import { adminRoutes } from './admin'
 import Dashboard from '../pages/dashboard/Dashboard.vue'
-
-
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -11,10 +10,7 @@ const routes: Array<RouteRecordRaw> = [
     component: Dashboard,
     props: {
       title: 'Dashboard'
-    },
-    meta: {
-      layout: 'default',
-    },
+    }
   },
   {
     name: 'login',
@@ -22,18 +18,23 @@ const routes: Array<RouteRecordRaw> = [
     props: {
       title: 'Login'
     },
-    component: () => import('../pages/auth/login/Login.vue'),
-    meta: {
-      layout: 'default',
+    component: () => import('../pages/auth/Login.vue')
+  },
+  {
+    name: 'unauthorized',
+    path: '/unauthorized',
+    props: {
+      title: 'You are unauthorized'
     },
+    component: () => import('../pages/auth/Unauthorized.vue')
   },
   {
     path: '/:catchAll(.*)',
     redirect: { name: 'home' },
   },
-  ...projects
+  ...projects,
+  ...adminRoutes
 ]
-
 
 
 const router = createRouter({

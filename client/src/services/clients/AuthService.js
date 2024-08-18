@@ -27,7 +27,7 @@ auth.interceptors.request.use(
 
 
 class AuthService {
-    check(){
+    check() {
         return auth.get('/login')
     }
     login(payload) {
@@ -36,22 +36,21 @@ class AuthService {
     logout() {
         return base.get('/logout')
     }
-    createExperiment(payload){
-        return auth.post('/experiments', payload)
+    getUsers(params) {
+        return base.get('/users', { params: params })
     }
-    updateExperiment(id, payload){
-        return auth.put(`/experiments/${id}`, payload)
+    getUser(id) {
+        return auth.get(`/users/${id}`)
     }
-    deleteExperiment(id){
-        return auth.delete(`/experiments/${id}`)
+    createUser(payload) {
+        return auth.post('/users', payload)
     }
-    createSample(payload){
-        return auth.post('/samples', payload)
+    updateUser(id, payload) {
+        return auth.put(`/users/${id}`, payload)
     }
-    updateSample(id, payload){
-        return auth.put(`/samples/${id}`, payload)
+    deleteUser(id) {
+        return auth.delete(`/users/${id}`)
     }
-    deleteSample(id){
-        return auth.delete(`/samples/${id}`)
-    }}
+}
+
 export default new AuthService()

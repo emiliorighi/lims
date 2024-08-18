@@ -3,7 +3,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from 'vue';
+import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
 
 const props = defineProps<{
     text: string;
@@ -17,6 +17,10 @@ const speed = props.speed || 100; // Default typing speed in milliseconds
 let typingInterval: number | undefined;
 
 const startTyping = () => {
+    // Reset the displayed text and index
+    displayedText.value = '';
+    currentIndex.value = 0;
+
     typingInterval = window.setInterval(() => {
         if (currentIndex.value < props.text.length) {
             displayedText.value += props.text[currentIndex.value];
@@ -35,5 +39,12 @@ onBeforeUnmount(() => {
     if (typingInterval) {
         clearInterval(typingInterval);
     }
+});
+
+watch(() => props.text, () => {
+    if (typingInterval) {
+        clearInterval(typingInterval);
+    }
+    startTyping();
 });
 </script>

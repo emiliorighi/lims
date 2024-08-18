@@ -16,6 +16,7 @@ export type FieldType = "input" | "select" | "range";
 
 export type Theme = "light" | "dark"
 export type ModelType = "sample" | "experiment"
+export type UserRole = 'admin' | 'project_manager'
 
 export type ItemModel = {
   experiment_id?: string,
@@ -23,6 +24,12 @@ export type ItemModel = {
   metadata: Record<string, any>
 }
 
+export type User = {
+  name: string,
+  password?: string
+  projects: string[]
+  role: UserRole
+}
 export const fieldTypes = ['input', 'select', 'range']
 
 export type Input = {

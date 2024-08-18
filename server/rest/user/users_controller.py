@@ -14,11 +14,7 @@ class LoginApi(Resource):
 
     def post(self):
         payload = request.json if request.is_json else request.form
-        name = payload.get('name')
-        pwd = payload.get('password')
-        if not name or not pwd:
-            return Response(json.dumps("name or password are required"), mimetype="application/json", status=400)
-        user = users_service.get_user(name,pwd)
+        user = users_service.login_user(payload)
         response = auth.set_token(user)
         return response
 
@@ -32,7 +28,11 @@ class LogoutApi(Resource):
 class UsersApi(Resource):
 
     @jwt_required()
-    def get(self):
+    def get(self, name=None):
+        if name:
+            user = users_service.get_user(name)
+            return Response(user.to_json(), mimetype="application/json", status=200)
+        
         total, data = users_service.get_users(**request.args)
         json_resp = dict(total=total,data=list(data.as_pymongo()))
         return Response(json.dumps(json_resp), mimetype="application/json", status=200)
@@ -43,11 +43,6 @@ class UsersApi(Resource):
         data = request.json if request.is_json else request.form
         message, status = users_service.create_user(data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
-
-
-class UserApi(Resource):
-
-
     
     @jwt_required()
     def put(self,name):

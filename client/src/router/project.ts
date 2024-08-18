@@ -1,52 +1,22 @@
-import { RouteRecordRaw, RouteLocationNormalizedLoaded } from 'vue-router';
-import { useGlobalStore } from '../stores/global-store'
-import { useSchemaStore } from '../stores/schemas-store';
-import { title } from 'process';
+import { RouteRecordRaw } from 'vue-router';
+import { hasProjectAccess, isAuthenticated } from './nav-guards'
 
-
-
-function isAdmin() {
-  const { userRole } = useGlobalStore()
-  if (userRole !== 'Admin') {
-    return { name: 'unauthorized' }
-  }
-}
-
-function isAuthenticated() {
-  const { isAuthenticated } = useGlobalStore()
-  if (!isAuthenticated) return { name: 'login' }
-}
 
 export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects',
     name: 'projects',
+    beforeEnter: [isAuthenticated],
     props: {
       title: 'Projects'
     },
-    component: () => import('../pages/project/Projects.vue'),
-    meta: {
-      layout: 'default',
-    },
-  },
-  {
-    path: '/project-form',
-    name: 'project-form',
-    props: {
-      title: 'Project Form'
-    },
-    component: () => import('../pages/project-form/ProjectForm.vue'),
-    meta: {
-      layout: 'default',
-    },
+    component: () => import('../pages/project/Projects.vue')
   },
   {
     path: '/projects/:projectId',
     props: true,
+    beforeEnter: [isAuthenticated, hasProjectAccess],
     component: () => import('../layouts/ProjectBypass.vue'),
-    meta: {
-      layout: 'project',
-    },
     children: [
       {
         path: '',

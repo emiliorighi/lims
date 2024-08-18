@@ -15,8 +15,10 @@ def initialize_routes(api):
 
 	##APP STATS
 	api.add_resource(stats_controller.LookupApi, '/api/lookup')
-	
 	api.add_resource(stats_controller.ModelStatsApi, '/api/<model>/stats/<field>')
+
+	##USERS
+	api.add_resource(users_controller.UsersApi, '/api/users', '/api/users/<name>')
 
 	###DRAFT PROJECT
 	api.add_resource(draft_projects_controller.DraftProjectsApi, '/api/draft_projects')

@@ -3,43 +3,6 @@
 </template>
 <script setup lang="ts">
 import AppLayout from './layouts/AppLayout.vue';
-import AuthService from './services/clients/AuthService'
-import { onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useGlobalStore } from './stores/global-store'
-import { AxiosError } from 'axios'
-import { useRoute } from 'vue-router';
-
-
-const gStore = useGlobalStore()
-
-const router = useRouter()
-
-
-onMounted(async () => {
-
-  await checkUserisLoggedIn()
-
-})
-
-async function checkUserisLoggedIn() {
-  try {
-    const { data } = await AuthService.check()
-    gStore.isAuthenticated = true
-    gStore.userName = data.name
-    gStore.userRole = data.role
-    gStore.userProjects = [...data.projects]
-  } catch (error) {
-
-    const axiosError = error as AxiosError
-    // Handle specific types of errors if necessary
-    if (axiosError.response && axiosError.response.status === 401) {
-      router.push({ name: 'login' })
-    } else {
-      console.error('An unexpected error occurred during authentication check.');
-    }
-  }
-}
 
 </script>
 <style lang="scss">

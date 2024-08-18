@@ -1,5 +1,4 @@
 from db.models import Project,Sample,Experiment
-from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import BadRequest, NotFound
 from mongoengine.errors import NotUniqueError
 from ..item.items_service import update_item
