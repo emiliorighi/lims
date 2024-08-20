@@ -1,20 +1,28 @@
 <template>
     <VaSidebar :minimized="isProjectView" v-model="globalStore.isSidebarVisible">
-        <VaSidebarItem :active="isRouteActive(name)" v-for=" { icon, title, name }  in  menu " :key="icon"
-            :to="{ name: name }">
+        <VaSidebarItem :active="isRouteActive('home')" :to="{ name: 'home' }">
+            <VaSidebarItemContent>
+                <VaIcon name="dashboard" />
+                <VaSidebarItemTitle>
+                    Dashboard
+                </VaSidebarItemTitle>
+            </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem v-if="globalStore.isAuthenticated" :active="isRouteActive('projects')"
+            :to="{ name: 'projects' }">
+            <VaSidebarItemContent>
+                <VaIcon name="folder" />
+                <VaSidebarItemTitle>
+                    Projects
+                </VaSidebarItemTitle>
+            </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem v-if="isAdmin" :active="isRouteActive(name)" v-for="{ icon, title, name } in adminMenu"
+            :key="icon" :to="{ name: name }">
             <VaSidebarItemContent>
                 <VaIcon :name="icon" />
                 <VaSidebarItemTitle>
                     {{ title }}
-                </VaSidebarItemTitle>
-            </VaSidebarItemContent>
-        </VaSidebarItem>
-        <VaSidebarItem :active="isRouteActive('users')" v-if="globalStore.user.role === 'admin'"
-            :to="{ name: 'users' }">
-            <VaSidebarItemContent>
-                <VaIcon name="group" />
-                <VaSidebarItemTitle>
-                    Users
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
@@ -35,17 +43,17 @@
             </VaSidebarItemContent>
         </VaSidebarItem>
         <VaSidebarItem v-else>
-            <VaSidebarItemContent @click="logout">
-                <VaIcon name="logout" />
+            <VaSidebarItemContent @click="$router.push({ name: 'login' })">
+                <VaIcon name="login" />
                 <VaSidebarItemTitle>
-                    Logout
+                    Login
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
     </VaSidebar>
     <VaDivider vertical style="margin: 0;" />
     <VaSidebar hoverable minimized-width="64px" v-if="isProjectView" v-model="globalStore.isSidebarVisible">
-        <VaSidebarItem :active="isSubRouteActive(m.name)" v-for=" m  in  projectMenu " :key="m.name" :to="m.to">
+        <VaSidebarItem :active="isSubRouteActive(m.name)" v-for=" m in projectMenu" :key="m.name" :to="m.to">
             <VaSidebarItemContent>
                 <VaIcon :name="m.icon" />
                 <VaSidebarItemTitle>
@@ -85,18 +93,17 @@ const tabs = [
     },
     {
         label: 'Upload',
-        icon: 'upload',
+        icon: 'upload_file',
         to: { name: 'upload' },
         name: 'upload'
     },
     {
-        label: 'Statistics',
-        icon: 'query_stats',
+        label: 'Charts',
+        icon: 'leaderboard',
         to: { name: 'statistics' },
         name: 'statistics'
     }
 ]
-
 
 const projectMenu = computed(() => {
     const projectId = schemaStore.schema.project_id
@@ -106,9 +113,9 @@ const projectMenu = computed(() => {
     } return tabs.filter(t => t.name !== 'experiments')
 })
 
-const mainMenu = computed(() => {
-    const isAdmin = globalStore.user.role === 'admin'
-    
+const isAdmin = computed(() => {
+    return globalStore.user.role === 'admin'
+
 })
 
 const isProjectView = computed(() => {
@@ -131,10 +138,8 @@ async function logout() {
     router.push({ name: 'home' })
 }
 
-const menu = [
-    { icon: "dashboard", title: "Dashboard", name: 'home' },
-    { icon: "folder", title: "Projects", name: 'projects' },
+const adminMenu = [
     { icon: "edit", title: "Project Form", name: 'project-form' },
+    { icon: "group", title: "Users", name: 'users' },
 ]
-
 </script>

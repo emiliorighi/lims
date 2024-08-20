@@ -115,26 +115,22 @@ class Sample(db.Document):
         'strict': False
     }
 
-class ActionLogs(db.Document):
-    created = db.DateTimeField(default=datetime.now())
-    user = db.StringField(required=True)
-    project = db.StringField(required=True)
-    action = db.EnumField(Actions, required=True)
-    model = db.EnumField(Model, required=True)
-    item_id = db.StringField(required=True)
+class AuditLog(db.Document):
+    user = db.StringField(required=True)  # Store the user's name or ID
+    action = db.EnumField(Actions, required=True)  # Store the action performed (create, update, delete)
+    model = db.EnumField(Model, required=True)  # Store the model type (Project, Experiment, etc.)
+    model_id = db.StringField(required=True)  # Store the ID of the model instance
+    timestamp = db.DateTimeField(default=datetime.now, required=True)
+    changes = db.DictField()  # Store the details of what was changed
     meta = {
         'indexes': [
-            'project',
-            'item_id',
             'user',
-            {
-                'fields': ['project', 'item_id', 'user'],
-                'unique': True  # This enforces uniqueness
-            }
-        ],
-        'strict': False
+            'action',
+            'model',
+            'model_id',
+            'timestamp'
+        ]
     }
-
 
 class Chart(db.Document):
     user = db.StringField(required=True)

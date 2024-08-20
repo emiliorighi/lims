@@ -1,6 +1,7 @@
 <template>
-    <VaButton :loading="isLoading" preset="primary" :disabled="!project.project_id" @click="createAndDownloadYaml">
-        Download Schema
+    <VaButton icon="download" :loading="isLoading" preset="primary" :disabled="!project.project_id"
+        @click="createAndDownloadYaml">
+        YAML
     </VaButton>
 </template>
 <script setup lang="ts">

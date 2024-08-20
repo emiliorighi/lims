@@ -1,6 +1,10 @@
 <template>
     <Header :title="title" />
     <div class="row">
+        <div v-for="(card, index) in Object.values(cardsToShow)" :key="index"
+            class="flex lg4 md4 sm12 xs12 cards-column">
+            <ModelCountCard :card="card" />
+        </div>
         <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
                 <VaCardContent>
@@ -13,7 +17,7 @@
                                 <div class="flex">
                                     <VaButton preset="primary"
                                         @click="schemaStore.showSchema = !schemaStore.showSchema">
-                                        View Schema
+                                        View
                                     </VaButton>
                                 </div>
                                 <div class="flex">
@@ -51,12 +55,16 @@
                 </VaCardContent>
             </VaCard>
         </div>
-        <!-- 
-        users involved in the project
-        number of users, samples and experiments
+        <div v-for="(card, index) in Object.values(cardsToShow)" :key="index"
+            class="flex lg4 md4 sm12 xs12 cards-column">
+            <ModelCountCard :card="card" />
+        </div>
+    </div>
+    <!-- 
+   Create date line chart with samples and experiments
         
         -->
-        <!-- <div class="flex lg8 md8 sm12 xs12">
+    <!-- <div class="flex lg8 md8 sm12 xs12">
             <VaCard v-if="expData && sampleData">
 
                 <VaCardContent style="height: 400px;">
@@ -66,14 +74,13 @@
             </VaCard>
             <VaSkeleton v-else height="400px" />
         </div> -->
-        <!-- <div class="flex lg4 md4 sm12 xs12 cards-column">
+    <!-- <div class="flex lg4 md4 sm12 xs12 cards-column">
             <div v-for="(card, index) in Object.values(cardsToShow)" :key="index" class="row row-equal card-wrapper">
                 <div class="flex lg12 md12 sm12 xs12">
                     <ModelCountCard :card="card" />
                 </div>
             </div>
         </div> -->
-    </div>
 
 
 
@@ -98,7 +105,7 @@
 
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue';
+import { computed, onMounted, reactive, ref } from 'vue';
 import { useSchemaStore } from '../../../stores/schemas-store';
 import DownloadYAMLProject from '../../../components/buttons/DownloadYAMLProject.vue'
 import Header from '../../../components/ui/Header.vue'
@@ -107,60 +114,43 @@ import ModelCountCard from '../../../components/cards/ModelCountCard.vue'
 import MetadataTree from '../../../components/ui/MetadataTree.vue';
 import ProjectService from '../../../services/clients/ProjectService'
 import ProjectDetailsModal from '../../../components/modals/ProjectDetailsModal.vue'
+import DateChartCard from '../../../components/cards/DateChartCard.vue'
 
 const props = defineProps<{
     title: string
 }>()
 
+const selectedFilter = ref<Filter | undefined>()
+const schemaStore = useSchemaStore()
+const { sample, experiment, ...details } = schemaStore.schema
 
 const accordion = ref([false, false, false])
-const switchValue = ref<ModelType>('sample')
 const showDetails = ref(false)
-const lookupData = ref<LookupResponse>({ samples: 0, experiments: 0 })
-const chartOptions = {
-    plugins: {
-        title: {
-            text: 'Number of Samples and Experiments',
-            display: true,
-            align: 'start'
-        },
-        datalabels: {
-            color: '#ffffff',
-            font: {
-                size: '18'
-            }
-        },
-        legend: { position: 'bottom', align: 'center' }
-    },
+const cards = reactive({
+    samples: { icon: 'fa-vial', text: 'Samples', color: 'success', count: 0 },
+    experiments: { icon: 'fa-dna', text: 'Experiments', color: 'primary', count: 0 },
+    users: { icon: 'group', text: 'Users', color: 'secondary', count: 0 }
+});
 
-}
+const cardsToShow = computed(() => {
+    const { samples, experiments, users } = cards
+    if (experiment.fields.length) return { samples, experiments, users }
+    return { samples, users }
+})
+
+
 type LookupResponse = {
     samples: number
     experiments: number
 }
 
-const selectedFilter = ref<Filter | undefined>()
-const schemaStore = useSchemaStore()
 
-const { sample, experiment, ...details } = schemaStore.schema
 
 onMounted(async () => {
     await lookupProjectData(details.project_id)
+    const samplesResp = await ProjectService.getProjectStats(details.project_id, 'samples', 'created')
+    console.log(samplesResp)
 })
-const switchDisabled = computed(() => {
-    return experiment.id_format.length === 0
-})
-
-const attributes = computed(() => {
-    return switchValue.value === 'sample' ? sample.fields : experiment.fields
-})
-
-// const dataToShow = computed(() => {
-//     const { samples, experiments } = cards.value
-//     if (switchDisabled.value) return { samples }
-//     return { samples, experiments }
-// })
-
 
 const parsedDetails = computed(() => {
     const dets = Object.entries(details).filter(([k, v]) => k !== 'created')
@@ -195,13 +185,23 @@ function getFieldType(item: Filter): 'input' | 'select' | 'range' {
 async function lookupProjectData(id: string) {
     try {
         const { data } = await ProjectService.lookupProject(id)
-        const { samples, experiments } = data
-        lookupData.value = { samples, experiments }
+        const { samples, experiments, users } = data
+        cards.samples.count = samples
+        cards.experiments.count = experiments
+        cards.users.count = users
     } catch (e) {
-
+        console.error(e)
     }
-
 }
+
+// function getModelStats(model: ModelType, field: string) {
+//     try {
+//         const { data } = await ProjectService.getProjectStats(details.project_id, model, field)
+
+//     } catch (err) {
+//         console.log(err)
+//     }
+// }
 
 function showFilterDetails(rowData: Filter) {
     selectedFilter.value = { ...rowData }
@@ -240,6 +240,7 @@ function createChartData(lookupData: LookupResponse) {
 }
 
 </script>
+
 <style scoped>
 .cards-column {
     display: flex;

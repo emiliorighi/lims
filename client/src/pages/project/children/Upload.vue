@@ -5,6 +5,10 @@
             <VaCard>
                 <VaInnerLoading :loading="isLoading">
                     <VaCardContent>
+                        <h5 class="va-h5">TSV Upload</h5>
+                        <p class="va-text-secondary">Upload a TSV file and map the columns to the target model attributes </p>
+                    </VaCardContent>
+                    <VaCardContent>
                         <VaAccordion v-model="accordionState" multiple>
                             <!-- TSV Upload Section -->
                             <VaCollapse icon="upload_file" header="TSV Upload">

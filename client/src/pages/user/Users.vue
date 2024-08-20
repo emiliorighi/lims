@@ -24,7 +24,7 @@
                             </div>
                         </div>
                         <div class="flex">
-                            <VaButton @click="createUser" icon="add">Add user</VaButton>
+                            <VaButton @click="createUser" icon="add">User</VaButton>
                         </div>
                     </div>
                 </VaCardContent>

@@ -14,7 +14,7 @@
                             <div class="row">
                                 <div class="flex">
                                     <VaButton :disabled="itemStore.total === 0" preset="primary"
-                                        @click="itemStore.showReport = !itemStore.showReport" icon-right="download">
+                                        @click="itemStore.showReport = !itemStore.showReport" icon="download">
                                         Report
                                     </VaButton>
                                 </div>

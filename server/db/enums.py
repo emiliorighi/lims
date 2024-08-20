@@ -28,6 +28,8 @@ class Actions(Enum):
 class Model(Enum):
     SAMPLE='sample'
     EXPERIMENT='experiment'
+    PROJECT='project'
+    USER='user'
 
 class ChartType(Enum):
     BAR="bar"

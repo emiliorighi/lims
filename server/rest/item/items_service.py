@@ -201,4 +201,9 @@ def get_model_field_stats(project_id, model, field):
     response = dict()
     for doc in db_model.objects(project=project_id).aggregate(pipeline):
         response[doc["_id"]] = doc["count"]
-    return response
+
+    #TODO:
+    #add datetime parsing
+    # print(response)
+    
+    return data.dump_json(response)

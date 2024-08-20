@@ -26,10 +26,16 @@
 import { useBreakpoint } from 'vuestic-ui'
 import { useGlobalStore } from "../stores/global-store"
 
+import {onMounted} from 'vue'
+
 import NavBar from '../components/navbar/Navbar.vue'
 import Sidebar from '../components/sidebars/Sidebar.vue'
 
 const globalStore = useGlobalStore()
 const breakpoints = useBreakpoint()
+
+onMounted(async() => {
+  await globalStore.checkUserIsLoggedIn()
+})
 
 </script>

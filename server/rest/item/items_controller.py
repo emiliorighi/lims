@@ -40,4 +40,4 @@ class ModelByProjectStatsApi(Resource):
     def get(self, project_id, model, field):
         
         stats = items_service.get_model_field_stats(project_id, model, field)
-        return Response(json.dumps(stats), mimetype="application/json", status=200)
+        return Response(stats, mimetype="application/json", status=200)

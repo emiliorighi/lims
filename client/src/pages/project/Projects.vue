@@ -2,13 +2,6 @@
     <Header :title="title" />
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
-            <!-- 
-            user table,
-            user details
-            edit user
-            delete user
-            
-            -->
             <VaCard>
                 <VaCardContent>
                     <div class="row justify-space-between">

@@ -45,13 +45,13 @@ export const projects: Array<RouteRecordRaw> = [
       {
         path: 'samples',
         name: 'samples',
-        props: { model: 'sample', title: 'Samples', icon: 'fa-vial', buttonLabel: 'Add Sample' },
+        props: { model: 'sample', title: 'Samples', icon: 'fa-vial', buttonLabel: 'Sample' },
         component: () => import('../pages/project/children/Items.vue'),
       },
       {
         path: 'experiments',
         name: 'experiments',
-        props: { model: 'experiment', title: 'Experiments', icon: 'fa-dna', buttonLabel: 'Add Experiment' },
+        props: { model: 'experiment', title: 'Experiments', icon: 'fa-dna', buttonLabel: 'Experiment' },
         component: () => import('../pages/project/children/Items.vue'),
       },
     ]

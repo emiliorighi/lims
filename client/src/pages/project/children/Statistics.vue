@@ -1,12 +1,16 @@
 <template>
     <Header :title="title" />
     <div class="row">
-        <div class="flex lg12 md12 sm12 xs12">
+        <div class="flex">
             <VaCard>
                 <VaCardContent>
-                    <VaButton icon="add" @click="show = !show">Create Chart</VaButton>
+                    <h5 class="va-h5">Chart creation</h5>
+                    <p class="va-text-secondary">Create a chart with the value frequencies of a selected field</p>
                 </VaCardContent>
                 <VaCardContent>
+                    <VaButton icon="add" @click="show = !show">Chart</VaButton>
+                </VaCardContent>
+                <!-- <VaCardContent>
                     <div class="row row-equal align-center">
                         <div v-for="ch, index in vaCharts" :class="mapSize(ch.size)">
                             <StatsCard :chart="ch" :index="index" @on-delete="deleteChart"
@@ -14,8 +18,14 @@
                                 :chartId="`${ch.field}_${ch.model}_${ch.type}`" />
                         </div>
                     </div>
-                </VaCardContent>
+                </VaCardContent> -->
             </VaCard>
+        </div>
+    </div>
+    <div class="row row-equal align-center">
+        <div v-for="ch, index in vaCharts" :class="mapSize(ch.size)">
+            <StatsCard :chart="ch" :index="index" @on-delete="deleteChart" :label="`${ch.model}s by ${ch.field} `"
+                :chartId="`${ch.field}_${ch.model}_${ch.type}`" />
         </div>
     </div>
     <VaModal v-model="show" hide-default-actions>
