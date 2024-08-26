@@ -1,7 +1,7 @@
 <template>
     <VaModal v-model="itemStore.showDeleteConfirm" hide-default-actions>
         <template #header>
-            <Header :title="`Deleting ${itemStore.idToDelete }?`" :icon="icon"/>
+            <Header :title="`Deleting ${itemStore.idToDelete}?`" :icon="icon" />
         </template>
         <VaDivider />
         <div class="row align-center justify-space-between">

@@ -1,5 +1,8 @@
 <template>
     <VaDataTable :items="items" :columns="columns">
+        <template v-for="column in columns" :key="column" v-slot:[`header(${column})`]="{ key }">
+            {{ key.split('.').length ? key.split('.')[key.split('.').length - 1] : key }}
+        </template>
         <template #cell(actions)="{ rowData }">
             <VaButton v-if="canBeEdited(rowData)" preset="plain" icon="edit" @click="editItem(rowData)" />
             <VaButton preset="plain" icon="delete" color="danger" class="ml-3" @click="triggerDelete(rowData)" />

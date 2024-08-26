@@ -12,7 +12,7 @@
                                 </template>
                             </VaInput>
                         </div>
-                        <div class="flex">
+                        <div v-if="isAdmin" class="flex">
                             <VaButton :to="{ name: 'project-form' }" icon="add">
                                 Project
                             </VaButton>
@@ -38,14 +38,17 @@
 
 </template>
 <script setup lang="ts">
-import { reactive, ref, watchEffect } from 'vue';
+import { computed, reactive, ref, watchEffect } from 'vue';
 import ProjectService from '../../services/clients/ProjectService';
 import { useRouter } from 'vue-router';
 import { useSchemaStore } from '../../stores/schemas-store';
 import { SchemaForm } from '../../data/types';
 import Pagination from '../../components/filters/Pagination.vue';
 import Header from '../../components/ui/Header.vue'
+import { useGlobalStore } from '../../stores/global-store'
 
+
+const globalStore = useGlobalStore()
 const props = defineProps<{
     title: string
 }>()
@@ -60,6 +63,10 @@ const searchForm = reactive({
     limit: 10
 })
 const total = ref(0)
+
+const isAdmin = computed(() => {
+    return globalStore.user.role === 'admin'
+})
 
 watchEffect(async () => {
     await getProjects(searchForm)

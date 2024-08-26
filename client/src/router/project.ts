@@ -6,7 +6,7 @@ export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects',
     name: 'projects',
-    beforeEnter: [isAuthenticated],
+    // beforeEnter: [isAuthenticated],
     props: {
       title: 'Projects'
     },
@@ -15,7 +15,7 @@ export const projects: Array<RouteRecordRaw> = [
   {
     path: '/projects/:projectId',
     props: true,
-    beforeEnter: [isAuthenticated, hasProjectAccess],
+    // beforeEnter: [isAuthenticated, hasProjectAccess],
     component: () => import('../layouts/ProjectBypass.vue'),
     children: [
       {

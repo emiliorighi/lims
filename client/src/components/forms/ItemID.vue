@@ -15,4 +15,5 @@ const props = defineProps<{
     id: string
     rules: Array<(v: string) => boolean | string>
 }>()
+
 </script>

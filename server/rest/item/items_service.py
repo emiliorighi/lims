@@ -3,6 +3,7 @@ from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.queryset.visitor import Q
 from helpers import data,filter,schema
 from ..project import projects_service
+from datetime import datetime
 
 FIELDS_TO_EXCLUDE=['id']
 MODELS={
@@ -193,17 +194,21 @@ def delete_item(project_id, model, item_id):
 def get_model_field_stats(project_id, model, field):
 
     projects_service.get_project(project_id)
+
     db_model = get_model(model)
 
     pipeline = [
         {"$group" : {"_id" : f"${field}", "count" : {"$sum" : 1}}}
     ]
-    response = dict()
-    for doc in db_model.objects(project=project_id).aggregate(pipeline):
-        response[doc["_id"]] = doc["count"]
 
-    #TODO:
-    #add datetime parsing
-    # print(response)
+    response = {}
     
+    for doc in db_model.objects(project=project_id).aggregate(pipeline):
+        key = doc.get("_id")
+        value = doc.get("count")
+
+        if isinstance(key, datetime):
+            key = key.strftime('%Y-%m-%d')
+        response[key] = response.get(key, 0) + value
+
     return data.dump_json(response)

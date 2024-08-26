@@ -18,7 +18,7 @@
                                         Report
                                     </VaButton>
                                 </div>
-                                <div class="flex">
+                                <div v-if="globalStore.isAuthenticated" class="flex">
                                     <VaButton icon="add" @click="newItem">
                                         {{ buttonLabel }}
                                     </VaButton>
@@ -61,7 +61,9 @@ import { useItemStore } from '../../../stores/item-store'
 import ConfirmDeleteModal from '../../../components/modals/ConfirmDeleteModal.vue'
 import Header from '../../../components/ui/Header.vue'
 import ItemsTable from '../../../components/tables/ItemsTable.vue'
+import { useGlobalStore } from '../../../stores/global-store'
 
+const globalStore = useGlobalStore()
 const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
 const { project_id } = schemaStore.schema
@@ -101,7 +103,9 @@ const filteredFields = computed(() =>
     schemaStore.schema[props.model].fields.filter(f => !singleId.value || singleId.value !== f.key)
 )
 const columns = computed(() => {
-    return [...idColumns.value, ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`), 'actions'];
+    const c = [...idColumns.value, ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`)]
+    if (globalStore.isAuthenticated) c.push('actions')
+    return c
 });
 
 async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {

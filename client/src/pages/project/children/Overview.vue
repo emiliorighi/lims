@@ -1,10 +1,6 @@
 <template>
     <Header :title="title" />
     <div class="row">
-        <div v-for="(card, index) in Object.values(cardsToShow)" :key="index"
-            class="flex lg4 md4 sm12 xs12 cards-column">
-            <ModelCountCard :card="card" />
-        </div>
         <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
                 <VaCardContent>
@@ -59,6 +55,10 @@
             class="flex lg4 md4 sm12 xs12 cards-column">
             <ModelCountCard :card="card" />
         </div>
+        <!-- <div v-if="samplesCreatedStats" class="flex lg4 md4 sm12 xs12">
+            <DateChartCard title="Samples" :chart-data="createChartData(samplesCreatedStats, 'Samples created')" color="success" :count="cardsToShow.samples.count"
+                icon="fa-vial" />
+        </div> -->
     </div>
     <!-- 
    Create date line chart with samples and experiments
@@ -120,46 +120,7 @@ const props = defineProps<{
     title: string
 }>()
 
-const selectedFilter = ref<Filter | undefined>()
-const schemaStore = useSchemaStore()
-const { sample, experiment, ...details } = schemaStore.schema
 
-const accordion = ref([false, false, false])
-const showDetails = ref(false)
-const cards = reactive({
-    samples: { icon: 'fa-vial', text: 'Samples', color: 'success', count: 0 },
-    experiments: { icon: 'fa-dna', text: 'Experiments', color: 'primary', count: 0 },
-    users: { icon: 'group', text: 'Users', color: 'secondary', count: 0 }
-});
-
-const cardsToShow = computed(() => {
-    const { samples, experiments, users } = cards
-    if (experiment.fields.length) return { samples, experiments, users }
-    return { samples, users }
-})
-
-
-type LookupResponse = {
-    samples: number
-    experiments: number
-}
-
-
-
-onMounted(async () => {
-    await lookupProjectData(details.project_id)
-    const samplesResp = await ProjectService.getProjectStats(details.project_id, 'samples', 'created')
-    console.log(samplesResp)
-})
-
-const parsedDetails = computed(() => {
-    const dets = Object.entries(details).filter(([k, v]) => k !== 'created')
-    if (details.created && details.created.$date) {
-        const parsedTime = parseTimestamp(details.created.$date)
-        dets.push(['created', parsedTime])
-    }
-    return dets
-})
 const columns = [
     { key: "key", sortable: true },
     { key: "label", sortable: true },
@@ -172,16 +133,63 @@ const collapseOptions = [
     { label: 'Experiment Definitions', value: 'experiment' as ModelType, icon: 'fa-dna' }
 ]
 
+
+const selectedFilter = ref<Filter | undefined>()
+const schemaStore = useSchemaStore()
+const { sample, experiment, ...details } = schemaStore.schema
+// const samplesCreatedStats = ref<Record<string, any> | undefined>()
+// const expCreatedStats = ref<Record<string, any> | undefined>()
+
+const accordion = ref([false, false, false])
+const showDetails = ref(false)
+const cards = reactive({
+    samples: { icon: 'fa-vial', text: 'Samples', color: 'success', count: 0 },
+    experiments: { icon: 'fa-dna', text: 'Experiments', color: 'primary', count: 0 },
+    users: { icon: 'group', text: 'Users', color: 'secondary', count: 0 }
+});
+
+const hasExperiments = computed(() => {
+    return experiment.fields.length > 0
+})
+
+const cardsToShow = computed(() => {
+    const { samples, experiments, users } = cards
+    if (hasExperiments.value) return { samples, experiments, users }
+    return { samples, users }
+})
+
 const opts = computed(() => {
-    if (schemaStore.schema.experiment.fields.length > 0) return collapseOptions
+    if (hasExperiments.value) return collapseOptions
     return collapseOptions.filter(f => f.value !== 'experiment')
 })
+
+const parsedDetails = computed(() => {
+    const dets = Object.entries(details).filter(([k, v]) => k !== 'created')
+    if (details.created && details.created.$date) {
+        const parsedTime = parseTimestamp(details.created.$date)
+        dets.push(['created', parsedTime])
+    }
+    return dets
+})
+
+onMounted(async () => {
+    await lookupProjectData(details.project_id)
+    // const samplesResp = await ProjectService.getProjectStats(details.project_id, 'samples', 'created')
+    // samplesCreatedStats.value = { "2024-10-12":10, "2023-10-12":10,  ...samplesResp.data, }
+    // const expResp = await ProjectService.getProjectStats(details.project_id, 'experiments', 'created')
+    // expCreatedStats.value = { ...expResp.data }
+})
+
+
+
+
 function getFieldType(item: Filter): 'input' | 'select' | 'range' {
     const filterKeys = Object.keys(item.filter)
     if (filterKeys.includes('input_type')) return 'input'
     if (filterKeys.includes('choices')) return 'select'
     return 'range'
 }
+
 async function lookupProjectData(id: string) {
     try {
         const { data } = await ProjectService.lookupProject(id)
@@ -224,16 +232,16 @@ function parseTimestamp(timestamp: number): string {
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 }
 
-function createChartData(lookupData: LookupResponse) {
+function createChartData(data: Record<string, number>, label: string) {
 
 
     return {
-        labels: ['Samples', 'Experiments'],
+        labels: Object.keys(data),
         datasets: [
             {
-                backgroundColor: '#2c82e0',
-                label: '',
-                data: [lookupData.samples, lookupData.experiments],
+                backgroundColor: 'rgba(75,192,192,0.4)',
+                label: label,
+                data: Object.values(data),
             },
         ]
     }

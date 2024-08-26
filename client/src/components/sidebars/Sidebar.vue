@@ -8,7 +8,7 @@
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
-        <VaSidebarItem v-if="globalStore.isAuthenticated" :active="isRouteActive('projects')"
+        <VaSidebarItem :active="isRouteActive('projects')"
             :to="{ name: 'projects' }">
             <VaSidebarItemContent>
                 <VaIcon name="folder" />
@@ -31,6 +31,14 @@
                 <VaIcon name="github" />
                 <VaSidebarItemTitle>
                     Open Issue
+                </VaSidebarItemTitle>
+            </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem :active="isRouteActive('docs')" :to="{name:'docs'}">
+            <VaSidebarItemContent>
+                <VaIcon name="quiz" />
+                <VaSidebarItemTitle>
+                    Documentation
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
@@ -58,6 +66,14 @@
                 <VaIcon :name="m.icon" />
                 <VaSidebarItemTitle>
                     {{ m.label }}
+                </VaSidebarItemTitle>
+            </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem v-if="globalStore.isAuthenticated" :active="isSubRouteActive('upload')" :to="{ name: 'upload' }">
+            <VaSidebarItemContent>
+                <VaIcon name="upload_file" />
+                <VaSidebarItemTitle>
+                    Upload
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
@@ -92,12 +108,6 @@ const tabs = [
         name: 'experiments'
     },
     {
-        label: 'Upload',
-        icon: 'upload_file',
-        to: { name: 'upload' },
-        name: 'upload'
-    },
-    {
         label: 'Charts',
         icon: 'leaderboard',
         to: { name: 'statistics' },
@@ -115,7 +125,6 @@ const projectMenu = computed(() => {
 
 const isAdmin = computed(() => {
     return globalStore.user.role === 'admin'
-
 })
 
 const isProjectView = computed(() => {

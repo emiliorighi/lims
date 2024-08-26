@@ -4,7 +4,7 @@
             <h3 class="va-h3">
                 {{ title }}
             </h3>
-            <p class="va-text-secondary">{{ description }}</p>
+            <p v-if="description" class="va-text-secondary">{{ description }}</p>
         </div>
         <VaIcon v-if="icon" color="primary" size="large" class="flex" :name="icon" />
     </div>
