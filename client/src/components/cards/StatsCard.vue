@@ -7,11 +7,9 @@
             </VaButton>
         </VaCardActions>
         <VaCardContent style="height: 400px;">
-
             <VaChart :chart-id="chartId" :type="chart.type" :options="chartOptions"
                 :data="createChartData(chart.data)" />
         </VaCardContent>
-
     </VaCard>
 </template>
 <script setup lang="ts">
@@ -51,7 +49,8 @@ const chartOptions = computed(() => {
                 font: {
                     size: '18'
                 }
-            }, legend: { position: 'bottom', align: 'center', display: displayLegend }
+            },
+            legend: { position: 'bottom', align: 'center', display: displayLegend }
         },
 
     }

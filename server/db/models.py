@@ -51,13 +51,12 @@ class ProjectDraft(db.Document):
         ]
     }
 
-class Experiment(db.Document):
+class Experiment(db.DynamicDocument):
     sample_id= db.StringField(required=True)
     experiment_id= db.StringField(required=True)
     created = db.DateTimeField(default=datetime.now())
     project=db.StringField(required=True)
     files=db.ListField(db.StringField)
-    metadata=db.DictField()
     meta = {
         'indexes': [
             'project',
@@ -70,24 +69,22 @@ class Experiment(db.Document):
         'strict': False
     }
 
-class File(db.Document):
-    id=db.StringField(unique=True,required=True)
+class File(db.DynamicDocument):
+    file_id=db.StringField(unique=True,required=True)
     related_object=db.StringField(required=True)
     path=db.StringField(required=True,unique=True)
     created = db.DateTimeField(default=datetime.now())
-    metadata=db.DictField()
     meta = {
-        'indexes': ['id']
+        'indexes': ['file_id']
     }
 
-class Analysis(db.Document):
+class Analysis(db.DynamicDocument):
     id = db.StringField(required=True,unique=True)
     experiment = db.StringField(required=True)
     created = db.DateTimeField(default=datetime.now())
     user=db.StringField(required=True)
     project=db.StringField(required=True)
     files=db.ListField(db.StringField)
-    metadata=db.DictField()
     meta = {
         'indexes': [
             'id',
@@ -95,13 +92,12 @@ class Analysis(db.Document):
         'strict': False
     }
 
-class Sample(db.Document):
+class Sample(db.DynamicDocument):
     created = db.DateTimeField(default=datetime.now())
     sample_id = db.StringField(required=True)
     taxid = db.StringField()
     scientific_name = db.StringField()
     project=db.StringField(required=True)
-    metadata=db.DictField()
     files=db.ListField(db.StringField)
     meta = {
         'indexes': [

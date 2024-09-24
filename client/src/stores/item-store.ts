@@ -1,73 +1,65 @@
 import { defineStore } from 'pinia'
-import { ItemModel, ModelSearchForm, ModelType } from '../data/types'
+import { ModelType } from '../data/types'
 import ItemService from '../services/clients/ItemService'
 import { useToast } from 'vuestic-ui/web-components'
 import { AxiosError } from 'axios'
+import AuthService from '../services/clients/AuthService'
 
-function parseQuery(pagination: Record<string, any>, searchForm: Record<string, any>) {
-    let q = { ...pagination }
-    const { query, ...fields } = searchForm
-    const validFilters = Object.fromEntries(Object.entries(query).filter(([k, v]) => v))
-    if (Object.keys(validFilters).length) {
-        q = { ...q, ...validFilters }
-    }
-    if (Object.entries(fields).filter(([k, v]) => v).length) {
-        q = { ...q, ...fields }
-    }
-    return q
+const MODELS = ['sample', 'experiment']
+
+const staticFilters = {
+    sort_order: "",
+    sort_column: "",
 }
-
-function triggerDownload(data: Blob | MediaSource, model: ModelType) {
-    const href = URL.createObjectURL(data)
-    const filename = `${model}_report.tsv`
-    const link = document.createElement('a');
-    link.href = href;
-    link.setAttribute('download', filename); //or any other extension
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(href);
-}
-
-const initSearchForm: ModelSearchForm = {
-    filter: '',
-    query: {},
-    sort_column: '',
-    sort_order: 'asc'
-}
-
 const initPagination = {
     offset: 0,
     limit: 10,
 }
 
+function mapModelStore() {
+    const searchForm = {} as Record<string, any>
+    const sort = { ...staticFilters }
+    const pagination = { ...initPagination }
+    const items: Record<string, any>[] = []
+    const item: null | Record<string, any> = null
+    const total = 0
+    return {
+        searchForm,
+        pagination,
+        sort,
+        items,
+        item,
+        total,
+    }
+}
+
 export const useItemStore = defineStore('item', {
     state: () => {
+        const mappedStores = MODELS.map(m => [m, mapModelStore()])
+        const stores = Object.fromEntries(mappedStores)
         return {
-            item: undefined as ItemModel | undefined,
-            items: [] as ItemModel[],
             showForm: false,
             showReport: false,
             isLoading: false,
-            searchForm: { ...initSearchForm },
+            isTSVLoading: false,
+            currentModel: 'sample' as ModelType,
+            stores,
             showItemDetails: false,
             showDeleteConfirm: false,
             idToDelete: undefined as undefined | string,
-            pagination: { ...initPagination },
             toast: useToast().init,
-            total: 0
         }
     },
-
     actions: {
-
-        async fetchItems(projectId: string, model: ModelType) {
+        async fetchItems(projectId: string) {
             this.isLoading = true
-            const query = parseQuery(this.pagination, this.searchForm)
+            const model = this.currentModel
+            const { searchForm, pagination, sort } = this.stores[model]
+            const params = { ...searchForm, ...pagination, ...sort }
             try {
-                const { data } = await ItemService.getItems(projectId, model, query);
-                this.items = [...data.data];
-                this.total = data.total;
+                const { data } = await ItemService.getItems(projectId, model, params);
+                this.stores[model].items = [...data.data];
+                this.stores[model].total = data.total;
             } catch (e) {
                 this.toast({ message: 'Error fetching data', color: 'danger' })
             } finally {
@@ -75,11 +67,13 @@ export const useItemStore = defineStore('item', {
             }
 
         },
-        async fetchItem(projectId: string, itemId: string, m: ModelType) {
+        async fetchItem(projectId: string, itemId: string) {
             this.isLoading = true
+            const model = this.currentModel
+            console.log(itemId)
             try {
-                const { data } = await ItemService.getItem(projectId, itemId, m)
-                this.item = { ...data }
+                const { data } = await ItemService.getItem(projectId, itemId, model)
+                this.stores[model].item = { ...data }
                 this.showItemDetails = true
             } catch (e) {
                 let message: string
@@ -90,21 +84,18 @@ export const useItemStore = defineStore('item', {
                 } else {
                     message = axiosError.message
                 }
-
                 this.toast({ message: message, color: 'danger' })
             } finally {
                 this.isLoading = false
             }
         },
-
-        async deleteItem(projectId: string, model: ModelType) {
+        async deleteItem(projectId: string) {
             if (!this.idToDelete) return
             this.isLoading = true
-
+            const model = this.currentModel
             try {
-                const { data } = await ItemService.deleteItem(projectId, this.idToDelete, model);
+                const { data } = await AuthService.deleteItem(projectId, this.idToDelete, model);
                 this.toast({ message: data, color: 'success', duration: 1500 });
-                // reset();
             } catch (error) {
                 console.error(error);
                 this.toast({ message: 'Error deleting item', color: 'danger', duration: 1500 });
@@ -113,27 +104,37 @@ export const useItemStore = defineStore('item', {
 
             }
         },
-        async downloadData(requestData: Record<string, any>, projectId: string, model: ModelType) {
-            this.isLoading = true
+        async downloadData(projectId: string, fields: string[], applyFilters: boolean) {
+            this.isTSVLoading = true
+            const model = this.currentModel
+            const downloadRequest = { format: "tsv", fields }
             try {
-
-                const response = await ItemService.getTsv(projectId, model, requestData)
-                const data = response.data
-                triggerDownload(data, model)
+                const requestData = applyFilters ? { ...this.stores[model].searchForm, ...downloadRequest } : { ...downloadRequest }
+                const { data } = await ItemService.getTsv(projectId, model, requestData)
+                const href = URL.createObjectURL(data)
+                const filename = `${model}_report.tsv`
+                const link = document.createElement('a');
+                link.href = href;
+                link.setAttribute('download', filename); //or any other extension
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(href);
             } catch (e) {
                 const axiosError = e as AxiosError
                 this.toast({ message: axiosError.message, color: 'danger' })
             } finally {
-                this.isLoading = false
+                this.isTSVLoading = false
                 this.showReport = false
             }
         },
-
         resetSearchForm() {
-            this.searchForm = { ...initSearchForm }
+            const model = this.currentModel
+            this.stores[model].searchForm = {}
         },
         resetPagination() {
-            this.pagination = { ...initPagination }
+            const model = this.currentModel
+            this.stores[model].pagination.offset = 0
         },
     }
 })

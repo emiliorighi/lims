@@ -1,4 +1,4 @@
-from db.models import Project,ProjectDraft
+from db.models import Project,ProjectDraft,User
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import  NotFound
@@ -26,6 +26,7 @@ def get_projects(offset=0,limit=20,
         sort = '-'+sort_column if sort_order == 'desc' else sort_column
         projects = projects.order_by(sort)
     return projects.count(), list(projects.skip(offset).limit(limit).as_pymongo())
+
 
 def create_project(data):
     errors = schema.validate_content(data)

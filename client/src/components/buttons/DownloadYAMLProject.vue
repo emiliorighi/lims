@@ -1,6 +1,6 @@
 <template>
-    <VaButton icon="download" :loading="isLoading" preset="primary" :disabled="!project.project_id"
-        @click="createAndDownloadYaml">
+    <VaButton icon="cloud_download" :loading="isLoading" preset="primary" :disabled="!project.project_id"
+        @click.stop.prevent="createAndDownloadYaml">
         YAML
     </VaButton>
 </template>

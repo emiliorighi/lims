@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.VITE_BASE_PATH  ?  import.meta.env.VITE_BASE_PATH + '/api' : '/api' 
+const baseURL = import.meta.env.VITE_BASE_PATH ? import.meta.env.VITE_BASE_PATH + '/api' : '/api'
 
 const base = axios.create({
   baseURL: baseURL,
@@ -26,14 +26,12 @@ const submitInstance = axios.create({
 
 
 const download = axios.create({
-  baseURL: baseURL,
-  timeout: 60000,
-  responseType: 'blob'
+  baseURL: baseURL, responseType: 'blob'
 })
 
 export default {
   submission: submitInstance,
   base: base,
   yaml: yaml,
-  download:download
+  download: download
 }

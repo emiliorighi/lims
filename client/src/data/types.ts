@@ -34,7 +34,7 @@ export const fieldTypes = ['input', 'select', 'range']
 
 export type Input = {
   input_type: 'text' | 'number' | 'date'
-  regex: undefined | ''
+  regex?: string
 }
 
 export type Select = {

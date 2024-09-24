@@ -13,7 +13,7 @@
 <script setup lang="ts">
 const props = defineProps<{
     id: string
-    rules: Array<(v: string) => boolean | string>
+    rules: any
 }>()
 
 </script>

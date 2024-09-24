@@ -18,3 +18,13 @@ export function useDebouncedRef(value, delay = 200) {
     }
   })
 }
+
+export function debounce(fn, delay) {
+  let timeoutId;
+  return function (...args) {
+    if (timeoutId) clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => {
+      fn(...args);
+    }, delay);
+  };
+}

@@ -117,10 +117,8 @@
   .cards-column {
     display: flex;
     flex-direction: column;
+    gap: 1rem;
   }
   
-  .card-wrapper {
-    margin-bottom: 1rem; /* Adjusts space between cards */
-  }
   </style>
   

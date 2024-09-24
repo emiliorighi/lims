@@ -2,6 +2,7 @@ from db.models import User,Project
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.errors import NotUniqueError
+from helpers import data as data_helper
 
 FIELDS_TO_EXCLUDE=['password','id','created']
 
@@ -89,3 +90,18 @@ def login_user(data):
     if not user or not user[0]:
         raise BadRequest(description="Wrong name or password")
     return user[0]
+
+def get_related_projects(name, filter=None, offset=0,limit=20,sort_order=None):
+    user = get_user(name)
+    query = Q(**{'project_id__in':user.projects})
+    if filter:
+        query &= Q(name__icontains=filter) | Q(name__iexact=filter)
+
+    projects = Project.objects(query).exclude('id', 'created')
+    
+    if sort_order:
+        sort_column = "name"
+        sort = '-'+sort_column if sort_order == 'desc' else sort_column
+        projects = projects.order_by(sort)
+        
+    return projects.count(), list(projects.skip(offset).limit(limit).as_pymongo())

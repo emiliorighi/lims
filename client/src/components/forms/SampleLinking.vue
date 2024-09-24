@@ -13,7 +13,6 @@
 <script setup lang="ts">
 
 const props = defineProps<{
-    model: string
     metadata: { sample_id: string }
     samples: string[]
     selectLoading: boolean

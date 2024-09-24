@@ -1,131 +1,78 @@
 <template>
-    <h1 class="va-h1">{{ schemaStore.schema.name }}</h1>
-    <p class="va-text-secondary">{{ schemaStore.schema.version }}</p>
-    <p class="va-text-secondary">{{ schemaStore.schema.description }}</p>
-    <!-- <div class="row justify-space-between align-end">
-        <div class="flex">
-            <h1 style="display: inline;" class="va-h1 pt-0">{{ schemaStore.schema.name }}</h1>
-            <span style="margin-left: 3px;" class="va-text-secondary">{{ schemaStore.schema.version }}</span>
+    <h1 class="va-h1">{{ schemaStore.schema.project_id }}</h1>
+    <div class="row justify-space-between align-end">
+        <div class="flex lg6 md8 sm8 xs8">
+            <VaTabs v-model="tab">
+                <template #tabs>
+                    <VaTab name="samples" label="Samples" icon="fa-vial" />
+                    <VaTab v-if="schemaStore.schema.experiment.id_format.length" name="experiments" label="Experiments"
+                        icon="fa-dna" />
+                    <VaTab v-if="isAuthorized" name="upload" label="Upload" icon="upload_file" />
+                </template>
+            </VaTabs>
         </div>
         <div class="flex">
             <div class="row">
+                <div class="flex">
+                    <VaButton @click="schemaStore.showChart = !schemaStore.showChart">Create Chart</VaButton>
+                </div>
                 <div class="flex">
                     <VaButton preset="primary" @click="schemaStore.showSchema = !schemaStore.showSchema">
                         View Schema
                     </VaButton>
                 </div>
-                <div class="flex">
-                    <DownloadYAMLProject :project="schemaStore.schema" />
-                </div>
-
             </div>
         </div>
-    </div> -->
-    <div class="row">
-
-        <div class="flex lg12 md12 sm12 xs12">
-            <VaCard>
-                <VaCardContent style="padding: 0;padding-top: 5px;">
-                    <VaTabs v-if="validTabs.length" v-model="tab">
-                        <template #tabs>
-                            <VaTab v-for="(tab, index) in validTabs" :name="tab.name" :key="index" :label="tab.label"
-                                :icon="tab.icon">
-                            </VaTab>
-                        </template>
-                    </VaTabs>
-
-                </VaCardContent>
-                <VaDivider style="margin: 0;" />
-
-                <VaCardContent>
-
-                    <router-view v-if="showProject"></router-view>
-
-                </VaCardContent>
-            </VaCard>
-        </div>
     </div>
-
+    <div v-if="schemaStore.schema.project_id">
+        <Upload v-if="tab === 'upload'" />
+        <Items v-else :button-label="selectedProps.buttonLabel" :model="selectedProps.model"
+            :icon="selectedProps.icon" />
+    </div>
+    <Statistics />
     <ProjectDetailsModal />
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useSchemaStore } from '../../stores/schemas-store';
 import ProjectService from '../../services/clients/ProjectService';
-import { useRoute, useRouter } from 'vue-router';
-import DownloadYAMLProject from '../../components/buttons/DownloadYAMLProject.vue';
 import ProjectDetailsModal from '../../components/modals/ProjectDetailsModal.vue'
+import Items from './children/Items.vue';
+import { ModelType } from '../../data/types';
+import Upload from './children/Upload.vue';
+import Statistics from './children/Statistics.vue';
+import { useGlobalStore } from '../../stores/global-store';
 
-const router = useRouter()
-const route = useRoute()
 const schemaStore = useSchemaStore()
+const globalStore = useGlobalStore()
 const props = defineProps<{
     projectId: string
 }>()
 
-
-const showProject = computed(() => {
-    return !!schemaStore.schema.project_id
+const isAuthorized = computed(() => {
+    return globalStore.isAuthenticated && (globalStore.user.role === 'admin' || globalStore.user.projects.includes(schemaStore.schema.project_id))
 })
 
+const tab = ref('samples')
 
-const tab = ref('project')
+const itemProps = [
+    {
+        buttonLabel: 'Sample',
+        icon: 'fa-vial',
+        model: 'sample' as ModelType
+    },
+    {
+        buttonLabel: 'Experiment',
+        icon: 'fa-dna',
+        model: 'experiment' as ModelType
+    },
+]
 
-
-watch(() => tab.value, () => {
-    if (route.name && route.name !== tab.value) {
-        const t = tabs.find(({ name }) => name === tab.value)
-        if (t) {
-            router.push(t.to)
-        }
-    }
-})
+const selectedProps = computed(() => tab.value === 'samples' ? itemProps[0] : itemProps[1])
 
 onMounted(async () => {
     if (!schemaStore.schema.project_id) await getProject()
-
-    if (!schemaStore.schema.experiment.id_format.length) {
-        validTabs.value = [...tabs.filter(({ label }) => label !== 'Experiments')]
-    } else {
-        validTabs.value = [...tabs]
-    }
-    if (route.name !== tab.value) tab.value = route.name as string
 })
-
-const tabs = [
-    {
-        label: 'Overview',
-        icon: 'info',
-        to: { name: 'project', params: { projectId: props.projectId } },
-        name: 'project'
-    },
-    {
-        label: 'Samples',
-        icon: 'fa-vial',
-        to: { name: 'samples' },
-        name: 'samples'
-    },
-    {
-        label: 'Experiments',
-        icon: 'fa-dna',
-        to: { name: 'experiments' },
-        name: 'experiments'
-    },
-    {
-        label: 'Upload',
-        icon: 'upload',
-        to: { name: 'upload' },
-        name: 'upload'
-    },
-    {
-        label: 'Statistics',
-        icon: 'query_stats',
-        to: { name: 'statistics' },
-        name: 'statistics'
-    }
-]
-
-const validTabs = ref<Record<string, any>[]>([])
 
 async function getProject() {
     try {
@@ -134,10 +81,6 @@ async function getProject() {
     } catch (error) {
         console.error(error)
     }
-}
-
-function showProjectDetails() {
-    schemaStore.showSchema = true
 }
 
 </script>

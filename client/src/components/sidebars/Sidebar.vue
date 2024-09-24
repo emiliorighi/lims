@@ -1,5 +1,5 @@
 <template>
-    <VaSidebar :minimized="isProjectView" v-model="globalStore.isSidebarVisible">
+    <VaSidebar v-model="globalStore.isSidebarVisible">
         <VaSidebarItem :active="isRouteActive('home')" :to="{ name: 'home' }">
             <VaSidebarItemContent>
                 <VaIcon name="dashboard" />
@@ -8,8 +8,7 @@
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
-        <VaSidebarItem :active="isRouteActive('projects')"
-            :to="{ name: 'projects' }">
+        <VaSidebarItem :active="isRouteActive('projects')" :to="{ name: 'projects' }">
             <VaSidebarItemContent>
                 <VaIcon name="folder" />
                 <VaSidebarItemTitle>
@@ -34,7 +33,7 @@
                 </VaSidebarItemTitle>
             </VaSidebarItemContent>
         </VaSidebarItem>
-        <VaSidebarItem :active="isRouteActive('docs')" :to="{name:'docs'}">
+        <VaSidebarItem :active="isRouteActive('docs')" :to="{ name: 'docs' }">
             <VaSidebarItemContent>
                 <VaIcon name="quiz" />
                 <VaSidebarItemTitle>
@@ -59,76 +58,16 @@
             </VaSidebarItemContent>
         </VaSidebarItem>
     </VaSidebar>
-    <VaDivider vertical style="margin: 0;" />
-    <VaSidebar hoverable minimized-width="64px" v-if="isProjectView" v-model="globalStore.isSidebarVisible">
-        <VaSidebarItem :active="isSubRouteActive(m.name)" v-for=" m in projectMenu" :key="m.name" :to="m.to">
-            <VaSidebarItemContent>
-                <VaIcon :name="m.icon" />
-                <VaSidebarItemTitle>
-                    {{ m.label }}
-                </VaSidebarItemTitle>
-            </VaSidebarItemContent>
-        </VaSidebarItem>
-        <VaSidebarItem v-if="globalStore.isAuthenticated" :active="isSubRouteActive('upload')" :to="{ name: 'upload' }">
-            <VaSidebarItemContent>
-                <VaIcon name="upload_file" />
-                <VaSidebarItemTitle>
-                    Upload
-                </VaSidebarItemTitle>
-            </VaSidebarItemContent>
-        </VaSidebarItem>
-    </VaSidebar>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useGlobalStore } from "../../stores/global-store"
-import { useSchemaStore } from "../../stores/schemas-store"
 
-const schemaStore = useSchemaStore()
 const globalStore = useGlobalStore()
-
-const tabs = [
-    {
-        label: 'Summary',
-        icon: 'summarize',
-        to: { name: 'project' },
-        name: 'project'
-    },
-    {
-        label: 'Samples',
-        icon: 'fa-vial',
-        to: { name: 'samples' },
-        name: 'samples'
-    },
-    {
-        label: 'Experiments',
-        icon: 'fa-dna',
-        to: { name: 'experiments' },
-        name: 'experiments'
-    },
-    {
-        label: 'Charts',
-        icon: 'leaderboard',
-        to: { name: 'statistics' },
-        name: 'statistics'
-    }
-]
-
-const projectMenu = computed(() => {
-    const projectId = schemaStore.schema.project_id
-    if (!projectId) return
-    if (schemaStore.schema.experiment.id_format.length) {
-        return tabs
-    } return tabs.filter(t => t.name !== 'experiments')
-})
 
 const isAdmin = computed(() => {
     return globalStore.user.role === 'admin'
-})
-
-const isProjectView = computed(() => {
-    return !!route.params.projectId
 })
 
 const route = useRoute()

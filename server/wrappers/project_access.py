@@ -12,8 +12,8 @@ def project_access_required():
             project_id = kwargs.get('project_id')
             verify_jwt_in_request()
             claims = get_jwt()
-            username = claims.get("username")
-            role = claims.get("role")
+            username = claims.get("sub").get('name')
+            role = claims.get("sub").get("role")
             user = User.objects(name=username).first()
             if not user:
                 return Response(json.dumps(dict(message=f"User {username} not found")), mimetype="application/json", status=403)

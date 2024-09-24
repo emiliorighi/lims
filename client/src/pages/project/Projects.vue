@@ -4,13 +4,21 @@
         <div class="flex lg12 md12 sm12 xs12">
             <VaCard>
                 <VaCardContent>
-                    <div class="row justify-space-between">
+                    <div class="row align-center justify-space-between">
                         <div class="flex">
-                            <VaInput v-model="searchForm.filter" placeholder="Search project" clearable>
-                                <template #appendInner>
-                                    <VaIcon name="search" />
-                                </template>
-                            </VaInput>
+                            <div class="row align-center">
+                                <div class="flex">
+                                    <VaInput v-model="searchForm.filter" placeholder="Search project" clearable>
+                                        <template #appendInner>
+                                            <VaIcon name="search" />
+                                        </template>
+                                    </VaInput>
+                                </div>
+                                <div v-if="isProjectManager" class="flex">
+                                    <VaButtonToggle preset="secondary" border-color="primary" v-model="viewAll"
+                                        :options="viewOptions" />
+                                </div>
+                            </div>
                         </div>
                         <div v-if="isAdmin" class="flex">
                             <VaButton :to="{ name: 'project-form' }" icon="add">
@@ -35,23 +43,27 @@
             </VaCard>
         </div>
     </div>
-
 </template>
 <script setup lang="ts">
-import { computed, reactive, ref, watchEffect } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import ProjectService from '../../services/clients/ProjectService';
 import { useRouter } from 'vue-router';
 import { useSchemaStore } from '../../stores/schemas-store';
-import { SchemaForm } from '../../data/types';
 import Pagination from '../../components/filters/Pagination.vue';
 import Header from '../../components/ui/Header.vue'
 import { useGlobalStore } from '../../stores/global-store'
+import DownloadYAMLProject from '../../components/buttons/DownloadYAMLProject.vue';
+import { SchemaForm } from '../../data/types';
 
 
 const globalStore = useGlobalStore()
 const props = defineProps<{
     title: string
 }>()
+const viewOptions = [
+    { label: "My Projects", value: false },
+    { label: "All Projects", value: true },
+]
 const projects = ref<Record<string, any>[]>([])
 const router = useRouter()
 const schemaStore = useSchemaStore()
@@ -63,12 +75,25 @@ const searchForm = reactive({
     limit: 10
 })
 const total = ref(0)
+const viewAll = ref(false)
 
 const isAdmin = computed(() => {
     return globalStore.user.role === 'admin'
 })
 
-watchEffect(async () => {
+const isProjectManager = computed(() => {
+    return globalStore.user.role === 'project_manager'
+})
+
+watch(() => searchForm, async () => {
+    await getProjects(searchForm)
+}, { deep: true })
+
+watch(() => viewAll.value, async () => {
+    await getProjects(searchForm)
+}, { deep: true })
+
+onMounted(async () => {
     await getProjects(searchForm)
 })
 
@@ -79,14 +104,16 @@ function useProject(project: SchemaForm) {
 
 async function getProjects(params: Record<string, any>) {
     if (params.offset > 1) params.offset = params.offset - 1
+    const query = { ...params }
     try {
         isLoading.value = true
-        const { data } = await ProjectService.getProjects(params)
+        const { data } = isProjectManager.value && !viewAll.value ?
+            await ProjectService.getUserProjects(globalStore.user.name, query) :
+            await ProjectService.getProjects(query)
         projects.value = data.data
         total.value = data.total
     } catch (error) {
         console.error(error)
-
     } finally {
         isLoading.value = false
     }

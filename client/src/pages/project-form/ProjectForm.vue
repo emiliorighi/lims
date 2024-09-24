@@ -47,7 +47,6 @@
 import { computed, ref } from 'vue';
 import { defineVaStepperSteps, useForm, useToast } from 'vuestic-ui'
 import { useProjectStore } from '../../stores/project-store'
-import ProjectService from '../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
 import SaveDraftProject from '../../components/buttons/SaveDraftProject.vue';
 import UploadDraftProject from '../../components/buttons/UploadDraftProject.vue';
@@ -60,6 +59,7 @@ import ModelAttributes from './steps/ModelAttributes.vue';
 import { useRouter } from 'vue-router';
 import ConfirmOverwriteModal from '../../components/modals/ConfirmOverwriteModal.vue'
 import Header from '../../components/ui/Header.vue'
+import AuthService from '../../services/clients/AuthService';
 
 const props = defineProps<{
     title: string
@@ -102,7 +102,7 @@ const isValidExperiment = computed(() => {
 async function submitProject() {
     isLoading.value = !isLoading.value
     try {
-        const { data } = await ProjectService.createProject(projectStore.currentProject)
+        const { data } = await AuthService.createProject(projectStore.currentProject)
         data.forEach((d: string) => {
             init({ color: 'success', message: d })
         })

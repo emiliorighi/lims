@@ -1,57 +1,85 @@
 <template>
-    <VaDataTable :items="items" :columns="columns">
-        <template v-for="column in columns" :key="column" v-slot:[`header(${column})`]="{ key }">
-            {{ key.split('.').length ? key.split('.')[key.split('.').length - 1] : key }}
-        </template>
-        <template #cell(actions)="{ rowData }">
-            <VaButton v-if="canBeEdited(rowData)" preset="plain" icon="edit" @click="editItem(rowData)" />
-            <VaButton preset="plain" icon="delete" color="danger" class="ml-3" @click="triggerDelete(rowData)" />
-        </template>
-        <template #cell(sample_id)="{ rowData }">
-            <VaChip @click="showItemDetails(rowData.sample_id, 'sample')" color="textPrimary" flat>
-                {{ rowData.sample_id }}
-            </VaChip>
-        </template>
-        <template #cell(experiment_id)="{ rowData }">
-            <VaChip v-if="rowData.experiment_id" @click="showItemDetails(rowData.experiment_id, 'experiment')"
-                color="textPrimary" flat>
-                {{ rowData.experiment_id }}
-            </VaChip>
+    <VaDataTable @columnSorted="sortItems" disableClientSideSorting @row:click="showItemDetails" hoverable clickable
+        :loading="isLoading" :items="items" :columns="columns">
+        <template v-if="isAuthorized" #cell(actions)="{ rowData }">
+            <VaButton v-if="canBeEdited" preset="plain" icon="edit" @click.stop.prevent="editItem(rowData)" />
+            <VaButton preset="plain" icon="delete" color="danger" class="ml-3"
+                @click.stop.prevent="triggerDelete(rowData)" />
         </template>
     </VaDataTable>
+    <ModelFormModal :model="model" :icon="icon" />
+    <ConfirmDeleteModal :projectId="projectId" :icon="icon" />
+    <ItemDetailsModal :icon="icon" />
+    <ReportModal :model="model" :icon="icon" />
+
 </template>
 
 <script setup lang="ts">
 import { useSchemaStore } from '../../stores/schemas-store'
-import { ModelType } from '../../data/types'
+import { Filter } from '../../data/types'
+import { computed, ref } from 'vue';
+import { useGlobalStore } from '../../stores/global-store'
+import { useItemStore } from '../../stores/item-store';
+import ModelFormModal from '../modals/ModelFormModal.vue';
+import ConfirmDeleteModal from '../modals/ConfirmDeleteModal.vue';
+import ItemDetailsModal from '../modals/ItemDetailsModal.vue';
+import ReportModal from '../modals/ReportModal.vue';
 
+const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
-
+const globalStore = useGlobalStore()
+const isLoading = ref(false)
 const props = defineProps<{
-    items: any[],
-    columns: string[],
-    model: ModelType,
+    items: Record<string, any>[],
+    filters: Filter[],
+    projectId: string,
+    isAuthorized: boolean
 }>();
 
-const emit = defineEmits(['edit-item', 'trigger-delete', 'show-item-details']);
+const model = computed(() => itemStore.currentModel)
+const icon = computed(() => model.value === 'experiment' ? 'fa-dna' : 'fa-vial')
+const idColumns = computed(() => {
+    const sample = { label: 'Sample id', key: 'sample_id', sortable: true }
+    return itemStore.currentModel === 'experiment'
+        ? [{ label: 'Experiment id', key: 'experiment_id', sortable: true }, sample]
+        : [sample];
+})
+
+const columns = computed(() => {
+    const cols = props.filters.map(({ key, label }) => { return { sortable: true, key, label } })
+    if (globalStore.isAuthenticated) cols.push({ key: 'actions', label: 'actions', sortable: false })
+    return [...idColumns.value, ...cols]
+})
 
 function editItem(rowData: any) {
-    emit('edit-item', rowData);
+    itemStore.stores[model.value].item = { ...rowData }
+    itemStore.showForm = !itemStore.showForm
 }
 
 function triggerDelete(rowData: any) {
-    emit('trigger-delete', rowData);
+    itemStore.idToDelete = rowData.experiment_id ? rowData.experiment_id : rowData.sample_id
+    itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
 }
 
-function showItemDetails(id: string, model: string) {
-    emit('show-item-details', { id, model });
+async function showItemDetails(payload: any) {
+    const { row } = payload
+    let id = row.rowData.sample_id
+    if (model.value === 'experiment') id = row.rowData.experiment_id
+    await itemStore.fetchItem(props.projectId, id)
 }
 
-const canBeEdited = (rowData: any) => {
-    const idFormat = schemaStore.schema[props.model].id_format;
-    const fields = schemaStore.schema[props.model].fields;
+const canBeEdited = computed(() => {
+    const idFormat = schemaStore.schema[model.value].id_format;
+    const fields = schemaStore.schema[model.value].fields;
     const optionalFields = fields.filter(f => !f.required);
 
-    return idFormat.length !== Object.keys(rowData.metadata).length || optionalFields.length;
-};
+    return idFormat.length !== fields.length || optionalFields.length;
+})
+
+async function sortItems(event: { columnName: string, value: 'asc' | 'desc' | null, column: any },) {
+    const { columnName, value } = event
+    itemStore.stores[model.value].sort.sort_column = columnName
+    itemStore.stores[model.value].sort.sort_order = value
+    await itemStore.fetchItems(props.projectId)
+}
 </script>

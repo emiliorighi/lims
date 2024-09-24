@@ -16,9 +16,6 @@ class ProjectService {
   lookupProject(id) {
     return base.get(`/projects/${id}/lookup`)
   }
-  createProject(data) {
-    return base.post('/projects', data)
-  }
   validateYAMLProject(data) {
     return yaml.post('/draft_projects/validate', data)
   }
@@ -31,21 +28,14 @@ class ProjectService {
   inferHeadersFromTSV(projectId, data) {
     return base.post(`/projects/${projectId}/map_header`, data)
   }
-  uploadTSV(projectId, data) {
-    return base.post(`/projects/${projectId}/upload_tsv`, data)
-  }
-
   getDraftProjects(params) {
     return base.get('/draft_projects', { params: params })
   }
   getDraftProject(id) {
     return base.get(`/draft_projects/${id}`)
   }
-  createDraftProject(data) {
-    return base.post('/draft_projects', data)
-  }
-  updateDraftProject(id, data) {
-    return base.put(`/draft_projects/${id}`, data)
+  getUserProjects(name, params){
+    return base.get(`/users/${name}/projects`, {params: params})
   }
 }
 

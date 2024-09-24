@@ -19,6 +19,7 @@ def initialize_routes(api):
 
 	##USERS
 	api.add_resource(users_controller.UsersApi, '/api/users', '/api/users/<name>')
+	api.add_resource(users_controller.UserProjectsApi, '/api/users/<name>/projects')
 
 	###DRAFT PROJECT
 	api.add_resource(draft_projects_controller.DraftProjectsApi, '/api/draft_projects')
@@ -41,8 +42,9 @@ def initialize_routes(api):
 
 	###PROJECT RELATED DATA
 	api.add_resource(items_controller.ItemsByProjectApi, '/api/projects/<project_id>/<model>')
-	api.add_resource(items_controller.ModelByProjectStatsApi, '/api/projects/<project_id>/<model>/stats/<field>')
 	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>')
+
+	api.add_resource(items_controller.ModelByProjectStatsApi, '/api/projects/<project_id>/<model>/stats/<field>')
 
 	##SAVED CHARTS MANAGEMENT 
 	# api.add_resource(stats_controller.ModelStatsApi, '/api/charts', 'api/charts/<chart_id>')

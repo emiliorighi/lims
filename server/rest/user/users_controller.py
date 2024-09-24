@@ -37,7 +37,6 @@ class UsersApi(Resource):
         json_resp = dict(total=total,data=list(data.as_pymongo()))
         return Response(json.dumps(json_resp), mimetype="application/json", status=200)
 
-    ##create user
     @jwt_required()
     def post(self):
         data = request.json if request.is_json else request.form
@@ -55,3 +54,9 @@ class UsersApi(Resource):
     def delete(self,name):
         message, status = users_service.delete_user(name)
         return Response(json.dumps(message), mimetype="application/json", status=status)
+
+class UserProjectsApi(Resource):
+    def get(self, name):
+        total, data = users_service.get_related_projects(name, **request.args)
+        json_resp = dict(total=total,data=data)
+        return Response(json.dumps(json_resp), mimetype="application/json", status=200)

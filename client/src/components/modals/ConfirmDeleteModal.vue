@@ -19,24 +19,20 @@
 </template>
 <script setup lang="ts">
 import { useItemStore } from '../../stores/item-store'
-import { ModelType } from '../../data/types'
-import { useSchemaStore } from '../../stores/schemas-store'
 import Header from './common/Header.vue'
 
-const schemaStore = useSchemaStore()
 const props = defineProps<{
-    icon: string
-    model: ModelType
+    icon: string,
+    projectId:string
 }>()
 
 const itemStore = useItemStore()
 
 async function deleteItem() {
-    const { project_id } = schemaStore.schema
-    await itemStore.deleteItem(project_id, props.model)
+    await itemStore.deleteItem(props.projectId)
     itemStore.resetPagination()
     itemStore.resetSearchForm()
-    await itemStore.fetchItems(project_id, props.model)
+    await itemStore.fetchItems(props.projectId)
     itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
 }
 

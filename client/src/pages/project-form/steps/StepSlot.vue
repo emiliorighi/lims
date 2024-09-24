@@ -9,6 +9,9 @@
                 <span v-else class="va-text-danger"><b>Select at least one field!</b></span>
             </div>
         </div>
+        <VaAlert v-if="currentProject[model].fields.length === 0" color="warning">
+            Any experiment field declared, skip this step!
+        </VaAlert>
         <VaDataTable v-model="currentProject[model].id_format" :items="currentProject[model].fields" :columns="columns"
             striped selectable select-mode="multiple" items-track-by="key">
             <template #cell(type)="{ rowData }">

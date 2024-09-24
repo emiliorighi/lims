@@ -1,163 +1,123 @@
 <template>
-    <Header :title="title" />
-    <div class="row">
-        <div class="flex lg12 md12 sm12 xs12">
-            <VaCard>
-                <VaCardContent>
-                    <div class="row justify-space-between">
+    <VaCard>
+        <VaCardContent>
+            <div class="row justify-space-between align-center">
+                <div class="flex">
+                    <div class="row">
                         <div class="flex">
-                            <TableFilters :key="model" @on-metadata-update="updateQueryForm"
-                                @on-search-change="updateSearchForm" :columns="columns" :fields="filteredFields"
-                                @on-show-field-change="updateShowFields" />
+                            <ItemsInput :model="model" @value-change="handleSearch" />
+                        </div>
+                        <div v-if="hasFilters" class="flex">
+                            <TableFilters :fields="filters" :project-id="project_id" />
                         </div>
                         <div class="flex">
-                            <div class="row">
-                                <div class="flex">
-                                    <VaButton :disabled="itemStore.total === 0" preset="primary"
-                                        @click="itemStore.showReport = !itemStore.showReport" icon="download">
-                                        Report
-                                    </VaButton>
-                                </div>
-                                <div v-if="globalStore.isAuthenticated" class="flex">
-                                    <VaButton icon="add" @click="newItem">
-                                        {{ buttonLabel }}
-                                    </VaButton>
-                                </div>
-                            </div>
+                            <VaButton :disabled="itemStore.stores[model].total === 0" preset="primary"
+                                @click="itemStore.showReport = !itemStore.showReport" icon="download">
+                                Report
+                            </VaButton>
+                        </div>
+                        <div v-if="isAuthorized" class="flex">
+                            <VaButton icon="add" @click="newItem">
+                                {{ buttonLabel }}
+                            </VaButton>
                         </div>
                     </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <ItemsTable :items="itemStore.items" :columns="columns" :model="model" @edit-item="editItem"
-                        @trigger-delete="triggerDelete" @show-item-details="showItemDetails" />
-                    <Pagination @handle-limit="handleLimit" @offset-changed="handlePagination"
-                        :limit="itemStore.pagination.limit" :offset="itemStore.pagination.offset"
-                        :total="itemStore.total" />
-                </VaCardContent>
-            </VaCard>
-        </div>
-    </div>
-
-    <ReportModal :model="model" :icon="icon" />
-
-    <ConfirmDeleteModal :model="model" :icon="icon" />
-
-    <ModelFormModal :model="model" :icon="icon" />
-
-    <ItemDetailsModal :icon="itemType === 'sample' ? 'fa-vial' : 'fa-dna'" />
+                </div>
+                <div class="flex">
+                    <h4 class="va-h4">
+                        {{ total }}
+                        <span style="text-transform: capitalize">
+                            {{ model }}s
+                        </span>
+                    </h4>
+                </div>
+            </div>
+        </VaCardContent>
+        <VaCardContent>
+            <ItemsTable :isAuthorized="isAuthorized" :project-id="project_id" :items="itemStore.stores[model].items"
+                :filters="filters" />
+            <Pagination @offset-changed="handlePagination" :limit="limit" :offset="offset" :total="total" />
+        </VaCardContent>
+    </VaCard>
 
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, watch } from 'vue';
 import { useSchemaStore } from '../../../stores/schemas-store'
 import TableFilters from '../../../components/filters/TableFilters.vue'
-import ReportModal from '../../../components/modals/ReportModal.vue'
-import ModelFormModal from '../../../components/modals/ModelFormModal.vue'
-import ItemDetailsModal from '../../../components/modals/ItemDetailsModal.vue'
-import { ItemModel, ModelType } from '../../../data/types';
+import { ModelType } from '../../../data/types';
 import Pagination from '../../../components/filters/Pagination.vue'
 import { useItemStore } from '../../../stores/item-store'
-import ConfirmDeleteModal from '../../../components/modals/ConfirmDeleteModal.vue'
-import Header from '../../../components/ui/Header.vue'
 import ItemsTable from '../../../components/tables/ItemsTable.vue'
-import { useGlobalStore } from '../../../stores/global-store'
+import ItemsInput from '../../../components/inputs/ItemsInput.vue';
+import { useGlobalStore } from '../../../stores/global-store';
 
-const globalStore = useGlobalStore()
 const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
+const globalStore = useGlobalStore()
 const { project_id } = schemaStore.schema
 
 const props = defineProps<{
     model: ModelType,
-    title: string,
     buttonLabel: string,
     icon: string
 }>()
 
-const itemType = ref<ModelType>('sample')
-const showFields = ref(
-    schemaStore.schema[props.model].fields.map(f => ({ show: f.required, value: f.key }))
-)
+
+watch(() => props.model, async () => {
+    itemStore.resetSearchForm()
+    itemStore.resetPagination()
+    itemStore.currentModel = props.model
+    await itemStore.fetchItems(schemaStore.schema.project_id)
+})
 
 onMounted(async () => {
-    await itemStore.fetchItems(schemaStore.schema.project_id, props.model)
+    itemStore.currentModel = props.model
+    await itemStore.fetchItems(schemaStore.schema.project_id)
 })
 
-watch(() => props.model, async (v) => {
-    itemStore.resetPagination()
+onUnmounted(() => {
     itemStore.resetSearchForm()
-    await itemStore.fetchItems(project_id, v)
+    itemStore.resetPagination()
 })
 
-const singleId = computed(() =>
-    schemaStore.schema[props.model].id_format.length === 1
-        ? schemaStore.schema[props.model].id_format[0]
-        : undefined
-);
-
-const idColumns = computed(() => {
-    return props.model === 'experiment' ? ['experiment_id', 'sample_id'] : ['sample_id'];
+const isAuthorized = computed(() => {
+    return globalStore.isAuthenticated && (globalStore.user.role === 'admin' || globalStore.user.projects.includes(schemaStore.schema.project_id))
 })
-const filteredFields = computed(() =>
-    schemaStore.schema[props.model].fields.filter(f => !singleId.value || singleId.value !== f.key)
-)
-const columns = computed(() => {
-    const c = [...idColumns.value, ...showFields.value.filter(f => f.show).map(f => `metadata.${f.value}`)]
-    if (globalStore.isAuthenticated) c.push('actions')
-    return c
-});
+const offset = computed(() => {
+    const m = itemStore.currentModel
+    return itemStore.stores[m].pagination.offset
+})
 
-async function updateSearchForm(tuple: ['filter' | 'sort_column' | 'sort_order', Record<string, any>[keyof Record<string, any>]]) {
-    const { searchForm } = itemStore
-    searchForm[tuple[0]] = tuple[1]
-    itemStore.searchForm = { ...searchForm }
-    itemStore.resetPagination()
-    itemStore.fetchItems(project_id, props.model)
+const limit = computed(() => {
+    const m = itemStore.currentModel
+    return itemStore.stores[m].pagination.limit
+})
+const total = computed(() => {
+    const m = itemStore.currentModel
+    return itemStore.stores[m].total
+})
+
+async function handleSearch(payload: { field: 'sample_id' | 'experiment_id', value: string }) {
+    const { field, value } = payload
+    const m = itemStore.currentModel
+    itemStore.stores[m].searchForm[field] = value
+    await itemStore.fetchItems(project_id)
 }
 
-async function updateQueryForm(list: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) {
-    const { query } = itemStore.searchForm
-    const newQuery = Object.fromEntries(list)
-    if (newQuery) {
-        itemStore.searchForm.query = { ...query, ...Object.fromEntries(list) }
-    }
-    itemStore.resetPagination()
-    await itemStore.fetchItems(project_id, props.model)
-}
+const filters = computed(() => schemaStore.schema[props.model].fields)
 
-function updateShowFields(updatedShowFields: { show: boolean, value: string }[]) {
-    showFields.value = [...updatedShowFields]
-}
-
-async function showItemDetails(payload: { id: string, model: ModelType }) {
-    const { id, model } = payload
-    itemType.value = model
-    await itemStore.fetchItem(project_id, id, model)
-}
-
-function triggerDelete(rowData: ItemModel) {
-    itemStore.idToDelete = rowData.experiment_id ? rowData.experiment_id : rowData.sample_id
-    itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
-}
-
-async function handleLimit(limit: number) {
-    itemStore.pagination.limit = limit;
-    await itemStore.fetchItems(project_id, props.model)
-}
-
+const hasFilters = computed(() => schemaStore.schema[props.model].id_format.length < schemaStore.schema[props.model].fields.length)
 async function handlePagination(offset: number) {
-    itemStore.pagination.offset = offset - 1;
-    await itemStore.fetchItems(project_id, props.model)
-}
-
-function editItem(rowData: ItemModel) {
-    itemStore.item = { ...rowData }
-    itemStore.showForm = !itemStore.showForm;
+    const m = itemStore.currentModel
+    itemStore.stores[m].pagination.offset = offset - 1;
+    await itemStore.fetchItems(project_id)
 }
 
 function newItem() {
-    itemStore.item = undefined
+    const m = itemStore.currentModel
+    itemStore.stores[m].item = null
     itemStore.showForm = !itemStore.showForm;
 }
 

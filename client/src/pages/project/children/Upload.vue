@@ -1,42 +1,31 @@
 <template>
-    <Header :title="title" />
-    <div class="row">
-        <div class="flex lg12 md12 sm12 xs12">
-            <VaCard>
-                <VaInnerLoading :loading="isLoading">
-                    <VaCardContent>
-                        <h5 class="va-h5">TSV Upload</h5>
-                        <p class="va-text-secondary">Upload a TSV file and map the columns to the target model attributes </p>
-                    </VaCardContent>
-                    <VaCardContent>
-                        <VaAccordion v-model="accordionState" multiple>
-                            <!-- TSV Upload Section -->
-                            <VaCollapse icon="upload_file" header="TSV Upload">
-                                <ModelSelector :behaviour="behaviour" :model="model"
-                                    @update:model="(v: ModelType) => model = v"
-                                    @update:behaviour="(v: string) => behaviour = v" />
-                                <TSVUploader :model="model" :tsv="tsv" @update:tsv="(v: any) => tsv = v" />
-                            </VaCollapse>
+    <VaCard>
+        <VaInnerLoading :loading="isLoading">
+            <VaCardContent>
+                <VaAccordion v-model="accordionState" multiple>
+                    <!-- TSV Upload Section -->
+                    <VaCollapse icon="upload_file" header="TSV Upload">
+                        <ModelSelector :behaviour="behaviour" :model="model" @update:model="(v: ModelType) => model = v"
+                            @update:behaviour="(v: string) => behaviour = v" />
+                        <TSVUploader :model="model" :tsv="tsv" @update:tsv="(v: any) => tsv = v" />
+                    </VaCollapse>
 
-                            <!-- Column Mapping Section -->
-                            <VaCollapse :disabled="mappedFields.length === 0" icon="checklist" header="Column Mapping">
-                                <ColumnMapping :mapped-fields="mappedFields" :model="model"
-                                    @update:mapped-fields="updateMappedFields" />
+                    <!-- Column Mapping Section -->
+                    <VaCollapse :disabled="mappedFields.length === 0" icon="checklist" header="Column Mapping">
+                        <ColumnMapping :mapped-fields="mappedFields" :model="model"
+                            @update:mapped-fields="updateMappedFields" />
 
-                            </VaCollapse>
-                        </VaAccordion>
-                    </VaCardContent>
-                    <VaCardActions align="between">
-                        <VaButton color="danger" @click="resetMap">Reset</VaButton>
-                        <VaButton @click="handleSubmit" :disabled="isSubmitDisabled">
-                            Submit
-                        </VaButton>
-                    </VaCardActions>
-                </VaInnerLoading>
-
-            </VaCard>
-        </div>
-    </div>
+                    </VaCollapse>
+                </VaAccordion>
+            </VaCardContent>
+            <VaCardActions align="between">
+                <VaButton color="danger" @click="resetMap">Reset</VaButton>
+                <VaButton @click="handleSubmit" :disabled="isSubmitDisabled">
+                    Submit
+                </VaButton>
+            </VaCardActions>
+        </VaInnerLoading>
+    </VaCard>
 </template>
 
 <script setup lang="ts">
@@ -45,21 +34,17 @@ import { useSchemaStore } from '../../../stores/schemas-store';
 import { useToast } from 'vuestic-ui/web-components';
 import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';
-import Header from '../../../components/ui/Header.vue'
 import { ModelType } from '../../../data/types'
 import ModelSelector from '../../../components/forms/ModelSelector.vue'
 import TSVUploader from '../../../components/forms/TSVUploader.vue';
 import ColumnMapping from '../../../components/forms/ColumnMapping.vue'
+import AuthService from '../../../services/clients/AuthService';
 
-const props = defineProps<{
-    title: string
-}>()
 const schemaStore = useSchemaStore();
 const isLoading = ref(false);
 const tsv = ref();
 const behaviour = ref('SKIP');
 const model = ref<ModelType>('sample');
-const filter = ref('');
 const accordionState = ref([true, false]);
 
 const { init, } = useToast();
@@ -142,7 +127,7 @@ async function handleSubmit() {
 
     try {
         isLoading.value = true;
-        const { data } = await ProjectService.uploadTSV(schemaStore.schema.project_id, formData);
+        const { data } = await AuthService.uploadTSV(schemaStore.schema.project_id, formData);
         init({ message: data, color: 'success' });
         resetForm();
     } catch (error) {

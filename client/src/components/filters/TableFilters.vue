@@ -1,165 +1,61 @@
 <template>
-    <div class="row">
-        <div class="flex">
-            <VaInput iconColor="primary" v-model="searchForm.filter" clearable
-                @update:modelValue="(v: string) => emits('onSearchChange', ['filter', v])"
-                placeholder="Type to search..">
-                <template #appendInner>
-                    <va-icon name="search" />
-                </template>
-            </VaInput>
-        </div>
-        <div v-if="showFields.length" class="flex">
-            <VaButtonDropdown :closeOnContentClick="false" icon="hide_source" preset="primary" label="Fields"
-                class="mr-2 mb-2">
-                <div class="row row-drop-down">
-                    <div class="flex lg12 md12 sm12 xs12" v-for="(field, index) in showFields">
-                        <VaSwitch class="mt-2" :key="index" v-model="showFields[index].show" :label="field.value"
-                            size="small" />
-                    </div>
+    <VaBadge style="z-index: 1;" overlap color="info" :text="activeFilters">
+        <VaButtonDropdown :closeOnContentClick="false" icon="tune" label="Filters" preset="primary">
+            <div class="row row-drop-down">
+                <div class="flex" v-for="(field, index) in fields" :key="index">
+                    <TextInput class="mt-3" @value-change="(v) => updateQuery(v, field)" :label="field.label"
+                        :type="field.filter.input_type" v-if="isInputField(field.filter)"
+                        :value="searchForm[field.key]">
+                    </TextInput>
+                    <SelectInput class="mt-3" @value-change="(v) => updateQuery(v, field)"
+                        :options="field.filter.choices" :multi="field.filter.multi" :label="field.label"
+                        :value="searchForm[field.key]" v-else-if="isSelectField(field.filter)"></SelectInput>
+                    <!-- <RangeInput @value-change="(v) => updateQuery(v, field)" :label="field.label" :min="field.filter.min"
+                :max="field.filter.max" v-else-if="isRangeField(field.filter)"></RangeInput> -->
                 </div>
-            </VaButtonDropdown>
-        </div>
-        <div v-if="Object.entries(searchForm.query).length" class="flex">
-            <VaBadge style="z-index: 1;" overlap color="info" :text="activeFilters">
-                <VaButtonDropdown :closeOnContentClick="false" icon="filter_list" label="Filters" preset="primary"
-                    class="mr-2 mb-2">
-                    <div class="row row-drop-down">
-                        <div class="flex lg12 md12 sm12 xs12" v-for="(field, index) in fields" :key="index">
-                            <VaInput @update:modelValue="(v: string) => onQueryUpdate(v, field)" class="mt-2" clearable
-                                :label="field.key" v-if="isInputField(field.filter)"
-                                v-model="searchForm.query[field.key]">
-                            </VaInput>
-                            <VaSelect class="mt-2" @update:modelValue="(v: any) => onQueryUpdate(v, field)" clearable
-                                :label="field.key" v-else-if="isSelectField(field.filter)"
-                                v-model="searchForm.query[field.key]" :multiple="field.filter.multi"
-                                :options="field.filter.choices">
-                            </VaSelect>
-                            <VaSlider :label="field.label" v-else-if="isRangeField(field.filter)"
-                                @update:modelValue="(v: any) => onQueryUpdate(v, field)"
-                                v-model="searchForm.query[field.key]" class="mt-4" :min="field.filter.min"
-                                :max="field.filter.max" range track-label-visible>
-                                <template #trackLabel="{ value, order }">
-                                    <VaChip size="small" :color="order === 0 ? 'secondary' : 'warning'">
-                                        {{ value }}
-                                    </VaChip>
-                                </template>
-                            </VaSlider>
-                        </div>
-                    </div>
-                </VaButtonDropdown>
-            </VaBadge>
-        </div>
-        <div class="flex">
-            <VaBadge style="z-index: 1;" overlap color="warning" :text="searchForm.sort_column">
-                <VaButtonDropdown preset="primary" :closeOnContentClick="false" label="Sort" icon="sort"
-                    class="mr-2 mb-2">
-                    <div class="row row-drop-down">
-                        <div class="flex lg12 md12 sm12 xs12">
-                            <VaSelect clearable class="mt-2" label="Sort Field"
-                                @update:modelValue="(v: string) => emits('onSearchChange', ['sort_column', v])"
-                                v-model="searchForm.sort_column" :options="fields.map(f => f.key)" />
-                        </div>
-                        <div class="flex lg12 md12 sm12 xs12">
-                            <VaSelect clearable class="mt-2" label="Sort Order"
-                                @update:modelValue="(v: string) => emits('onSearchChange', ['sort_order', v])"
-                                v-model="searchForm.sort_order" :options="['asc', 'desc']" />
-                        </div>
-                    </div>
-                </VaButtonDropdown>
-            </VaBadge>
-        </div>
-    </div>
+            </div>
+        </VaButtonDropdown>
+    </VaBadge>
+
 </template>
 <script setup lang="ts">
-import { computed, onMounted, ref, watchEffect } from 'vue';
-import { Filter, Input, Select, Range, ModelSearchForm } from '../../data/types'
+import { Filter, Input, Select, Range } from '../../data/types'
+import TextInput from '../inputs/Input.vue'
+import SelectInput from '../inputs/Select.vue'
+import { useItemStore } from '../../stores/item-store';
+import { computed } from 'vue';
 
 const props = defineProps<{
-    columns: string[],
     fields: Filter[],
+    projectId: string
 }>()
 
-
-onMounted(() => {
-    searchForm.value.query = { ...createFilters(props.fields) }
-})
+const itemStore = useItemStore()
 
 const activeFilters = computed(() => {
-
-    const entries = Object.entries(searchForm.value.query)
-
-    const inputs = entries.filter(([k, v]) => !!v && !Array.isArray(v))
-
-    //check ranges
-    const ranges = entries.filter(([k, v]) => Array.isArray(v))
-    const filteredRanges: any[][] = []
-    ranges.forEach(([k, v]) => {
-        const [minV, maxV] = v
-        //get filter
-        const filter = props.fields.find(f => f.key === k)
-        if (filter && isRangeField(filter.filter)) {
-            const { min, max } = filter.filter
-            if (minV !== min || maxV !== max) {
-                filteredRanges.push([k, v])
-            }
-        }
-    })
-    return [...inputs, ...filteredRanges].length
-})
-const searchForm = ref<ModelSearchForm>({
-    query: {},
-    filter: '',
-    sort_column: '',
-    sort_order: 'asc'
+    const m = itemStore.currentModel
+    return Object.entries(itemStore.stores[m].searchForm).filter(([k, v]) => v && k !== 'sample_id' && k !== 'experiment_id').length
 })
 
-const emits = defineEmits(['onMetadataUpdate', 'onShowFieldChange', 'onSearchChange'])
+const searchForm = computed(() => itemStore.stores[itemStore.currentModel].searchForm)
 
-const showFields = ref(props.fields.map((filter: Filter) => {
-    return {
-        show: filter.required,
-        value: filter.key
-    }
-}))
-
-watchEffect(() => {
-    emits('onShowFieldChange', showFields.value)
-})
-
-function onQueryUpdate(v: any, field: Filter) {
-    const { filter } = field
-    const list = []
+async function updateQuery(v: any, field: Filter) {
+    const m = itemStore.currentModel
+    const { filter, key } = field
     if (isInputField(filter)) {
-        const tuple = [field.key, v]
-        list.push(tuple)
+        itemStore.stores[m].searchForm[key] = v
     } else if (isSelectField(filter)) {
-        const tuple = [field.key, filter.multi ? v.join(', ') : v]
-        list.push(tuple)
+        let value = filter.multi ? v.join(', ') : v
+        itemStore.stores[m].searchForm[key] = value
     } else {
         const [min, max] = v
-        const lteTuple = [`${field.key}__lte`, max]
-        const gteTuple = [`${field.key}__gte`, min]
-        list.push(lteTuple)
-        list.push(gteTuple)
-
+        itemStore.stores[m].searchForm[`${key}__lte`] = max
+        itemStore.stores[m].searchForm[`${key}__gte`] = min
     }
-    emits('onMetadataUpdate', list)
-
+    itemStore.resetPagination()
+    await itemStore.fetchItems(props.projectId)
 }
 
-function createFilters(fields: Filter[]) {
-    const entries = fields.map(f => {
-        if (isInputField(f.filter)) {
-            return [f.key, '']
-        } else if (isSelectField(f.filter)) {
-            return f.filter.multi ? [f.key, ['']] : [f.key, '']
-        } else {
-            return [f.key, [f.filter.min, f.filter.max]]
-        }
-    })
-    return Object.fromEntries(entries)
-}
 
 const isInputField = (filter: Filter['filter']): filter is Input => {
     return (filter as Input).input_type !== undefined;
@@ -177,9 +73,11 @@ const isRangeField = (filter: Filter['filter']): filter is Range => {
 <style scoped>
 .row-drop-down {
     max-height: 400px;
-    max-width: 400px;
-
+    max-width: min-content;
     overflow: scroll;
     padding: 16px;
+}
+.mt-3{
+    margin-top: 3px;
 }
 </style>

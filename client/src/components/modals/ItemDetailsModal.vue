@@ -4,9 +4,9 @@
             <Header :title="itemId" :icon="icon" />
         </template>
         <VaDivider />
-        <div v-if="itemStore.item" class="row">
+        <div v-if="item" class="row">
             <div class="flex lg12 md12 sm12 xs12">
-                <MetadataTree :metadata="Object.entries(itemStore.item.metadata)" />
+                <MetadataTree :metadata="Object.entries(item)" />
             </div>
         </div>
     </VaModal>
@@ -21,12 +21,16 @@ const props = defineProps<{
     icon: string,
 }>()
 
-const itemId = computed(() => {
-    if (itemStore.item) {
-        return 'experiment_id' in itemStore.item ? itemStore.item.experiment_id : itemStore.item.sample_id
-    }
-})
-
 const itemStore = useItemStore()
+
+const model = computed(() => itemStore.currentModel)
+
+const item = computed(() => itemStore.stores[model.value].item)
+
+const itemId = computed(() => {
+    if (!item.value) return ''
+    return model.value === 'experiment' ? item.value.experiment_id : item.value.sample_id
+
+})
 
 </script>

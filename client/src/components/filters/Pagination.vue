@@ -1,11 +1,5 @@
 <template>
-    <div class="row align-center justify-space-between">
-        <div class="flex">
-            <b>Total {{ total }}</b>
-            Results per page
-            <VaSelect style="width: 100px;" :options="[10, 20, 50]" v-model="limit"
-                @update:modelValue="(v: number) => $emit('handleLimit', v)" />
-        </div>
+    <div class="row align-center justify-center">
         <div class="flex">
             <VaPagination v-model="offSet" :page-size="limit" :total="total" :visible-pages="3"
                 buttons-preset="secondary" rounded gapped border-color="primary"
@@ -14,7 +8,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 
 
 const props = defineProps<{
@@ -22,8 +16,6 @@ const props = defineProps<{
     limit: number,
     total: number
 }>()
-
-// const offSet = ref(props.offset + 1)
 
 const offSet = computed({
     get() {
@@ -34,6 +26,6 @@ const offSet = computed({
     }
 })
 
-const emits = defineEmits(['offsetChanged', 'handleLimit'])
+const emits = defineEmits(['offsetChanged'])
 
 </script>

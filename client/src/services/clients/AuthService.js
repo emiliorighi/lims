@@ -51,6 +51,27 @@ class AuthService {
     deleteUser(id) {
         return auth.delete(`/users/${id}`)
     }
+    createProject(data) {
+        return auth.post('/projects', data)
+    }
+    createDraftProject(data) {
+        return auth.post('/draft_projects', data)
+    }
+    updateDraftProject(id, data) {
+        return auth.put(`/draft_projects/${id}`, data)
+      }
+    createItem(projectId, model, data) {
+        return auth.post(`/projects/${projectId}/${model}s`, data)
+    }
+    updateItem(projectId, itemId, model, data) {
+        return auth.put(`/projects/${projectId}/${model}s/${itemId}`, data)
+    }
+    deleteItem(projectId, itemId, model) {
+        return auth.delete(`/projects/${projectId}/${model}s/${itemId}`)
+    }
+    uploadTSV(projectId, data) {
+        return auth.post(`/projects/${projectId}/upload_tsv`, data)
+    }
 }
 
 export default new AuthService()

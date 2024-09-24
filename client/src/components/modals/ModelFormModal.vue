@@ -8,8 +8,9 @@
             <VaForm ref="modelForm">
                 <div v-if="!idToUpdate">
                     <ItemID :id="id" :rules="rules" />
-                    <SampleLinking v-if="model === 'experiment'" :model="props.model" :metadata="metadata.value"
-                        :samples="samples" :selectLoading="selectLoading" @update:search="handleSearch" />
+                    <SampleLinking v-if="model === 'experiment'" :metadata="metadata.value" :samples="samples"
+                        :selectLoading="selectLoading" @update:search="handleSearch" />
+                    <VaDivider />
                 </div>
                 <div v-for="(f, index) in fields" :key="index">
                     <h6 class="va-h6">{{ f.title }}</h6>
@@ -18,6 +19,7 @@
                         @update-field="(tuple: [keyof Record<string, any>, Record<string, any>[keyof Record<string, any>]]) => metadata.value[tuple[0]] = tuple[1]"
                         :fields="f.filters">
                     </MetadataForm>
+                    <VaDivider />
                 </div>
             </VaForm>
         </VaInnerLoading>
@@ -33,47 +35,41 @@
 <script setup lang="ts">
 import { AxiosError } from 'axios';
 import { computed, reactive, ref, watch } from 'vue';
-
 import { useSchemaStore } from './../../stores/schemas-store';
 import { useToast, useForm } from 'vuestic-ui/web-components';
 import { useItemStore } from '../../stores/item-store'
-
-import { ItemModel, Filter, ModelType } from '../../data/types';
-
+import { ItemModel, Filter } from '../../data/types';
 import ItemService from '../../services/clients/ItemService';
-
 import Header from './common/Header.vue'
-
 import MetadataForm from '../forms/MetadataForm.vue'
 import SampleLinking from '../forms/SampleLinking.vue'
 import ItemID from '../forms/ItemID.vue'
+import AuthService from '../../services/clients/AuthService';
 
 const props = defineProps<{
-    model: ModelType
     icon: string
-
 }>()
 
 const { init } = useToast()
 const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
 const { validate } = useForm('modelForm')
-
+const model = computed(() => itemStore.currentModel)
 const modelExists = ref(false)
 const samples = ref<string[]>([])
 const selectLoading = ref(false)
 const idGeneratorLoading = ref(false)
 const metadata = reactive<Record<string, any>>({ value: {} })
 
+const item = computed(() => itemStore.stores[model.value].item)
 // Computed Properties
 const existingMetadata = computed(() => {
-    return itemStore.item ? Object.entries(itemStore.item.metadata) : [];
+    return item.value ? Object.entries(item.value) : [];
 });
 
 const id = computed(() => {
     // Track all keys in metadata by converting it to a string
-    const metadataString = JSON.stringify(metadata.value);
-    const keys = schemaStore.schema[props.model].id_format;
+    const keys = schemaStore.schema[model.value].id_format;
     const idFields = Object.entries(metadata.value).filter(([k, v]) => keys.includes(k) && v);
     if (keys.length > idFields.length) return ' ';
     return idFields.map(([k, v]) => v).join('_');
@@ -81,16 +77,16 @@ const id = computed(() => {
 
 const rules = computed(() => {
     return [(v: string) => v.length > 0 || 'Fill the required fields to generate the unique identifier',
-    !modelExists.value || `${props.model} already exists`]
+    !modelExists.value || `${model.value} already exists`]
 })
 
 const idToUpdate = computed(() => {
-    if (!itemStore.item) return undefined
-    return itemStore.item.experiment_id ? itemStore.item.experiment_id : itemStore.item.sample_id
+    if (!item.value) return undefined
+    return item.value.experiment_id ? item.value.experiment_id : item.value.sample_id
 })
 
 const fields = computed(() => {
-    const { id_format, fields } = schemaStore.schema[props.model];
+    const { id_format, fields } = schemaStore.schema[model.value];
     const idFields = fields.filter(f => id_format.includes(f.key) && !idToUpdate.value);
     const requiredFields = fields.filter(f => f.required && !id_format.includes(f.key));
     const optionalFields = fields.filter(f => !f.required);
@@ -116,7 +112,7 @@ async function handleSearch(query: string) {
     selectLoading.value = true;
 
     try {
-        const { data } = await ItemService.getItems(schemaStore.schema.project_id, 'sample', { filter: query });
+        const { data } = await ItemService.getItems(schemaStore.schema.project_id, 'sample', { sample_id: query });
         samples.value = data.data.map((d: ItemModel) => d.sample_id);
     } catch (error) {
         handleError(error, 'Error fetching samples');
@@ -128,10 +124,10 @@ async function handleSearch(query: string) {
 async function getItem(id: string) {
     try {
         idGeneratorLoading.value = true;
-        const { data } = await ItemService.getItem(schemaStore.schema.project_id, id, props.model);
+        const { data } = await ItemService.getItem(schemaStore.schema.project_id, id, model.value);
         modelExists.value = !!data;
         if (data) {
-            init({ message: `${props.model} with ${id} already exists`, color: 'danger' });
+            init({ message: `${model.value} with ${id} already exists`, color: 'danger' });
         }
     } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 404) {
@@ -146,19 +142,21 @@ async function getItem(id: string) {
 async function submit() {
     if (!validate()) return;
     itemStore.isLoading = true;
+    const { fields } = schemaStore.schema[model.value];
 
-    const allMetadata = { ...Object.fromEntries(existingMetadata.value), ...metadata.value };
+    const filteredExistingMetadata = existingMetadata.value.filter(([k, v]) => fields.some(f => f.key === k))
+    const allMetadata = { ...Object.fromEntries(filteredExistingMetadata), ...metadata.value };
 
     try {
         const response = idToUpdate.value
-            ? await ItemService.updateItem(schemaStore.schema.project_id, idToUpdate.value, props.model, allMetadata as FormData)
-            : await ItemService.createItem(schemaStore.schema.project_id, props.model, allMetadata as FormData);
+            ? await AuthService.updateItem(schemaStore.schema.project_id, idToUpdate.value, model.value, allMetadata as FormData)
+            : await AuthService.createItem(schemaStore.schema.project_id, model.value, allMetadata as FormData);
 
         itemStore.toast({
             color: 'success',
             message: Array.isArray(response.data)
                 ? response.data.join(', ')
-                : `${props.model} ${idToUpdate.value ? `${idToUpdate.value} edited` : 'created'} successfully`,
+                : `${model.value} ${idToUpdate.value ? `${idToUpdate.value} edited` : 'created'} successfully`,
         });
 
         resetForm();
@@ -179,7 +177,8 @@ function resetForm() {
     metadata.value = {};
     itemStore.resetSearchForm();
     itemStore.resetPagination();
-    itemStore.fetchItems(schemaStore.schema.project_id, props.model);
+    itemStore.fetchItems(schemaStore.schema.project_id);
     itemStore.showForm = false;
 }
+
 </script>

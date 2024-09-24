@@ -4,7 +4,7 @@
         Draft</VaButton>
     <VaModal max-height="500px" size="large" v-model="show" hide-default-actions>
         <h2 class="va-h2">{{
-        projectStore.incomingProject?.project_id }} already exists!</h2>
+            projectStore.incomingProject?.project_id }} already exists!</h2>
         <p class="va-text-secondary">Choose if you want to save the current changes or revert to the database
             object</p>
         <VaDivider />
@@ -19,7 +19,7 @@
             <VaCardBlock class="flex-auto">
                 <VaButton color="warning" @click="revertProject" icon="chevron_left"> Revert to
                     Database Object </VaButton>
-                <MetadataTree :metadata="Object.entries(projectStore.incomingProject) " />
+                <MetadataTree :metadata="Object.entries(projectStore.incomingProject)" />
             </VaCardBlock>
         </VaCardBlock>
     </VaModal>
@@ -32,6 +32,7 @@ import { AxiosError } from 'axios'
 import MetadataTree from '../ui/MetadataTree.vue'
 
 import { useToast } from 'vuestic-ui/web-components'
+import AuthService from '../../services/clients/AuthService'
 
 const projectStore = useProjectStore()
 const { init } = useToast()
@@ -65,7 +66,7 @@ async function updateDraftProject() {
     try {
         isLoading.value = !isLoading.value
         const { project_id, ...projectData } = projectStore.currentProject
-        const { data } = await ProjectService.updateDraftProject(project_id, projectData)
+        const { data } = await AuthService.updateDraftProject(project_id, projectData)
         init({ color: "success", message: data.message, title: 'Draft project updated', duration: 1500 })
         projectStore.incomingProject = { ...projectStore.currentProject }
         projectStore.draftProjectExists = true
@@ -97,7 +98,7 @@ async function createDraftProject() {
     try {
         isLoading.value = !isLoading.value
         init({ color: 'info', message: 'Saving Draft Project..' })
-        const { data } = await ProjectService.createDraftProject(projectStore.currentProject)
+        const { data } = await AuthService.createDraftProject(projectStore.currentProject)
         init({ color: "success", message: 'Draft Project saved!' })
         projectStore.incomingProject = { ...projectStore.currentProject }
         projectStore.draftProjectExists = true

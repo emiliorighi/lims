@@ -1,7 +1,14 @@
 <template>
     <VaModal max-height="500px" fixed-layout v-model="schemaStore.showSchema">
         <template #header>
-            <Header :title="schemaStore.schema.project_id" icon="folder"/>
+            <div class="row justify-space-between align-end">
+                <div class="flex">
+                    <Header :title="schemaStore.schema.project_id" />
+                </div>
+                <div class="flex">
+                    <DownloadYAMLProject :project="schemaStore.schema" />
+                </div>
+            </div>
         </template>
         <VaDivider />
         <div class="row">
@@ -13,6 +20,7 @@
 </template>
 <script setup lang="ts">
 import { useSchemaStore } from '../../stores/schemas-store';
+import DownloadYAMLProject from '../buttons/DownloadYAMLProject.vue';
 import MetadataTree from '../ui/MetadataTree.vue';
 import Header from './common/Header.vue'
 
