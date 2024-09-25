@@ -4,27 +4,21 @@ import { isAuthenticated, isAdmin } from './nav-guards'
 
 export const adminRoutes: Array<RouteRecordRaw> = [
     {
-        path: '/admin',
-        name: 'admin',
+        name: 'users',
+        path: '/users',
         beforeEnter: [isAuthenticated, isAdmin],
-        component: () => import('../layouts/RouterBypass.vue'),
-        children: [
-            {
-                path: 'project-form',
-                name: 'project-form',
-                props: {
-                    title: 'Project Form'
-                },
-                component: () => import('../pages/project-form/ProjectForm.vue')
-            },
-            {
-                name: 'users',
-                path: '/users',
-                props: {
-                    title: 'Users'
-                },
-                component: () => import('../pages/user/Users.vue')
-            },
-        ]
-    }
+        props: {
+            title: 'Users'
+        },
+        component: () => import('../pages/user/Users.vue')
+    },
+    {
+        path: '/project-form',
+        name: 'project-form',
+        beforeEnter: [isAuthenticated, isAdmin],
+        props: {
+            title: 'Project Form'
+        },
+        component: () => import('../pages/project-form/ProjectForm.vue')
+    },
 ]

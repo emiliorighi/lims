@@ -32,8 +32,11 @@
                     <VaDataTable :loading="isLoading" :items="userStore.users"
                         :columns="['name', 'projects', 'role', 'actions']">
                         <template #cell(actions)="{ rowData }">
-                            <VaButton @click="editUser(rowData)" preset="plain" icon="edit" />
-                            <VaButton preset="plain" icon="delete" color="danger" class="ml-3" />
+                            <div v-if="rowData.name !== gStore.user.name">
+                                <VaButton @click="editUser(rowData)" preset="plain" icon="edit" />
+                                <VaButton @click="triggerDelete(rowData)" preset="plain" icon="delete" color="danger"
+                                    class="ml-3" />
+                            </div>
                         </template>
                     </VaDataTable>
                 </VaCardContent>
@@ -45,6 +48,7 @@
         </div>
     </div>
     <UserFormModal />
+    <ConfirmDeleteModal @confirmDelete="deleteUser" :idToDelete="idToDelete" icon="person" />
 </template>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
@@ -54,11 +58,12 @@ import Pagination from '../../components/filters/Pagination.vue';
 import Header from '../../components/ui/Header.vue'
 import { useToast } from 'vuestic-ui'
 import UserFormModal from '../../components/modals/UserFormModal.vue'
-import { User } from '../../data/types'
 import { useUserStore } from '../../stores/user-store'
+import ConfirmDeleteModal from '../../components/modals/ConfirmDeleteModal.vue';
+import { useGlobalStore } from '../../stores/global-store';
 
 const userStore = useUserStore()
-
+const gStore = useGlobalStore()
 const props = defineProps<{
     title: string
 }>()
@@ -67,6 +72,7 @@ const { init } = useToast()
 const selectLoading = ref(false)
 const isLoading = ref(false)
 const projects = ref<string[]>([])
+const idToDelete = ref('')
 
 watch(() => userStore.searchForm, async () => {
     await userStore.fetchUsers()
@@ -74,8 +80,8 @@ watch(() => userStore.searchForm, async () => {
 
 onMounted(async () => {
     await userStore.fetchUsers()
-
 })
+
 async function handleSearch(query: string) {
     if (query.length < 2) return;
     selectLoading.value = true;
@@ -96,6 +102,11 @@ function handleError(error: any, defaultMessage: string) {
     init({ color: 'danger', message });
 }
 
+function triggerDelete(rowData: any) {
+    idToDelete.value = rowData.name
+    gStore.showDeleteConfirmation = !gStore.showDeleteConfirmation
+}
+
 function handlePagination(v: number) {
     userStore.searchForm.offset = v - 1
 }
@@ -105,9 +116,17 @@ function createUser() {
     userStore.showForm = !userStore.showForm
 }
 
-function editUser(rowData: User) {
+function editUser(rowData: any) {
     userStore.user = { ...rowData }
     userStore.userForm = { ...rowData }
     userStore.showForm = !userStore.showForm
 }
+
+async function deleteUser() {
+    await userStore.deleteUser(idToDelete.value)
+    gStore.showDeleteConfirmation = !gStore.showDeleteConfirmation
+    userStore.resetSearchForm()
+    await userStore.fetchUsers()
+}
+
 </script>

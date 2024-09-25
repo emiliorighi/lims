@@ -28,7 +28,6 @@ export const useUserStore = defineStore('user', {
             searchForm: { ...initSearchForm },
             total: 0,
             toast: useToast().init,
-
         }
     },
 

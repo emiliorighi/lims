@@ -45,8 +45,6 @@ export const useItemStore = defineStore('item', {
             currentModel: 'sample' as ModelType,
             stores,
             showItemDetails: false,
-            showDeleteConfirm: false,
-            idToDelete: undefined as undefined | string,
             toast: useToast().init,
         }
     },
@@ -89,12 +87,11 @@ export const useItemStore = defineStore('item', {
                 this.isLoading = false
             }
         },
-        async deleteItem(projectId: string) {
-            if (!this.idToDelete) return
+        async deleteItem(projectId: string, idToDelete: string) {
             this.isLoading = true
             const model = this.currentModel
             try {
-                const { data } = await AuthService.deleteItem(projectId, this.idToDelete, model);
+                const { data } = await AuthService.deleteItem(projectId, idToDelete, model);
                 this.toast({ message: data, color: 'success', duration: 1500 });
             } catch (error) {
                 console.error(error);

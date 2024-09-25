@@ -23,6 +23,7 @@ export const useGlobalStore = defineStore('global', {
       user: { ...initUser },
       userForm: { ...initUserForm },
       isAuthenticated: false,
+      showDeleteConfirmation:false,
       theme: savedTheme,
       toast: init
     }

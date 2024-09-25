@@ -1,7 +1,7 @@
 <template>
-    <VaModal v-model="itemStore.showDeleteConfirm" hide-default-actions>
+    <VaModal v-model="gStore.showDeleteConfirmation" hide-default-actions>
         <template #header>
-            <Header :title="`Deleting ${itemStore.idToDelete}?`" :icon="icon" />
+            <Header :title="`Deleting ${idToDelete}?`" :icon="icon" />
         </template>
         <VaDivider />
         <div class="row align-center justify-space-between">
@@ -12,28 +12,22 @@
             </div>
         </div>
         <template #footer>
-            <VaButton @click="deleteItem" color="danger">
+            <VaButton @click="emits('confirmDelete')" color="danger">
                 Confirm </VaButton>
         </template>
     </VaModal>
 </template>
 <script setup lang="ts">
-import { useItemStore } from '../../stores/item-store'
 import Header from './common/Header.vue'
+import { useGlobalStore } from '../../stores/global-store'
+
+const gStore = useGlobalStore()
 
 const props = defineProps<{
     icon: string,
-    projectId:string
+    idToDelete: string,
 }>()
 
-const itemStore = useItemStore()
-
-async function deleteItem() {
-    await itemStore.deleteItem(props.projectId)
-    itemStore.resetPagination()
-    itemStore.resetSearchForm()
-    await itemStore.fetchItems(props.projectId)
-    itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
-}
+const emits = defineEmits(['confirmDelete'])
 
 </script>

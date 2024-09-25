@@ -8,7 +8,7 @@
         </template>
     </VaDataTable>
     <ModelFormModal :model="model" :icon="icon" />
-    <ConfirmDeleteModal :projectId="projectId" :icon="icon" />
+    <ConfirmDeleteModal @confirmDelete="deleteItem" :idToDelete="idToDelete" :icon="icon" />
     <ItemDetailsModal :icon="icon" />
     <ReportModal :model="model" :icon="icon" />
 
@@ -29,6 +29,7 @@ const itemStore = useItemStore()
 const schemaStore = useSchemaStore()
 const globalStore = useGlobalStore()
 const isLoading = ref(false)
+const idToDelete = ref('')
 const props = defineProps<{
     items: Record<string, any>[],
     filters: Filter[],
@@ -57,8 +58,16 @@ function editItem(rowData: any) {
 }
 
 function triggerDelete(rowData: any) {
-    itemStore.idToDelete = rowData.experiment_id ? rowData.experiment_id : rowData.sample_id
-    itemStore.showDeleteConfirm = !itemStore.showDeleteConfirm
+    idToDelete.value = rowData.experiment_id ? rowData.experiment_id : rowData.sample_id
+    globalStore.showDeleteConfirmation = !globalStore.showDeleteConfirmation
+}
+
+async function deleteItem() {
+    await itemStore.deleteItem(props.projectId, idToDelete.value)
+    itemStore.resetPagination()
+    itemStore.resetSearchForm()
+    await itemStore.fetchItems(props.projectId)
+    globalStore.showDeleteConfirmation = !globalStore.showDeleteConfirmation
 }
 
 async function showItemDetails(payload: any) {

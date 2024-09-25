@@ -4,9 +4,9 @@ from flask_restful import Resource
 from flask import Response, request
 from flask_jwt_extended import jwt_required, unset_jwt_cookies, get_jwt_identity
 from helpers import auth
+from wrappers import admin
 
 class LoginApi(Resource):
-    #check if user alredy logged in
     @jwt_required()
     def get(self):
         current_user = get_jwt_identity()
@@ -28,6 +28,7 @@ class LogoutApi(Resource):
 class UsersApi(Resource):
 
     @jwt_required()
+    @admin.admin_required()
     def get(self, name=None):
         if name:
             user = users_service.get_user(name)
@@ -38,12 +39,14 @@ class UsersApi(Resource):
         return Response(json.dumps(json_resp), mimetype="application/json", status=200)
 
     @jwt_required()
+    @admin.admin_required()
     def post(self):
         data = request.json if request.is_json else request.form
         message, status = users_service.create_user(data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
     
     @jwt_required()
+    @admin.admin_required()
     def put(self,name):
         data = request.json if request.is_json else request.form
         message, status = users_service.update_user(name,data)
@@ -51,6 +54,7 @@ class UsersApi(Resource):
 
 
     @jwt_required()
+    @admin.admin_required()
     def delete(self,name):
         message, status = users_service.delete_user(name)
         return Response(json.dumps(message), mimetype="application/json", status=status)

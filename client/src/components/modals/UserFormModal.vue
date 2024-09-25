@@ -22,10 +22,11 @@
                         </VaSelect>
                     </div>
                     <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect :disabled="userStore.userForm.role === 'admin'" multiple @update:search="handleSearch"
-                            v-model="userStore.userForm.projects" :options="projects" placeholder="Search projects"
-                            clearable :loading="selectLoading" searchable highlight-matched-text
-                            searchPlaceholderText="Type to search" noOptionsText="No project found">
+                        <VaSelect :rules="projectManagerRules" :disabled="userStore.userForm.role === 'admin'" multiple
+                            @update:search="handleSearch" v-model="userStore.userForm.projects" :options="projects"
+                            placeholder="Search projects" clearable :loading="selectLoading" searchable
+                            highlight-matched-text searchPlaceholderText="Type to search"
+                            noOptionsText="No project found">
                         </VaSelect>
                     </div>
                 </div>
@@ -68,6 +69,10 @@ const passwordRules = computed(() => {
     return [(v: string) => v.length > 0 || 'Password is mandatory']
 })
 
+const projectManagerRules = computed(() => {
+    return [(userStore.userForm.role === 'project_manager'
+        && userStore.userForm.projects.length) || 'Select at least one project for the user']
+})
 const isUpdate = computed(() => {
     return !!userStore.user
 })
@@ -145,7 +150,6 @@ async function resetForm() {
     userStore.resetUserForm();
     userStore.resetSearchForm()
     userStore.user = undefined
-    // await userStore.fetchUsers();
     userStore.showForm = false;
 }
 </script>
