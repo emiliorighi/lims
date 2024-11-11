@@ -25,37 +25,22 @@
 </template>
 <script setup lang="ts">
 import { useGlobalStore } from '../../stores/global-store'
-import { computed, ref } from 'vue'
+import { ref } from 'vue'
 import { VaCard, VaCardContent, VaInnerLoading } from 'vuestic-ui'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const GlobalStore = useGlobalStore()
 
+const name = ref('')
+const password = ref('')
 const inputType = ref('password')
 const isLoading = ref(false)
 
 async function handleSubmit() {
   isLoading.value = true
-  await GlobalStore.loginUser()
+  await GlobalStore.login(name.value, password.value)
   if (GlobalStore.isAuthenticated) router.push({ name: 'projects' })
 }
 
-const name = computed({
-  get() {
-    return GlobalStore.userForm.name
-  },
-  set(v) {
-    GlobalStore.userForm.name = v
-  }
-})
-
-const password = computed({
-  get() {
-    return GlobalStore.userForm.password
-  },
-  set(v) {
-    GlobalStore.userForm.password = v
-  }
-})
 </script>

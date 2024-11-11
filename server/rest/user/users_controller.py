@@ -10,13 +10,11 @@ class LoginApi(Resource):
     @jwt_required()
     def get(self):
         current_user = get_jwt_identity()
-        return Response(json.dumps(current_user), 200)
+        return Response(json.dumps(current_user),mimetype="application/json",status= 200)
 
     def post(self):
         payload = request.json if request.is_json else request.form
-        user = users_service.login_user(payload)
-        response = auth.set_token(user)
-        return response
+        return  users_service.login_user(payload)
 
 class LogoutApi(Resource):
     @jwt_required()

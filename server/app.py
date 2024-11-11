@@ -19,7 +19,7 @@ app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
 # If true this will only allow the cookies that contain your JWTs to be sent
 # over https. In production, this should always be set to True
 app.config["JWT_COOKIE_SAMESITE"] = "None"
-# app.config["JWT_COOKIE_SECURE"] = True
+app.config["JWT_COOKIE_SECURE"] = True
 app.config['CORS_SUPPORTS_CREDENTIALS'] = True
 
 db = MongoEngine()

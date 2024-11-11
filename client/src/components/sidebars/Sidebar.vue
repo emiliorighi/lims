@@ -82,7 +82,7 @@ function isRouteActive(name: string) {
 }
 
 async function logout() {
-    await globalStore.logoutUser()
+    await globalStore.logout()
     router.push({ name: 'home' })
 }
 

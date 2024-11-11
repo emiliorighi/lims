@@ -2,7 +2,7 @@ from db.models import User,Project
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.errors import NotUniqueError
-from helpers import data as data_helper
+from helpers import auth
 
 FIELDS_TO_EXCLUDE=['password','id','created']
 
@@ -86,10 +86,13 @@ def login_user(data):
     name = data.get('name')
     pwd = data.get('password')
 
-    user = User.objects(name=name, password=pwd).exclude('id','created','password').as_pymongo()
-    if not user or not user[0]:
+    user = User.objects(name=name, password=pwd).exclude('id','password').first()
+    if not user:
         raise BadRequest(description="Wrong name or password")
-    return user[0]
+    user_to_dict = user.to_mongo().to_dict()
+    response = auth.set_token(user_to_dict)
+    
+    return response
 
 def get_related_projects(name, filter=None, offset=0,limit=20,sort_order=None):
     user = get_user(name)

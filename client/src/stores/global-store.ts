@@ -7,6 +7,8 @@ const STORAGE_KEY = 'theme';
 const savedTheme = localStorage.getItem(STORAGE_KEY) || 'light'
 const { init } = useToast()
 
+const AUTH_KEY = 'auth'
+const isAuth = localStorage.getItem(AUTH_KEY) === 'true'
 const initUser = {
   name: '',
   role: '',
@@ -22,7 +24,7 @@ export const useGlobalStore = defineStore('global', {
       isSidebarVisible: true,
       user: { ...initUser },
       userForm: { ...initUserForm },
-      isAuthenticated: false,
+      isAuthenticated: isAuth,
       showDeleteConfirmation:false,
       theme: savedTheme,
       toast: init
@@ -49,42 +51,41 @@ export const useGlobalStore = defineStore('global', {
     changeUserName(name: string) {
       this.user.name = name
     },
-    async loginUser() {
+    mapUser(data: Record<string, any>) {
+    
+      this.user.name = data.name
+      this.user.role = data.role
+      localStorage.setItem(AUTH_KEY, 'true');
+      this.isAuthenticated = true
+    },
+
+    async login(name: string, password: string) {
       try {
-        const { name, password } = this.userForm
         const { data } = await AuthService.login({ name, password })
-        if (data) {
-          this.user = { ...data.user }
-          this.isAuthenticated = true
-          init({ message: data.message, color: 'success' })
-          this.userForm = {...initUserForm}
-        }
-      } catch (err) {
-        console.error(err)
-        init({ message: 'Bad user or password', color: 'danger' })
-      }
-    },
-
-    async logoutUser() {
-      try {
-        await AuthService.logout()
-        this.user = { ...initUser }
-        this.isAuthenticated = false
+        this.mapUser(data)
+        this.toast({ message: `Welcome ${this.user.name}!`, color: 'success' })
       } catch (error) {
-        console.error('An unexpected error occurred during authentication check.');
+        console.log(error)
+        this.toast({ message: 'Bad user or password', color: 'danger' })
+        this.isAuthenticated = false
+        localStorage.setItem(AUTH_KEY, 'false');
       }
     },
-
+    async logout() {
+      await AuthService.logout()
+      this.user = {...initUser}
+      localStorage.setItem(AUTH_KEY, 'false');
+      this.isAuthenticated = false
+    },
     async checkUserIsLoggedIn() {
+      if (!this.isAuthenticated) return
       try {
         const { data } = await AuthService.check()
-        this.user = { ...data }
-        this.isAuthenticated = true
+        this.mapUser(data)
       } catch (error) {
         console.error(error)
-        console.error('An unexpected error occurred during authentication check.');
-        this.isAuthenticated = false
+        localStorage.setItem(AUTH_KEY, 'false');
       }
-    }
+    },
   },
 })
