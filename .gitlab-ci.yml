@@ -12,13 +12,12 @@ build_containers:
     - master
 
   tags:
-    - docker
+    - shell
     - monstre
   stage: build
   image: docker:latest
 
   before_script:
-    - unset DOCKER_HOST
     - echo $CI_REGISTRY_PASSWORD | docker login $CI_REGISTRY -u $CI_REGISTRY_USER --password-stdin
   script:
     - docker build --build-arg BASE_PATH="$BASE_PATH" -t gitlab.linux.crg.es:5005/monstre/lims/$APP_NAME_FRONT ./client
