@@ -1,4 +1,9 @@
 
+ADD IMAGES AND PROTOCOLS TO SAMPLES AND EXPERIMENTS,
+ WHEN EXPORTING THE TSV EXPORT THE FILE NAME, 
+ THAN ALLOW TO EXPORT ALL THE IMAGES AND PROTOCOLS OF A PROJECT IN ZIP FILE,
+ SAME FOR THE UPLOAD
+        
     PROJECT MANAGER (PM) LOGS IN:
         ACCESS TO SPECIFIC PROJECT(S) CRUD ACTIONS
         PM ACTIONS
@@ -8,9 +13,24 @@
 
 
 PRIORITIES
-2 IMPROVE PROJECT DETAILS
-4 ADD USERS
-    add login and logout logic
-    check if user is authenticad in localstorage and refresh token
+ADD PICTURES TO EXPERIMENTS
+ADD PROTOCOLS (PDF FILES/DOCS)
 5 ADD FILES
 6 ADD AUDIT TRAILS
+
+
+dashboard -> stats ALL
+project form -> admin
+users -> admin
+projects -> ALL
+
+
+PROJECT PAGE FROM THE USER PERSPECTIVE:
+
+landing in the page
+
+    project id -> download yaml, view project info
+    actions: create sample or experiment, create chart, export/import data 
+
+    items table -> CRUD ITEM, export data
+    see samples or experiments

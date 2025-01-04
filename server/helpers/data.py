@@ -77,3 +77,8 @@ def build_query(filters, args, query):
             query &= Q(**{f"{key}":value})
             
     return query
+
+
+def apply_sorting(cursor, sort_column: str, sort_order: str):
+    sort = f"-{sort_column}" if sort_order == 'desc' else sort_column
+    return cursor.order_by(sort)

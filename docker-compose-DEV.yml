@@ -21,6 +21,8 @@ services:
     volumes:
       - ./server:/server
       - ./project-spec.json:/server/project-spec.json
+      - ./protocols:/server/protocols # store protocols here (pdf, txt, doc)
+      - ./images:/server/images # store pictures here (jpeg, png)
     env_file:
       - .env
 

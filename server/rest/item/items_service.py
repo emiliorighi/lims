@@ -3,7 +3,6 @@ from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.queryset.visitor import Q
 from helpers import data,filter,schema
 from ..project import projects_service
-from datetime import datetime
 
 MODELS={
     "samples": Sample,
@@ -43,7 +42,7 @@ def get_items_by_project(project_id: str, model: str, args: dict):
         tsv_fields.extend(selected_fields)
 
     if sort_column and sort_order:
-        cursor = apply_sorting(cursor, sort_column, sort_order)
+        cursor = data.apply_sorting(cursor, sort_column, sort_order)
 
     return prepare_response(cursor, tsv_fields, response_format, limit, offset)
 
@@ -86,10 +85,6 @@ def build_queries(filters, filtered_args):
 
 def get_selected_fields(args: dict) -> list:
     return [v for k, v in args.items(multi=True) if k.startswith('fields[]')]
-
-def apply_sorting(cursor, sort_column: str, sort_order: str):
-    sort = f"-{sort_column}" if sort_order == 'desc' else sort_column
-    return cursor.order_by(sort)
 
 def prepare_response(cursor, tsv_fields: list, response_format: str, limit: int, offset: int):
     if response_format == 'tsv':
@@ -264,5 +259,4 @@ def get_model_field_stats(project_id, model, field):
         doc["_id"]: doc["count"]
         for doc in db_model.objects(project=project_id).aggregate(pipeline)
     }
-    print(response)
     return response

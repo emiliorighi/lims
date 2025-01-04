@@ -1,5 +1,5 @@
 from datetime import datetime
-from .enums import Roles, Actions, Model,ChartSize,ChartType
+from .enums import Roles, Actions, Model, ChartSize,ChartType
 import mongoengine as db
 
 def handler(event):
@@ -23,6 +23,7 @@ class Project(db.Document):
     name = db.StringField(required=True)
     description = db.StringField()
     version = db.StringField(required=True)
+    protocols=db.ListField(db.StringFields)
     experiment = db.DictField(required=True)
     sample = db.DictField(required=True)
     created = db.DateTimeField(default=datetime.now())
@@ -40,6 +41,7 @@ class ProjectDraft(db.Document):
     name = db.StringField(required=True)
     description = db.StringField()
     version = db.StringField(required=True)
+    protocols=db.ListField(db.StringFields)
     experiment = db.DictField()
     sample = db.DictField()
     created = db.DateTimeField(default=datetime.now())
@@ -51,12 +53,36 @@ class ProjectDraft(db.Document):
         ]
     }
 
+class Protocol(db.DynamicDocument):
+    name= db.StringField(unique=True, required=True)
+    created = db.DateTimeField(default=datetime.now())
+    description=db.StringField()
+    project_id = db.StringField()
+    meta = {
+        'indexes': [
+            'name'
+        ]
+    }
+
+class Image(db.DynamicDocument):
+    name = db.StringField(unique=True, required=True)
+    description=db.StringField()
+    file_path = db.StringField(unique=True, required=True)
+    model_id = db.StringField(required=True)
+    meta = {
+        'indexes': [
+            'name',
+            'file_path'
+        ]
+    }
+
 class Experiment(db.DynamicDocument):
     sample_id= db.StringField(required=True)
     experiment_id= db.StringField(required=True)
     created = db.DateTimeField(default=datetime.now())
     project=db.StringField(required=True)
-    files=db.ListField(db.StringField)
+    images=db.ListField(db.StringField)
+    protocols=db.ListField(db.StringField)
     meta = {
         'indexes': [
             'project',
@@ -75,7 +101,7 @@ class File(db.DynamicDocument):
     path=db.StringField(required=True,unique=True)
     created = db.DateTimeField(default=datetime.now())
     meta = {
-        'indexes': ['file_id']
+        'indexes': ['file_id', 'path']
     }
 
 class Analysis(db.DynamicDocument):
@@ -98,7 +124,8 @@ class Sample(db.DynamicDocument):
     taxid = db.StringField()
     scientific_name = db.StringField()
     project=db.StringField(required=True)
-    files=db.ListField(db.StringField)
+    images=db.ListField(db.StringField)
+    protocols=db.ListField(db.StringField)
     meta = {
         'indexes': [
             'project',
