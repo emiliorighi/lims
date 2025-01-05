@@ -1,4 +1,4 @@
-from db.models import Project,ProjectDraft,User
+from db.models import Project,ProjectDraft
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import NotFound
 from werkzeug.exceptions import  NotFound
@@ -8,7 +8,7 @@ from helpers import schema
 JSON_SCHEMA_PATH='/server/project-spec.json'
 
 def get_project(project_id):
-    project = Project.objects(project_id=project_id).exclude('id').first()
+    project = Project.objects(project_id=project_id).first()
     if not project:
         raise NotFound(description=f"Project: {project_id} not found!")
     return project

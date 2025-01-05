@@ -6,12 +6,17 @@ from .upload import upload_controller
 from .lookup import lookup_controller
 from .user import users_controller
 from .item import items_controller
+from .protocols import protocol_controller
 
 def initialize_routes(api):
 
 	##ADMIN
 	api.add_resource(users_controller.LoginApi, '/api/login')
 	api.add_resource(users_controller.LogoutApi, '/api/logout')
+
+	##PROTOCOLS
+	api.add_resource(protocol_controller.ProtocolsAPI, '/api/protocols')
+	api.add_resource(protocol_controller.ProtocolAPI, '/api/protocols/<name>')
 
 	##APP STATS
 	api.add_resource(stats_controller.LookupApi, '/api/lookup')
@@ -33,8 +38,13 @@ def initialize_routes(api):
 	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
 	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
 
-	##PROJECT LOOKUP RELATED DATA DATA
+	##PROJECT LOOKUP RELATED DATA
 	api.add_resource(lookup_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
+
+	##PROJECT RELATED PROTOCOLS
+	api.add_resource(protocol_controller.ProtocolsAPI, '/api/projects/<project_id>/protocols')
+	api.add_resource(protocol_controller.ProtocolAPI, '/api/projects/<project_id>/protocols/<name>')
+	api.add_resource(protocol_controller.DownloadProtocolAPI, '/api/projects/<project_id>/protocols/<name>/download')
 
 	#PROJECT ENDPOINT UTILITIES
 	api.add_resource(project_mapper_controller.InferHeaderApi, '/api/projects/<project_id>/map_header')
@@ -43,6 +53,14 @@ def initialize_routes(api):
 	###PROJECT RELATED DATA
 	api.add_resource(items_controller.ItemsByProjectApi, '/api/projects/<project_id>/<model>')
 	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>')
+
+	# DO WE NEED THIS ENDPOINT?
+	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/protocols')
+
+	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/images')
+	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/images/<name>/download')
+
+
 
 	api.add_resource(items_controller.ModelByProjectStatsApi, '/api/projects/<project_id>/<model>/stats/<field>')
 

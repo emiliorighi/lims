@@ -67,12 +67,19 @@ class Protocol(db.DynamicDocument):
 class Image(db.DynamicDocument):
     name = db.StringField(unique=True, required=True)
     description=db.StringField()
-    file_path = db.StringField(unique=True, required=True)
-    model_id = db.StringField(required=True)
+    model = db.EnumField(Model, required=True)  # Store the model type (Project, Experiment, etc.)
+    created = db.DateTimeField(default=datetime.now())
+    item_id = db.StringField(required=True)
+    project = db.StringField(required=True)
     meta = {
         'indexes': [
             'name',
-            'file_path'
+            'item_id',
+            'project',
+            {
+                'fields': ['project', 'item_id'],
+                'unique': True  # This enforces uniqueness
+            }
         ]
     }
 

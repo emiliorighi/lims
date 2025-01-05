@@ -4,6 +4,7 @@ from flask import Response, request
 from . import projects_service
 from flask_jwt_extended import jwt_required
 from wrappers import admin
+from helpers import data as data_helper
 
 class ProjectsApi(Resource):
     def get(self):
@@ -21,4 +22,4 @@ class ProjectsApi(Resource):
 class ProjectApi(Resource):
     def get(self, project_id):
         project = projects_service.get_project(project_id)
-        return Response(project.to_json(), mimetype="application/json", status=200)
+        return Response(data_helper.dump_json(project.to_mongo().to_dict()), mimetype="application/json", status=200)
