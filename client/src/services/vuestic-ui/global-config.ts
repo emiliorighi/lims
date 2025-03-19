@@ -16,16 +16,27 @@ export default {
   },
   components: {
     VaIcon,
-    VaModal:{
-      zIndex:100,
-      fixedLayout:true,
-      maxHeight:"500px"
+    VaModal: {
+      zIndex: 100,
+      fixedLayout: true,
     },
-    VaInput:{
-      preset:'solid'
+    VaInput: {
+      color: 'textPrimary'
     },
-    VaSelect:{
-      preset:'solid'
+    VaDateInput: {
+      color: 'textPrimary'
+    },
+    VaCounter: {
+      color: 'textPrimary'
+    },
+    VaSelect: {
+      color: 'textPrimary'
+    },
+    VaFileUpload: {
+      color: 'textPrimary'
+    },
+    VaTextarea: {
+      color: 'textPrimary'
     }
   }
 }

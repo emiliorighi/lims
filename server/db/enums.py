@@ -11,10 +11,9 @@ ROLES:
 
 class Roles(Enum):
     RESEARCHER = 'researcher' ## READ
-    SAMPLE_MANAGER = 'sample_manager'
-    EXPERIMENT_MANAGER = 'experiment_manager'
-    PROJECTS_MANAGER = 'project_manager'
-    ADMIN = 'admin'
+    MODEL_MANAGER = 'model_manager' ##CRUD MODEL
+    PROJECTS_MANAGER = 'project_manager' ##CRUD PROJECT
+    ADMIN = 'admin' ##CRUD USERS
 
 class SchemaModel(Enum):
     BIOSAMPLE = 'biosample'

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { Filter } from '../data/types'
+import { Filter, ResearchFilter } from '../data/types'
 
 const defaultItem: Filter = {
     key: '',
@@ -12,9 +12,11 @@ const defaultItem: Filter = {
     required: false
 };
 
+
 export const useAttributeStore = defineStore('attribute', {
     state: () => {
         return {
+            researchAttributes: [] as ResearchFilter[],
             attribute: null as Filter | null,
             attributeId: null as number | null,
             attributes: [] as Filter[]

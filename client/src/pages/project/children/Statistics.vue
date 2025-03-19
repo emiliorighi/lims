@@ -30,7 +30,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useSchemaStore } from '../../../stores/schemas-store';
+import { useSchemaStore } from '../../../stores/schema-store';
 import StatsCard from '../../../components/cards/StatsCard.vue';
 import { VaChartItem, ChartTypes, ColumnSizes } from '../../../data/types'
 import ItemService from '../../../services/clients/ItemService';

@@ -2,13 +2,19 @@ import http from "../../http";
 
 const { base, yaml } = http
 
-class ProjectService {
+class ResearchProjectService {
 
   getProjects(params) {
     return base.get('/projects', { params: params })
   }
   getProject(id) {
     return base.get(`/projects/${id}`)
+  }
+  getProjectModels(projectId){
+    return base.get(`/projects/${projectId}/models`)
+  }
+  getProjectSchema(projectId){
+    return base.get(`/projects/${projectId}/schema`)
   }
   getProjectStats(id, model, field) {
     return base.get(`/projects/${id}/${model}/stats/${field}`)
@@ -37,6 +43,12 @@ class ProjectService {
   getUserProjects(name, params){
     return base.get(`/users/${name}/projects`, {params: params})
   }
+  getProjectModels(projectId){
+    return base.get(`/projects/${projectId}/models`)
+  }
+  getProjectSchema(projectId){
+    return base.get(`/projects/${projectId}/schema`)
+  }
 }
 
-export default new ProjectService();
+export default new ResearchProjectService();

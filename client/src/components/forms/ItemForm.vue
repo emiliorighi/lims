@@ -5,33 +5,25 @@
                 <VaInput @update:modelValue="(v: any) => updateMetadata([field.key, v])" class="mt-4"
                     :disabled="disabledRule(field)" :messages="[field.description]" :label="field.label"
                     v-model="metadata[field.key]" :rules="[(v: string) => !field.required || v.length > 0 || 'Field is required',
-                ]" />
+                    ]" />
                 <!-- ADD REGEX CHECK -->
             </div>
             <div v-else-if="isSelectField(field.filter)" class="flex lg6 md6">
                 <VaSelect @update:modelValue="(v: any) => updateMetadata([field.key, v])" class="mt-4"
                     :disabled="disabledRule(field)" :messages="[field.description]" :label="field.label"
                     v-model="metadata[field.key]" :multiple="field.filter.multi" :options="field.filter.choices" :rules="[
-                    (v: string | string[]) =>
-                        !field.required ||
-                        (Array.isArray(v) && v.length > 0)
-                        || (v.length > 0)
-                        || 'Field is required']" />
+                        (v: string | string[]) =>
+                            !field.required ||
+                            (Array.isArray(v) && v.length > 0)
+                            || (v.length > 0)
+                            || 'Field is required']" />
             </div>
             <div v-else-if="isRangeField(field.filter)" class="flex">
-                <VaSlider 
-                    @update:modelValue="(v: any) => updateMetadata([field.key, v])" 
-                    class="mt-4"
-                    :disabled="disabledRule(field)" 
-                    :label="field.label" 
-                    :max="field.filter.max" 
-                    :min="field.filter.min"
-                    v-model="metadata[field.key]" 
-                    track-label-visible>
-                        <template #trackLabel="{ value }">
-                        <VaChip 
-                            color="warning" 
-                            size="small">
+                <VaSlider @update:modelValue="(v: any) => updateMetadata([field.key, v])" class="mt-4"
+                    :disabled="disabledRule(field)" :label="field.label" :max="field.filter.max" :min="field.filter.min"
+                    v-model="metadata[field.key]" track-label-visible>
+                    <template #trackLabel="{ value }">
+                        <VaChip color="warning" size="small">
                             {{ value }}
                         </VaChip>
                     </template>

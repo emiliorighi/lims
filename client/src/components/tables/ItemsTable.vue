@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { useSchemaStore } from '../../stores/schemas-store'
+import { useSchemaStore } from '../../stores/schema-store'
 import { Filter } from '../../data/types'
 import { computed, ref } from 'vue';
 import { useGlobalStore } from '../../stores/global-store'
@@ -78,11 +78,11 @@ async function showItemDetails(payload: any) {
 }
 
 const canBeEdited = computed(() => {
-    const idFormat = schemaStore.schema[model.value].id_format;
+    const id_format = schemaStore.schema[model.value].id_format;
     const fields = schemaStore.schema[model.value].fields;
     const optionalFields = fields.filter(f => !f.required);
 
-    return idFormat.length !== fields.length || optionalFields.length;
+    return id_format.length !== fields.length || optionalFields.length;
 })
 
 async function sortItems(event: { columnName: string, value: 'asc' | 'desc' | null, column: any },) {

@@ -51,15 +51,21 @@ class AuthService {
     deleteUser(id) {
         return auth.delete(`/users/${id}`)
     }
-    createProject(data) {
+    createResearchProject(data) {
         return auth.post('/projects', data)
     }
-    createDraftProject(data) {
-        return auth.post('/draft_projects', data)
+    createRecord(projectId, modelName, data) {
+        return auth.post(`/projects/${projectId}/models/${modelName}/records`, data)
     }
-    updateDraftProject(id, data) {
-        return auth.put(`/draft_projects/${id}`, data)
-      }
+    updateRecord(projectId, modelName, itemId, data) {
+        return auth.put(`/projects/${projectId}/models/${modelName}/records/${itemId}`, data)
+    }
+    deleteRecord(projectId, modelName, itemId) {
+        return auth.delete(`/projects/${projectId}/models/${modelName}/records/${itemId}`)
+    }
+    createModel(projectId, data) {
+        return auth.post(`/projects/${projectId}/models`, data)
+    }
     createItem(projectId, model, data) {
         return auth.post(`/projects/${projectId}/${model}s`, data)
     }
@@ -67,10 +73,10 @@ class AuthService {
         return auth.put(`/projects/${projectId}/${model}s/${itemId}`, data)
     }
     deleteItem(projectId, itemId, model) {
-        return auth.delete(`/projects/${projectId}/${model}s/${itemId}`)
+        return auth.delete(`/projects/${projectId}/models/${model}/${itemId}`)
     }
     uploadTSV(projectId, data) {
-        return auth.post(`/projects/${projectId}/upload_tsv`, data)
+        return auth.post(`/projects/${projectId}/upload`, data)
     }
 }
 

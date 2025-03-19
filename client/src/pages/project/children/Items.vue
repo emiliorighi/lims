@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { computed, onMounted, onUnmounted, watch } from 'vue';
-import { useSchemaStore } from '../../../stores/schemas-store'
+import { useSchemaStore } from '../../../stores/schema-store'
 import TableFilters from '../../../components/filters/TableFilters.vue'
 import { ModelType } from '../../../data/types';
 import Pagination from '../../../components/filters/Pagination.vue'

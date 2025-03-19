@@ -30,7 +30,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useSchemaStore } from '../../../stores/schemas-store';
+import { useSchemaStore } from '../../../stores/schema-store';
 import { useToast } from 'vuestic-ui/web-components';
 import ProjectService from '../../../services/clients/ProjectService';
 import { AxiosError } from 'axios';

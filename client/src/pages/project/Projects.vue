@@ -30,7 +30,7 @@
                 <VaCardContent>
                     <VaDataTable :items="projects" :columns="['name', 'description', 'version', 'action']">
                         <template #cell(action)="{ rowData }">
-                            <VaChip size="small" square @click="useProject(rowData as SchemaForm)">
+                            <VaChip size="small" square @click="useProject(rowData as ReseachProject)">
                                 View details
                             </VaChip>
                         </template>
@@ -46,15 +46,13 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
-import ProjectService from '../../services/clients/ProjectService';
 import { useRouter } from 'vue-router';
-import { useSchemaStore } from '../../stores/schemas-store';
+import { useSchemaStore } from '../../stores/schema-store';
 import Pagination from '../../components/filters/Pagination.vue';
 import Header from '../../components/ui/Header.vue'
 import { useGlobalStore } from '../../stores/global-store'
-import DownloadYAMLProject from '../../components/buttons/DownloadYAMLProject.vue';
-import { SchemaForm } from '../../data/types';
-
+import { ReseachProject } from '../../data/types';
+import ProjectService from '../../services/clients/ProjectService';
 
 const globalStore = useGlobalStore()
 const props = defineProps<{
@@ -97,9 +95,8 @@ onMounted(async () => {
     await getProjects(searchForm)
 })
 
-function useProject(project: SchemaForm) {
-    schemaStore.schema = { ...project }
-    router.push({ name: 'project', params: { projectId: project.project_id } })
+function useProject(project: ReseachProject) {
+    router.push({ name: 'projectSchema', params: { projectId: project.project_id } })
 }
 
 async function getProjects(params: Record<string, any>) {

@@ -18,6 +18,7 @@ export const COLOR_THEMES = [
       info: '#2c82e0',
       danger: '#e42222',
       warning: '#ffd43a',
+      backgroundElement: '#ffffff'
     },
   },
   {

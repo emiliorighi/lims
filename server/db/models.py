@@ -14,16 +14,16 @@ def handler(event):
 
 
 @handler(db.signals.pre_save)
-def create_project_id(sender, document):
+def create_model_id(sender, document):
     document.project_id =f"{document.name}_{document.version}"
 
-@create_project_id.apply
+@create_model_id.apply
 class Project(db.Document):
     project_id = db.StringField(required=True, unique=True)
     name = db.StringField(required=True)
     description = db.StringField()
     version = db.StringField(required=True)
-    protocols=db.ListField(db.StringFields)
+    protocols=db.ListField(db.StringField)
     experiment = db.DictField(required=True)
     sample = db.DictField(required=True)
     created = db.DateTimeField(default=datetime.now())
@@ -36,12 +36,70 @@ class Project(db.Document):
             ]
     }
 
+class ResearchProject(db.Document):
+    project_id = db.StringField(required=True, unique=True)
+    name = db.StringField(required=True)
+    description = db.StringField()
+    version = db.StringField(required=True)
+    models = db.ListField(db.StringField()) ##list of related models
+    created = db.DateTimeField(default=datetime.now())
+    archived = db.BooleanField(default=False)
+    meta = {
+        'indexes': [
+            'project_id',
+            'name',
+            '$name',
+            ('name','-version')
+        ]
+    }
+
+class ResearchModel(db.Document):
+    created = db.DateTimeField(default=datetime.now())
+    project_id = db.StringField(required=True)
+    name = db.StringField(required=True)
+    fields = db.ListField(db.DictField())
+    reference_model = db.StringField()
+    description = db.StringField()
+    id_format = db.ListField(db.StringField())
+    protocols = db.ListField(db.DictField())
+    links = db.ListField(db.DictField())
+    meta = {
+        'indexes': [
+            'project_id',
+            'name',
+            {
+                'fields': ['project_id', 'name'],
+                'unique': True  # This enforces uniqueness
+            }
+        ],
+        'strict': False
+    }
+
+class ResearchItem(db.DynamicDocument):
+    created = db.DateTimeField(default=datetime.now())
+    item_id = db.StringField(required=True)
+    model_name = db.StringField(required=True) #ref to research model
+    reference_id = db.StringField()
+    project_id = db.StringField(required=True)
+    meta = {
+        'indexes': [
+            'project_id',
+            'item_id',
+            'model_name',
+            {
+                'fields': ['project_id', 'item_id', 'model_name'],
+                'unique': True  # This enforces uniqueness
+            }
+        ],
+        'strict': False
+    }
+    
 class ProjectDraft(db.Document):
     project_id = db.StringField(required=True, unique=True)
     name = db.StringField(required=True)
     description = db.StringField()
     version = db.StringField(required=True)
-    protocols=db.ListField(db.StringFields)
+    protocols=db.ListField(db.StringField)
     experiment = db.DictField()
     sample = db.DictField()
     created = db.DateTimeField(default=datetime.now())
@@ -50,36 +108,6 @@ class ProjectDraft(db.Document):
             'project_id',
             'name',
             'version'
-        ]
-    }
-
-class Protocol(db.DynamicDocument):
-    name= db.StringField(unique=True, required=True)
-    created = db.DateTimeField(default=datetime.now())
-    description=db.StringField()
-    project_id = db.StringField()
-    meta = {
-        'indexes': [
-            'name'
-        ]
-    }
-
-class Image(db.DynamicDocument):
-    name = db.StringField(unique=True, required=True)
-    description=db.StringField()
-    model = db.EnumField(Model, required=True)  # Store the model type (Project, Experiment, etc.)
-    created = db.DateTimeField(default=datetime.now())
-    item_id = db.StringField(required=True)
-    project = db.StringField(required=True)
-    meta = {
-        'indexes': [
-            'name',
-            'item_id',
-            'project',
-            {
-                'fields': ['project', 'item_id'],
-                'unique': True  # This enforces uniqueness
-            }
         ]
     }
 

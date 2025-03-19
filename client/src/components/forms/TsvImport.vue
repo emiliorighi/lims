@@ -91,7 +91,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watchEffect } from 'vue'
-import { useSchemaStore } from '../../stores/schemas-store'
+import { useSchemaStore } from '../../stores/schema-store'
 import { defineVaStepperSteps } from 'vuestic-ui'
 import SampleService from '../../services/clients/SampleService'
 import { AxiosError } from 'axios'

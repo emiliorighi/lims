@@ -52,7 +52,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue';
-import ProjectService from '../../services/clients/ProjectService'
+import ResearchProjectService from '../../services/clients/ProjectService'
 import { AxiosError } from 'axios'
 import Pagination from '../../components/filters/Pagination.vue';
 import Header from '../../components/ui/Header.vue'
@@ -87,7 +87,7 @@ async function handleSearch(query: string) {
     selectLoading.value = true;
 
     try {
-        const { data } = await ProjectService.getProjects({ filter: query });
+        const { data } = await ResearchProjectService.getProjects({ filter: query });
         projects.value = [...data.data.map((i: any) => i.project_id)]
     } catch (error) {
         handleError(error, 'Error fetching projects');

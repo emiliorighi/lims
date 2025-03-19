@@ -1,9 +1,9 @@
-from db.models import Sample,Experiment,User
+from db.models import ResearchItem,ResearchModel
 
 
 def lookup_project_related_data(project_id):
+    models = ResearchModel.objects(project_id=project_id).scalar('name')
     response = {}
-    response['samples'] = Sample.objects(project=project_id).count()
-    response['experiments'] = Experiment.objects(project=project_id).count()
-    response['users'] = User.objects(projects=project_id).count()
+    for model in models:
+        response[model] = ResearchItem.objects(project_id=project_id, model_name=model).count()
     return response

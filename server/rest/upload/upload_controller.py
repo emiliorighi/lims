@@ -10,5 +10,5 @@ class TsvUploadApi(Resource):
     @project_access.project_access_required()
     def post(self, project_id):
         data = request.json if request.is_json else request.form
-        message,status = upload_service.upload_tsv(project_id, request.files.get('file'), data)
-        return Response(json.dumps(message), mimetype="application/json", status=status)
+        message = upload_service.upload_tsv(project_id, request.files.get('file'), data)
+        return Response(json.dumps(message), mimetype="application/json", status=201)

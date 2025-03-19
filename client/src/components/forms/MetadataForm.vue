@@ -12,20 +12,6 @@
                     :multiple="field.filter.multi" :options="field.filter.choices"
                     :rules="[requiredSelectRule(field.label, field.required)]" />
             </div>
-
-            <div v-else-if="isRangeField(field.filter)" class="flex lg6 md6 sm12 xs12">
-                <VaSlider  @update:modelValue="(v: any) => emits('updateField', [field.key, v])" class="mt-4"
-                    :label="field.label" :max="field.filter.max" :min="field.filter.min" v-model="metadata[field.key]"
-                    track-label-visible>
-                    <template #trackLabel="{ value }">
-                        <VaChip color="warning" size="small">
-                            {{ value }}({{ field.filter.unit }})
-                        </VaChip>
-                    </template>
-                </VaSlider>
-                <VaInput class="mt-2 mb-2" :rules="[requiredNumberFieldRule(field.label, field.required)]"
-                    :messages="[field.description]" readonly v-model="metadata[field.key]" />
-            </div>
         </div>
     </div>
 </template>
@@ -40,11 +26,8 @@ const props = defineProps<{
 
 const metadata = ref<Record<string, any> | null>(null)
 
-
 const requiredFieldRule = (label: string, required = true) => (v: any) => !required || (!!v) || `${label} is required`;
 const requiredSelectRule = (label: string, required = true) => (v: any) => !required || (!!v) || `${label} is required`;
-const requiredNumberFieldRule = (label: string, required = true) => (v: any) => !required || (!isNaN(v) || (!!v)) || `${label} must be a number`;
-
 
 const emits = defineEmits(['updateField'])
 

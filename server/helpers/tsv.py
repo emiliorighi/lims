@@ -11,6 +11,9 @@ def generate_tsv_reader(report):
 def generate_tsv_dict_reader(report):
     tsv_data = StringIO(report.read().decode('utf-8'))
     tsvreader = csv.DictReader(tsv_data, delimiter='\t')
+        # Strip whitespace from all keys
+    tsvreader.fieldnames = [key.strip() for key in tsvreader.fieldnames] if tsvreader.fieldnames else None
+
     return tsvreader
 
 def create_tsv(items, fields):

@@ -44,7 +44,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue';
-import { useSchemaStore } from '../../stores/schemas-store';
+import { useSchemaStore } from '../../stores/schema-store';
 import { ModelType } from '../../data/types'
 
 const props = defineProps<{

@@ -18,9 +18,12 @@ services:
     build: ./server
     container_name: "${API_HOST}"
     restart: always
+    ports:
+     - 5010:5000
     volumes:
       - ./server:/server
       - ./project-spec.json:/server/project-spec.json
+      - ./project-spec-v2.json:/server/project-spec-v2.json
       - ./protocols:/server/protocols # store protocols here (pdf, txt, doc)
       - ./images:/server/images # store pictures here (jpeg, png)
     env_file:

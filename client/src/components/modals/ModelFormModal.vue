@@ -35,7 +35,7 @@
 <script setup lang="ts">
 import { AxiosError } from 'axios';
 import { computed, reactive, ref, watch } from 'vue';
-import { useSchemaStore } from './../../stores/schemas-store';
+import { useSchemaStore } from '../../stores/schema-store';
 import { useToast, useForm } from 'vuestic-ui/web-components';
 import { useItemStore } from '../../stores/item-store'
 import { ItemModel, Filter } from '../../data/types';

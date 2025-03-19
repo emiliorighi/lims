@@ -7,39 +7,64 @@ from wrappers import project_access
 
 FIELDS_TO_EXCLUDE = ['id','created']
 
-class ItemsByProjectApi(Resource):
-    def get(self, project_id, model):
-        response, mimetype, status = items_service.get_items_by_project(project_id, model, request.args)
-        return Response(response, mimetype=mimetype, status=status)
+class ItemsApi(Resource):
+    @jwt_required()
+    def get(self):
+        response, mimetype = items_service.get_items(request.args)
+        return Response(response, mimetype=mimetype, status=200)
+
+class ItemsByProjectModelApi(Resource):
+    @jwt_required()
+    def get(self, project_id, model_name):
+        args = dict(project_id=project_id, model_name=model_name,**request.args)
+        response, mimetype = items_service.get_items(args)
+        return Response(response, mimetype=mimetype, status=200)
     
     @jwt_required()
     @project_access.project_access_required()
-    def post(self, project_id, model):
+    def post(self, project_id, model_name):
         data = request.json if request.is_json else request.form
-        messages, status = items_service.create_item(project_id,model, data)
-        return Response(json.dumps(messages), mimetype="application/json", status=status)
+        messages = items_service.create_item(project_id, model_name, data)
+        return Response(json.dumps(messages), mimetype="application/json", status=201)
+    
+class RelatedItemsByProjectModelApi(Resource):
+    @jwt_required()
+    def get(self, project_id, model_name, record_id):
+        args = dict(project_id=project_id, reference_id=record_id, **request.args)
+        response, mimetype = items_service.get_items(args)
+        return Response(response, mimetype=mimetype, status=200)
+    
+    @jwt_required()
+    @project_access.project_access_required()
+    def post(self, project_id, model_name):
+        data = request.json if request.is_json else request.form
+        messages = items_service.create_item(project_id, model_name, data)
+        return Response(json.dumps(messages), mimetype="application/json", status=201)
+    
 
-class ItemByProjectApi(Resource):
+class ItemByProjectModelApi(Resource):
 
-    def get(self, project_id, model, item_id):
-        item = items_service.get_item(project_id, model, item_id)
+    @jwt_required()
+    def get(self, project_id, model_name, record_id):
+        item = items_service.get_item(project_id, model_name, record_id)
         return Response(item, mimetype="application/json", status=200)
 
     @jwt_required()
     @project_access.project_access_required()
-    def put(self, project_id, model, item_id):
+    def put(self, project_id, model_name, record_id):
         data = request.json if request.is_json else request.form
-        messages, status = items_service.update_item(project_id,model, item_id, data)
-        return Response(json.dumps(messages), mimetype="application/json", status=status)
+        message = items_service.update_item(project_id,model_name, record_id, data)
+        return Response(json.dumps(message), mimetype="application/json", status=201)
     
     @jwt_required()
     @project_access.project_access_required()
-    def delete(self, project_id,model, item_id):
-        messages, status = items_service.delete_item(project_id,model,item_id)
-        return Response(json.dumps(messages), mimetype="application/json", status=status)
+    def delete(self, project_id,model_name, record_id):
+        message = items_service.delete_item(project_id,model_name,record_id)
+        return Response(json.dumps(message), mimetype="application/json", status=201)
+
+
 
 class ModelByProjectStatsApi(Resource):
     def get(self, project_id, model, field):
-        
         stats = items_service.get_model_field_stats(project_id, model, field)
         return Response(json.dumps(stats), mimetype="application/json", status=200)

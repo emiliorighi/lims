@@ -1,19 +1,14 @@
 import { defineStore } from 'pinia'
-import { ModelType, SchemaForm } from '../data/types'
+import { ProjectSchema } from '../data/types'
+import ProjectService from '../services/clients/ProjectService'
+import { useToast } from 'vuestic-ui/web-components'
 
-const initSchema: SchemaForm = {
+const initSchema: ProjectSchema = {
   project_id: '',
   name: '',
   description: '',
   version: '',
-  experiment: {
-    id_format: [],
-    fields: []
-  },
-  sample: {
-    id_format: [],
-    fields: []
-  },
+  models: []
 }
 
 const initSearchForm = {
@@ -29,19 +24,31 @@ const initPagination = {
 export const useSchemaStore = defineStore('schema', {
   state: () => {
     return {
-      schema: { ...initSchema },
+      schema: null as ProjectSchema | null,
       showReport: false,
+      isLoading: false,
       showForm: false,
       showDetails: false,
       showSchema: false,
       showChart: false,
-      model: 'sample' as ModelType,
       searchForm: { ...initSearchForm },
       pagination: { ...initPagination },
+      toast: useToast().init
     }
   },
 
   actions: {
+    async getProjectSchema(projectId: string) {
+      try {
+        this.isLoading = true
+        const { data } = await ProjectService.getProjectSchema(projectId)
+        this.schema = { ...data }
+      } catch (err) {
+        this.toast({ message: err as string, color: 'danger' })
+      } finally {
+        this.isLoading = false
+      }
+    },
     resetSearchForm() {
       this.searchForm = { ...initSearchForm }
     },

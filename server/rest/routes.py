@@ -1,12 +1,11 @@
-from .project import projects_controller
-from .draft_project import draft_projects_controller
 from .stats import stats_controller
 from .project_mapper import project_mapper_controller
 from .upload import upload_controller
 from .lookup import lookup_controller
 from .user import users_controller
 from .item import items_controller
-from .protocols import protocol_controller
+from .research_project import research_projects_controller
+from .research_models import model_controller
 
 def initialize_routes(api):
 
@@ -15,8 +14,8 @@ def initialize_routes(api):
 	api.add_resource(users_controller.LogoutApi, '/api/logout')
 
 	##PROTOCOLS
-	api.add_resource(protocol_controller.ProtocolsAPI, '/api/protocols')
-	api.add_resource(protocol_controller.ProtocolAPI, '/api/protocols/<name>')
+	# api.add_resource(protocol_controller.ProtocolsAPI, '/api/protocols')
+	# api.add_resource(protocol_controller.ProtocolAPI, '/api/protocols/<name>')
 
 	##APP STATS
 	api.add_resource(stats_controller.LookupApi, '/api/lookup')
@@ -26,39 +25,46 @@ def initialize_routes(api):
 	api.add_resource(users_controller.UsersApi, '/api/users', '/api/users/<name>')
 	api.add_resource(users_controller.UserProjectsApi, '/api/users/<name>/projects')
 
-	###DRAFT PROJECT
-	api.add_resource(draft_projects_controller.DraftProjectsApi, '/api/draft_projects')
-	api.add_resource(draft_projects_controller.DraftProjectApi, '/api/draft_projects/<project_id>')
-
-	### DRAFT PROJECTS ENDPOINT UTILITIES
-	api.add_resource(draft_projects_controller.ValidateProjectApi, '/api/draft_projects/validate')
-	api.add_resource(draft_projects_controller.TsvUploadMapApi, '/api/draft_projects/map_attributes')
-
 	###PROJECTS
-	api.add_resource(projects_controller.ProjectsApi, '/api/projects')
-	api.add_resource(projects_controller.ProjectApi, '/api/projects/<project_id>')
+	api.add_resource(research_projects_controller.ResearchProjectsApi, '/api/projects')
+	api.add_resource(research_projects_controller.ResearchProjectApi, '/api/projects/<project_id>')
 
-	##PROJECT LOOKUP RELATED DATA
+	##PROJECT SCHEMA
+	api.add_resource(research_projects_controller.ResearchProjectSchema, '/api/projects/<project_id>/schema')
+
+	## PROJECT STATS
 	api.add_resource(lookup_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
 
+	## PROJECT MODELS
+	api.add_resource(model_controller.ModelsApi, '/api/projects/<project_id>/models')
+	api.add_resource(model_controller.ModelApi, '/api/projects/<project_id>/models/<model_name>')
+
+
+	api.add_resource(items_controller.ItemsByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records')
+	api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records/<record_id>')
+	api.add_resource(items_controller.RelatedItemsByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records/<record_id>/related_records')
+
+	##PROJECT LOOKUP RELATED DATA
+
 	##PROJECT RELATED PROTOCOLS
-	api.add_resource(protocol_controller.ProtocolsAPI, '/api/projects/<project_id>/protocols')
-	api.add_resource(protocol_controller.ProtocolAPI, '/api/projects/<project_id>/protocols/<name>')
-	api.add_resource(protocol_controller.DownloadProtocolAPI, '/api/projects/<project_id>/protocols/<name>/download')
+	# api.add_resource(protocol_controller.ProtocolsAPI, '/api/projects/<project_id>/protocols')
+	# api.add_resource(protocol_controller.ProtocolAPI, '/api/projects/<project_id>/protocols/<name>')
+	# api.add_resource(protocol_controller.DownloadProtocolAPI, '/api/projects/<project_id>/protocols/<name>/download')
 
 	#PROJECT ENDPOINT UTILITIES
 	api.add_resource(project_mapper_controller.InferHeaderApi, '/api/projects/<project_id>/map_header')
-	api.add_resource(upload_controller.TsvUploadApi, '/api/projects/<project_id>/upload_tsv')
+	api.add_resource(upload_controller.TsvUploadApi, '/api/projects/<project_id>/upload')
 
-	###PROJECT RELATED DATA
-	api.add_resource(items_controller.ItemsByProjectApi, '/api/projects/<project_id>/<model>')
-	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>')
+	###ALL ITEMS ENDPOINT
+	api.add_resource(items_controller.ItemsApi, '/api/items')
+
+
 
 	# DO WE NEED THIS ENDPOINT?
-	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/protocols')
+	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/protocols')
 
-	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/images')
-	api.add_resource(items_controller.ItemByProjectApi, '/api/projects/<project_id>/<model>/<item_id>/images/<name>/download')
+	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/images')
+	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/images/<name>/download')
 
 
 

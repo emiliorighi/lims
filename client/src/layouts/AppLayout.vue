@@ -11,7 +11,7 @@
     </template>
     <template #content>
       <main>
-        <div class="layout fluid va-gutter-5">
+        <div class="layout va-gutter-5">
           <router-view v-slot="{ Component }">
             <Transition name="fade">
               <component :is="Component" />
@@ -26,7 +26,7 @@
 import { useBreakpoint } from 'vuestic-ui'
 import { useGlobalStore } from "../stores/global-store"
 
-import {onMounted} from 'vue'
+import { onMounted } from 'vue'
 
 import NavBar from '../components/navbar/Navbar.vue'
 import Sidebar from '../components/sidebars/Sidebar.vue'
@@ -34,7 +34,7 @@ import Sidebar from '../components/sidebars/Sidebar.vue'
 const globalStore = useGlobalStore()
 const breakpoints = useBreakpoint()
 
-onMounted(async() => {
+onMounted(async () => {
   await globalStore.checkUserIsLoggedIn()
 })
 

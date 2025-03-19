@@ -1,244 +1,152 @@
-from db.models import Experiment,Sample
+from db.models import ResearchItem,ResearchModel,ResearchProject
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.queryset.visitor import Q
 from helpers import data,filter,schema
-from ..project import projects_service
+from ..research_project import research_projects_service
+from ..research_models import model_service
 
-MODELS={
-    "samples": Sample,
-    "experiments":Experiment
-}
-
-def get_model(model):
-    db_model = MODELS.get(model)
-
-    if not db_model:
-        raise NotFound(description=f"Model: {model} not found")
-    
-    return db_model
+def check_project_exists(project_id):
+    if not ResearchProject.objects(project_id=project_id).first():
+        raise NotFound(description=f"{project_id} not found")
 
 
-def get_items_by_project(project_id: str, model: str, args: dict):
-    project = projects_service.get_project(project_id)
-    db_model = get_model(model)
+def get_model(project_id, model_name):
+    model = ResearchModel.objects(project_id=project_id, name= model_name).first()
+    if not model:
+        raise NotFound(description=f"Model {model_name} not found for project {project_id}")
+    return model
 
-    limit, offset = data.get_pagination(args)
-    sort_column, sort_order = data.get_sort(args)
-    response_format = args.get('format', 'json')
 
-    tsv_fields, filters = define_tsv_fields_and_filters(model, project)
-
-    filtered_args = filter_args(args)
-
-    query, q = build_queries(filters, filtered_args)
-    query['project'] = project_id
-    cursor = db_model.objects(**query).exclude('id')
-    if q:
-        cursor = cursor.filter(q)
-
-    selected_fields = get_selected_fields(args)
-    if selected_fields:
-        cursor = cursor.only(*selected_fields)
-        tsv_fields.extend(selected_fields)
-
-    if sort_column and sort_order:
-        cursor = data.apply_sorting(cursor, sort_column, sort_order)
-
-    return prepare_response(cursor, tsv_fields, response_format, limit, offset)
-
-def define_tsv_fields_and_filters(model, project):
-    if model == 'experiments':
-        return ['experiment_id', 'sample_id'], project.experiment['fields']
-    else:
-        return ['sample_id'], project.sample['fields']
-
-def filter_args(args):
-    ignored_keys = {"limit", "offset", "sort_order", "sort_column", "format", "fields[]"}
-    return {k: v for k, v in args.items() if k not in ignored_keys and v}
-
-def build_queries(filters, filtered_args):
-    query = {}
-    q = None
-
-    for f in filters:
-        key = f.get('key')
-        if key not in filtered_args:
-            continue
+def get_items(args):
+    try:
         
-        value = filtered_args[key] if filtered_args[key] != 'No Value' else None
-        filter_type = f.get('filter')
+        filter = args.pop('filter', None)
 
-        if filter_type.get('choices') or filter_type.get('min'):
-            query[key] = value
-        else:
-            condition = Q(**{f"{key}__icontains": value}) | Q(**{f"{key}__iexact": value})
-            q = condition if q is None else q & condition
+        q_query = None
+        
+        if filter:
+            q_query =(Q(item_id__icontains=filter) | Q(item_id__iexact=filter))
 
-    for key, value in filtered_args.items():
-        if any(op in key for op in ['__gte', '__lte', '__gt', '__lt']):
-            query[key] = value
-        elif key == 'sample_id' or 'experiment_id':
-            condition = Q(**{f"{key}__icontains": value}) | Q(**{f"{key}__iexact": value})
-            q = condition if q is None else q & condition
+        limit, offset = data.get_pagination(args)     
 
-    return query, q
+        sort_column, sort_order = data.get_sort(args)
+        
+        format = args.pop('format', 'json')
+        
+        selected_fields = args.pop('fields', None)
+        
+        query, q_query = data.create_query(args, q_query)
+        items = ResearchItem.objects(**query)
+        if q_query:
+            items = items.filter(q_query)
 
-def get_selected_fields(args: dict) -> list:
-    return [v for k, v in args.items(multi=True) if k.startswith('fields[]')]
+        if sort_column and sort_order:
+            sort = '-' + sort_column if sort_order == 'desc' else sort_column
+            items = items.order_by(sort)
 
-def prepare_response(cursor, tsv_fields: list, response_format: str, limit: int, offset: int):
-    if response_format == 'tsv':
-        return data.generate_tsv(cursor, tsv_fields), "text/tab-separated-values", 200
-    
-    total = cursor.count()
-    response = {'total': total, 'data': list(cursor.skip(offset).limit(limit).as_pymongo())}
-    return data.dump_json(response), "application/json", 200
+        if selected_fields:
+            selected_fields = selected_fields.split(',')
+            items = items.only(*selected_fields)
 
+        fields = selected_fields if selected_fields else ['project_id', 'model_name', 'item_id', 'reference_id']
+        return data.generate_response(format, fields, items, limit, offset)
 
-def get_item(project_id, model, item_id):
-    db_model = get_model(model)
-    query = {"project":project_id}
+    except Exception as e:
+        print(e)
+        raise BadRequest(description=f"{e}")
 
-    if model == 'samples':
-        query["sample_id"] = item_id
-    else:
-        query["experiment_id"] = item_id
-    
-    item = db_model.objects(**query).exclude('id').first().to_mongo().to_dict()
-    if not item:
-        raise NotFound(description=f"{item_id} not found")
-    return data.dump_json(item)
-    
-def create_item(project_id, model, data):
-    project = projects_service.get_project(project_id)
+def get_item(project_id, model_name, item_id):
+    item = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
+    return item
+
+def create_item(project_id, model_name, data):
+    check_project_exists(project_id)
+    model = get_model(project_id, model_name)
+    id_fields = model.id_format
+
+    item_id = schema.create_item_id(id_fields, data)
+    ## check if item already exists in the project and model context
+    existing_item = get_item(project_id, model_name, item_id)
+    if existing_item:
+        raise Conflict(description=f"An Item with id: {item_id} already exists in {model_name} of project {project_id}")
+
+    missing_fields = schema.validate_required_fields(model, data)
+    if missing_fields:
+        raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
+
+    if model.reference_model:
+        ## check reference id field and related record exist
+        reference_id = data.get('reference_id')
+        if not reference_id:
+            raise BadRequest(description=f"reference_id field is mandatory and must point to an item_id of {model.referce_model}")
+        ref_item = get_item(project_id, model.reference_model, reference_id)
+        if not ref_item:
+            raise NotFound(description=f"Reference item with id: {reference_id} not found. Create it first before referencing to it")    
     # Evaluate the fields and raise an error if there are any issues
-    evaluation_errors = filter.evaluate_fields(project, data)
+    evaluation_errors = filter.evaluate_model_fields(model.fields, data)
     if evaluation_errors:
         raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
-    
-    db_model = get_model(model)
-    # Helper function to handle shared logic
-    def process_item(project_entity, entity_type, item_key):
-        id_fields = project_entity.get('id_format', [])
-        item_id = schema.create_item_id(id_fields, data)
-        if not item_id:
-            raise BadRequest(description=f"Unable to generate {entity_type}_id with the fields provided")
+        # Helper function to handle shared logic
 
-        query = {"project": project_id, item_key: item_id}
-        item = db_model.objects(**query).first()
-
-        if item:
-            raise Conflict(description=f"{entity_type.capitalize()}: {item_id} already exists!")
-        
-        missing_fields = schema.validate_required_fields(project_entity, data)
-        if missing_fields:
-            raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
-    
-        item_to_save={
-            f"{item_key}":item_id,
-            "project":project_id,
-            **data
-        }
-
-        return item_to_save
-    
-    # Determine whether we are dealing with samples or experiments
-    if model == "samples":
-        key = "sample_id"
-        item_to_save = process_item(project.sample, "sample", key)
-    else:
-        key="experiment_id"
-        item_to_save = process_item(project.experiment, "experiment", key )
-
-        sample_id = data.get('sample_id')
-        if not sample_id:
-            raise BadRequest(description="sample_id field is mandatory")
-
-        sample_object = Sample.objects(project=project_id, sample_id=sample_id).first()
-        if not sample_object:
-            raise BadRequest(description=f"Sample {sample_id} does not exist, create it first")
-
-        item_to_save["sample_id"] = sample_object.sample_id
+    item_to_save={
+        "item_id":item_id,
+        "model_name":model_name,
+        "project_id":project_id,
+        **data
+    }
 
     try: 
-        db_model(
-            **item_to_save
-        ).save()
+        ResearchItem(**item_to_save).save()
 
     except Exception as e:
         raise BadRequest(description=e)
     
-    return f"{model} {key} of {project_id} correctly saved!", 201  # Return the created sample with 201 Created status
+    return f"{model_name} {item_id} of {project_id} correctly saved!" # Return the created sample with 201 Created status
 
 
-def update_item(project_id, model, item_id, data):
-    
-    project =projects_service.get_project(project_id)
-    db_model = get_model(model)
-    if model == "samples":
-        key = "sample_id"
-        id_fields = project.sample.get('id_format', [])
+def update_item(project_id, model_name, item_id, data):
 
-    else:
-        key="experiment_id"
-        id_fields = project.experiment.get('id_format', [])
+    check_project_exists(project_id)
 
-    query = {
-        f"{key}":item_id,
-        "project":project_id
-    }
-    item = db_model.objects(**query).first()
+    model = get_model(project_id, model_name)
+
+    item = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
     if not item:
-        raise NotFound(description=f"{key}: {item_id} not found")
+        raise NotFound(description=f"{model_name}: {item_id} not found")
     
-    new_item_id = schema.create_item_id(id_fields, data)
+    new_item_id = schema.create_item_id(model.id_format, data)
     
     if new_item_id and item_id != new_item_id:
-        message = f"{key} {item_id} has changed into {new_item_id}, the value of the fields {','.join(id_fields)} can't be changed"
+        message = f"{model_name} {item_id} has changed into {new_item_id}, the value of the fields {','.join(model.id_fields)} can't be changed"
         raise BadRequest(description=message)
     
-    evaluation_errors = filter.evaluate_fields(project, data)
+    evaluation_errors = filter.evaluate_model_fields(model.fields, data)
     if evaluation_errors:
         raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
     
     item.update(**data)
-    return [f"{model}: {item_id} successfully updated"], 201
+    return f"{model}: {item_id} successfully updated"
 
 
 
-def delete_item(project_id, model, item_id):
-    
-    projects_service.get_project(project_id)
-    
-    db_model = get_model(model)
-    if model=='samples':
-        key="sample_id"
-        experiments = Experiment.objects(project=project_id,sample_id=item_id)
-        experiments.delete()
-    else:
-        key = 'experiment_id'
-
-    query = {
-        f"{key}":item_id,
-        "project":project_id
-    }
-    item_to_delete = db_model.objects(**query).first()
+def delete_item(project_id, model_name, item_id):
+    item_to_delete = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
     if not item_to_delete:
-        raise NotFound(description=f"{key}: {item_id} not found")
+        raise NotFound(description=f"Item {item_id} in {model_name} of {project_id}, not found")
+    ##delete related records too
+    ResearchItem.objects(project_id=project_id, reference_id=item_id).delete()
 
     item_to_delete.delete()
 
-    return f"{model}: {item_id} successfully deleted", 201
+    return f"{model_name}: {item_id} successfully deleted"
 
 #TODO: ADD QUERY
-def get_model_field_stats(project_id, model, field):
+def get_model_field_stats(project_id, model_name, field):
 
     #check if project exists
-    projects_service.get_project(project_id)
+    research_projects_service.get_project(project_id)
 
     #retrieve db model
-    db_model = get_model(model)
-
     pipeline = [
             {
                 "$project": {
@@ -257,6 +165,6 @@ def get_model_field_stats(project_id, model, field):
         ]
     response = {
         doc["_id"]: doc["count"]
-        for doc in db_model.objects(project=project_id).aggregate(pipeline)
+        for doc in ResearchItem.objects(project=project_id, model_name=model_name).aggregate(pipeline)
     }
     return response

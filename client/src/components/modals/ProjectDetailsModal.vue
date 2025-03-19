@@ -19,7 +19,7 @@
     </VaModal>
 </template>
 <script setup lang="ts">
-import { useSchemaStore } from '../../stores/schemas-store';
+import { useSchemaStore } from '../../stores/schema-store';
 import DownloadYAMLProject from '../buttons/DownloadYAMLProject.vue';
 import MetadataTree from '../ui/MetadataTree.vue';
 import Header from './common/Header.vue'

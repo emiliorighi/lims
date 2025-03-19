@@ -106,7 +106,7 @@
 </template>
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue';
-import { useSchemaStore } from '../../../stores/schemas-store';
+import { useSchemaStore } from '../../../stores/schema-store';
 import DownloadYAMLProject from '../../../components/buttons/DownloadYAMLProject.vue'
 import Header from '../../../components/ui/Header.vue'
 import { Filter, ModelType } from '../../../data/types'

@@ -26,7 +26,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useSchemaStore } from './../../stores/schemas-store'
+import { useSchemaStore } from '../../stores/schema-store'
 import { useItemStore } from '../../stores/item-store'
 import Header from './common/Header.vue'
 

@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import { useSchemaStore } from '../../stores/schemas-store';
+import { useSchemaStore } from '../../stores/schema-store';
 
 const props = defineProps<{
     model: string,

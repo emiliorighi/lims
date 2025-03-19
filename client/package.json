@@ -35,11 +35,11 @@
     "pinia": "^2.0.16",
     "register-service-worker": "^1.7.1",
     "sass": "^1.53.0",
-    "vue": "^3.2.25",
+    "vue": "^3.5.13",
     "vue-chartjs": "^4.1.1",
     "vue-router": "^4.0.14",
     "vuestic-admin": "^0.0.1-security",
-    "vuestic-ui": "^1.9.8",
+    "vuestic-ui": "^1.10.0",
     "yaml": "^2.4.2"
   },
   "devDependencies": {

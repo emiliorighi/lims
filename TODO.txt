@@ -18,6 +18,7 @@ ADD PROTOCOLS (PDF FILES/DOCS)
 5 ADD FILES
 6 ADD AUDIT TRAILS
 
+ADD RECYCLE MODEL LOGIC IN CREATE PROJECT FORM
 
 dashboard -> stats ALL
 project form -> admin
@@ -34,3 +35,27 @@ landing in the page
 
     items table -> CRUD ITEM, export data
     see samples or experiments
+
+
+
+GENERATE INPUT FIELDS BY DEFAULTS AND IF USER REQUESTS SELECT FIELD, SCAN TSV FOR VALUES
+
+
+ADD SKIP EMPTY ROWS OPTIONS ON TSV DATA UPLOAD
+
+
+improve error in tsv upload, in case of proyect australia_0 fielc comments is a multi select choices and error says is mandatory but should say that value is not in the various values
+
+when importing project check if id format field is present otherwise delete it
+
+when experiment import, ask for column combination of sample id value
+
+experiment to sample id links in tsv upload doesnt work
+
+
+PROJECT REFACTOR
+
+    add protocols
+    add images
+
+PROJECT LAYOUT
