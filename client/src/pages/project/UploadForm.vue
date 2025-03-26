@@ -7,90 +7,88 @@
         </div>
         <div class="row">
             <div class="flex lg12 md12 sm12 xs12">
-                <VaInnerLoading :loading="isLoading">
-
-                    <VaForm ref="uploadForm">
-                        <VaStepper color="textPrimary" @finish="submit" linear v-model="currentStep" :steps="steps">
-                            <template #step-content-0>
-                                <div class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaSelect placeholder="Select the target model" v-model="selectedModel"
-                                            :options="modelNames"
-                                            :rules="[(v: string) => !!v || 'Model selection is required']" />
-                                    </div>
-
+                <VaForm ref="uploadForm">
+                    <VaStepper color="textPrimary" @finish="submit" linear v-model="currentStep" :steps="steps">
+                        <template #step-content-0>
+                            <div class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <VaSelect placeholder="Select the target model" v-model="selectedModel"
+                                        :options="modelNames"
+                                        :rules="[(v: any) => !!v || 'Model selection is required']" />
                                 </div>
-                            </template>
-                            <template #step-content-1>
-                                <div class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaFileUpload
-                                            dropZoneText="Drag a TSV file here to map its columns to the model field"
-                                            uploadButtonText="Upload" v-model="tsv" @update:modelValue="parseColumns()"
-                                            dropzone type="single" file-types=".tsv">
-                                        </VaFileUpload>
-                                    </div>
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaSelect placeholder="Select the behaviour model" v-model="behaviour"
-                                            :options="['SKIP', 'UPDATE']"
-                                            :messages="['What to do when encountering an existing record']" />
-                                    </div>
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaCounter v-model="header"
-                                            :messages="['The 0-based header row position, records will be processed starting by the next row after the header row']">
-                                        </VaCounter>
-                                    </div>
+
+                            </div>
+                        </template>
+                        <template #step-content-1>
+                            <div class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <VaFileUpload
+                                        dropZoneText="Drag a TSV file here to map its columns to the model field"
+                                        uploadButtonText="Upload" v-model="tsv" @update:modelValue="parseColumns()"
+                                        dropzone type="single" file-types=".tsv">
+                                    </VaFileUpload>
                                 </div>
-                            </template>
-                            <template #step-content-2>
-                                <div class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaButton @click="assignColumns" color="textPrimary">Auto-Assign Matching
-                                            Fields</VaButton>
-                                    </div>
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <div v-for="mappedField in mappedFields" class="row align-center">
-                                            <div class="flex lg6 md6 sm12 x12">
-                                                <VaInput :model-value="mappedField.field" read-only
-                                                    :messages="['The field name of the model, can not be edited']">
-                                                    <template #appendInner>
-                                                        <VaChip v-if="mappedField.required" size="small"
-                                                            :color="mappedField.column ? 'success' : 'danger'">
-                                                            required
-                                                        </VaChip>
-                                                    </template>
-                                                </VaInput>
-                                            </div>
-                                            <div class="flex lg6 md6 sm12 x12">
-                                                <VaSelect searchable :options="options" track-by="text" value-by="text"
-                                                    text-by="text"
-                                                    :messages="['The incoming TSV column to map agains the field name']"
-                                                    v-model="mappedField.column" clearable :rules="[
-                                                        (v: string) => !(mappedField.required && !v) || 'This field is required'
-                                                    ]">
-                                                </VaSelect>
-                                            </div>
+                                <div class="flex lg6 md6 sm12 xs12">
+                                    <VaSelect placeholder="Select the behaviour model" v-model="behaviour"
+                                        :options="['SKIP', 'UPDATE']"
+                                        :messages="['What to do when encountering an existing record']" />
+                                </div>
+                                <div class="flex lg6 md6 sm12 xs12">
+                                    <VaCounter style="width: 100%;" v-model="header"
+                                        :messages="['The 0-based header row position, records will be processed starting by the next row after the header row']">
+                                    </VaCounter>
+                                </div>
+                            </div>
+                        </template>
+                        <template #step-content-2>
+                            <div class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <VaButton @click="assignColumns" color="textPrimary">Auto-Assign Matching
+                                        Fields</VaButton>
+                                </div>
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <div v-for="mappedField in mappedFields" class="row align-center">
+                                        <div class="flex lg6 md6 sm12 x12">
+                                            <VaInput :model-value="mappedField.field" read-only
+                                                :messages="['The field name of the model, can not be edited']">
+                                                <template #appendInner>
+                                                    <VaChip v-if="mappedField.required" size="small"
+                                                        :color="mappedField.column ? 'success' : 'danger'">
+                                                        required
+                                                    </VaChip>
+                                                </template>
+                                            </VaInput>
+                                        </div>
+                                        <div class="flex lg6 md6 sm12 x12">
+                                            <VaSelect searchable :options="options" track-by="text" value-by="text"
+                                                text-by="text"
+                                                :messages="['The incoming TSV column to map agains the field name']"
+                                                v-model="mappedField.column" clearable :rules="[
+                                                    (v: any) => !(mappedField.required && !v) || 'This field is required'
+                                                ]">
+                                            </VaSelect>
                                         </div>
                                     </div>
                                 </div>
-                                <div v-if="refModel" class="row">
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <p>Select the list of columns that maps to the refence model id field: {{
-                                            refModel.id_format.join('_') }}. The
-                                            selection order matters!
-                                        </p>
-                                    </div>
-                                    <div class="flex lg12 md12 sm12 xs12">
-                                        <VaSelect placeholder="Reference models columns" multiple :options="options"
-                                            v-model="referencModelFields" track-by="text" value-by="text" text-by="text"
-                                            :messages="['Choose the columns that combined point to the reference model record']">
-                                        </VaSelect>
-                                    </div>
+                            </div>
+                            <div v-if="refModel" class="row">
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <h2 class="va-h4">Reference Model Id fields</h2>
+                                    <p>Select the list of columns that maps to the refence model id field: {{
+                                        refModel.id_format.join('_') }}. The
+                                        selection order matters!
+                                    </p>
                                 </div>
-                            </template>
-                        </VaStepper>
-                    </VaForm>
-                </VaInnerLoading>
+                                <div class="flex lg12 md12 sm12 xs12">
+                                    <VaSelect placeholder="Reference models columns" multiple :options="options"
+                                        v-model="referencModelFields" track-by="text" value-by="text" text-by="text"
+                                        :messages="['Choose the columns that combined point to the reference model record']">
+                                    </VaSelect>
+                                </div>
+                            </div>
+                        </template>
+                    </VaStepper>
+                </VaForm>
             </div>
         </div>
     </div>
@@ -160,7 +158,7 @@ const options = computed(() => {
 async function submit() {
     if (!validate()) return
     if (!tsv.value || !selectedModel.value) return
-    const map = mappedFields.value.map(({ field, column }) => [field, column])
+    const map = mappedFields.value.filter(({ column }) => !!column).map(({ field, column }) => [field, column])
     const formData = new FormData()
     formData.append('file', tsv.value)
     formData.append('map', JSON.stringify(Object.fromEntries(map)))
@@ -182,7 +180,7 @@ async function submit() {
         if (respData) {
             message = respData.message ? respData.message : respData
         }
-        init({ color: 'danger', message: message })
+        init({ color: 'danger', message: message, closeable: true, duration: 100000 })
     } finally {
         isLoading.value = false
         if (success) router.push({ name: 'projectModel', params: { projectId: props.projectId, modelName: selectedModel.value } })

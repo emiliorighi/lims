@@ -16,9 +16,10 @@
                 </template>
                 <template #right>
                     <VaButton icon="fa-plus" :to="{ name: 'modelForm' }" preset="primary" color="textPrimary">
-                        Add New Model
+                        Model
                     </VaButton>
-                    <VaButton preset="secondary" icon="fa-file-upload" @click="">Upload data
+                    <VaButton :to="{ name: 'uploadData' }" color="textPrimary" preset="secondary" icon="fa-file-upload">
+                        Data
                     </VaButton>
                 </template>
             </VaNavbar>

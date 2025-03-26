@@ -1,74 +1,30 @@
 <template>
-    <VaCard color="background-element">
-        <VaCardActions align="between">
+    <VaCard color="backgroundElement">
+        <VaCardActions align="end">
             <VaButton preset="primary" @click="downloadCanvasAsPNG(chartId, `${chartId}.png`)">Download</VaButton>
-            <VaButton preset="primary" @click="emits('onDelete', index)" color="danger">
-                Delete
-            </VaButton>
         </VaCardActions>
         <VaCardContent style="height: 400px;">
-            <VaChart :chart-id="chartId" :type="chart.type" :options="chartOptions"
-                :data="createChartData(chart.data)" />
+            <component :is="chartComponent" ref="chart" class="va-chart" :chart-id="chartId"
+            :chart-options="chartOptions" :chart-data="data" />
         </VaCardContent>
     </VaCard>
 </template>
 <script setup lang="ts">
-import VaChart from '../va-charts/VaChart.vue';
+import { chartTypesMap } from '../../composables/chartConfigs';
 import { computed } from 'vue'
 
 const emits = defineEmits(['onDelete'])
 type ChartTypes = "line" | "bar" | "bubble" | "doughnut" | "pie" | "horizontal-bar"
 
 const props = defineProps<{
-    chart: {
-        type: ChartTypes
-        data: Record<string, number>
-    }
-    index: number,
+    type:ChartTypes
+    data:any
     label: string
     chartId: string
+    chartOptions:any
 }>()
 
-const colors = ['#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#c9cbcf', '#e74c3c', '#3498db', '#2ecc71', '#f1c40f',
-    '#e67e22', '#1abc9c', '#9b59b6', '#34495e', '#95a5a6', '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#f39c12',
-    '#d35400', '#2c3e50', '#bdc3c7', '#7f8c8d', '#e74c3c', '#2980b9', '#f1c40f', '#2ecc71', '#9b59b6'
-]
-
-
-const chartOptions = computed(() => {
-    const displayLegend = props.chart.type === 'doughnut' || props.chart.type === 'pie'
-    const opts = {
-        plugins: {
-            title: {
-                text: props.label,
-                display: true,
-                align: 'center'
-            },
-            datalabels: {
-                color: '#ffffff',
-                font: {
-                    size: '18'
-                }
-            },
-            legend: { position: 'bottom', align: 'center', display: displayLegend }
-        },
-
-    }
-    return opts
-})
-function createChartData(data: Record<string, number>) {
-
-    return {
-        labels: Object.keys(data),
-        datasets: [
-            {
-                backgroundColor: colors,
-                data: Object.values(data),
-                label: ''
-            },
-        ],
-    }
-}
+const chartComponent = computed(() => chartTypesMap[props.type])
 
 function downloadCanvasAsPNG(canvasId: string, filename: string) {
     // Get the canvas element

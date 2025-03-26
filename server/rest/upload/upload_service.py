@@ -62,6 +62,7 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, h
     updated_items = set()
     id_fields = model.id_format
     model_fields = model.fields
+    ref_model_name = model.reference_model
     model_name = model.name
     id_set = set()
     tsvreader = generate_tsv_dict_reader(tsv)
@@ -73,7 +74,7 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, h
         item = {k: row[v] for k,v in map.items() if row.get(v)}
 
         reference_id = "_".join([row[ref_col] for ref_col in reference_columns]) if reference_columns else None
-        if reference_id and not ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=reference_id).first():
+        if reference_id and not ResearchItem.objects(project_id=project_id,model_name=ref_model_name, item_id=reference_id).first():
             raise BadRequest(description=f"Row {current_idx}: reference item {reference_id} not found")
         item_id = create_model_id(id_fields, item)
         if not item_id:

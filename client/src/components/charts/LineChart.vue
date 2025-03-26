@@ -25,8 +25,9 @@
     chartData: TLineChartData
     chartOptions?: TChartOptions<'line'>
     chartId?: string
+    isDate?:string
   }>()
 
 
-
+  
 </script>

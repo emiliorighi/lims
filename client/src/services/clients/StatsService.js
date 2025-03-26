@@ -4,8 +4,8 @@ const { base } = http
 
 class StatsService {
 
-    getStats(model, field) {
-        return base.get(`/${model}/stats/${field}`)
+    getStats(projectId, model, field, params) {
+        return base.get(`/projects/${projectId}/models/${model}/stats/${field}`, { params });
     }
     lookupData() {
         return base.get('/lookup')

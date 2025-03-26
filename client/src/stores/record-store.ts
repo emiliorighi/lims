@@ -3,7 +3,8 @@ import { useToast } from 'vuestic-ui/web-components'
 import { AxiosError } from 'axios'
 import AuthService from '../services/clients/AuthService'
 import RecordService from '../services/clients/RecordService'
-import { ResearchFilter, ResearchRecord } from '../data/types'
+import { ErrorResponseData, ResearchFilter, ResearchRecord } from '../data/types'
+import StatsService from '../services/clients/StatsService'
 
 const staticFilters: Record<string, any> = {
     sort_order: null,
@@ -19,7 +20,12 @@ export const useRecordStore = defineStore('record', {
         return {
             showRecordForm: false,
             showReportModal: false,
+            showRecordDetails: false,
             showChartModal: false,
+            showDeleteConfirmation: false,
+            showFilters: false,
+            idToDelete: null as null | string,
+            relatedRecordCount: 0,
             tableLoading: false,
             isTSVLoading: false,
             idToUpdate: null as null | string,
@@ -29,23 +35,18 @@ export const useRecordStore = defineStore('record', {
             searchForm: {} as Record<string, any>,
             records: [] as ResearchRecord[],
             total: 0,
-            record: null as null | Record<string, any>,
-            showItemDetails: false,
+            record: null as null | ResearchRecord,
             toast: useToast().init,
         }
     },
     actions: {
-        async fetchRecords(projectId: string, modelName: string) {
-            const params = { ...this.searchForm, ...this.pagination, ...this.sort }
-            try {
-                this.tableLoading = true
-                const { data } = await RecordService.getItems(projectId, modelName, params);
-                this.records = [...data.data];
-                this.total = data.total;
-            } catch (e) {
-                this.toast({ message: 'Error fetching data', color: 'danger' })
-            } finally {
-                this.tableLoading = false
+
+        buildQuery() {
+            if (this.searchForm) {
+                const searchFormEntries = Object.values(this.searchForm).map(value => Object.entries(value)).flat()
+                return Object.fromEntries(searchFormEntries);
+            } else {
+                return {}
             }
         },
         initForm(fields: ResearchFilter[]) {
@@ -64,20 +65,37 @@ export const useRecordStore = defineStore('record', {
             this.recordForm = {}
             this.idToUpdate = null
         },
+        async fetchRecords(projectId: string, modelName: string) {
+            const params = { ...this.buildQuery(), ...this.pagination, ...this.sort }
+            try {
+                this.tableLoading = true
+                const { data } = await RecordService.getItems(projectId, modelName, params);
+                this.records = [...data.data];
+                this.total = data.total;
+            } catch (e) {
+                this.catchError(e)
+            } finally {
+                this.tableLoading = false
+            }
+        },
+        async fetchRelatedRecords(projectId: string, modelName: string, itemId: string, query: Record<string, any>) {
+            const { data } = await RecordService.getRelatedRecords(projectId, modelName, itemId, query)
+            this.relatedRecordCount = data.total
+        },
+        async getFieldFrequencies(projectId: string, modelName: string, field: string, ignoreQuery?: boolean) {
+            try {
+                const { data } = await StatsService.getStats(projectId, modelName, field, ignoreQuery ? {} : this.buildQuery())
+                return data
+            } catch (err) {
+                this.catchError(err)
+            }
+        },
         async fetchItem(projectId: string, modelName: string, itemId: string) {
             try {
                 const { data } = await RecordService.getItem(projectId, itemId, modelName)
                 this.record = { ...data }
             } catch (e) {
-                let message: string
-                const axiosError = e as AxiosError
-
-                if (axiosError.response?.data) {
-                    message = (axiosError.response.data as { message: string }).message || axiosError.response.data as string
-                } else {
-                    message = axiosError.message
-                }
-                this.toast({ message: message, color: 'danger' })
+                this.catchError(e)
             }
         },
         async deleteItem(projectId: string, modelName: string, idToDelete: string) {
@@ -85,8 +103,7 @@ export const useRecordStore = defineStore('record', {
                 const { data } = await AuthService.deleteItem(projectId, idToDelete, modelName);
                 this.toast({ message: data, color: 'success', duration: 1500 });
             } catch (error) {
-                console.error(error);
-                this.toast({ message: 'Error deleting item', color: 'danger', duration: 1500 });
+                this.catchError(error)
             }
         },
         async downloadData(projectId: string, modelName: string, fields: string[], applyFilters: boolean) {
@@ -105,8 +122,7 @@ export const useRecordStore = defineStore('record', {
                 document.body.removeChild(link);
                 URL.revokeObjectURL(href);
             } catch (e) {
-                const axiosError = e as AxiosError
-                this.toast({ message: axiosError.message, color: 'danger' })
+                this.catchError(e)
             } finally {
                 this.isTSVLoading = false
                 this.showReportModal = false
@@ -117,6 +133,18 @@ export const useRecordStore = defineStore('record', {
         },
         resetPagination() {
             this.pagination = { ...initPagination }
+        },
+        catchError(error: any) {
+            console.error(error)
+            const axiosError = error as AxiosError<ErrorResponseData>
+            let message
+            if (axiosError.response && axiosError.response.data && axiosError.response.data.message) {
+                message = axiosError.response.data.message
+
+            } else {
+                message = axiosError.message
+            }
+            this.toast({ message: message, color: 'danger' })
         },
     }
 })

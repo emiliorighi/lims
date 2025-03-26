@@ -1,21 +1,12 @@
 <template>
-    <VaCard color="backgroundElement">
-        <VaCardContent>
-            <div class="row align-center justify-space-between">
-                <div class="flex">
-                    <h3 class="va-h6">
-                        {{ record.item_id }}
-                    </h3>
-                </div>
-                <div class="flex" v-if="!disabledActions">
-                    <RecordActions :record="record" :disabled-edit="disabledEdit" @delete="emits('delete', record)"
-                        @edit="emits('edit', record)" />
-                </div>
-            </div>
-        </VaCardContent>
-        <VaCardContent>
+    <VaModal v-model="recordStore.showRecordDetails" noDismiss hideDefaultActions close-button>
+        <template #header>
+            <h3 v-if="record" class="va-h3">
+                {{ record.record_id }}
+            </h3>
+        </template>
+        <div v-if="record" class="layout va-gutter-5 fluid">
             <div class="row">
-
                 <div class="flex lg6 md6 sm12 xs12">
                     <p> <strong>project id</strong></p>
                     <p>
@@ -30,9 +21,8 @@
                 </div>
                 <div v-if="record.reference_id" class="flex lg6 md6 sm12 xs12">
                     <p> <strong>{{ referenceModel }}</strong></p>
-                    <VaButton color="textPrimary" preset="secondary" icon-right="fa-up-right-from-square">
-                        {{ record.reference_id }}
-                    </VaButton>
+                    <p> {{ record.reference_id }}
+                    </p>
                 </div>
                 <div class="flex lg6 md6 sm12 xs12">
                     <p> <strong>created</strong></p>
@@ -47,25 +37,21 @@
                     </p>
                 </div>
             </div>
-        </VaCardContent>
-    </VaCard>
+        </div>
+    </VaModal>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
-import { ResearchRecord } from '../../data/types';
-import RecordActions from './RecordActions.vue';
+import { useRecordStore } from '../../../stores/record-store';
 
 const props = defineProps<{
-    record: ResearchRecord
-    disabledEdit: boolean,
-    disabledActions: boolean,
     referenceModel?: string
 }>()
-
-const emits = defineEmits(['delete', 'edit'])
+const recordStore = useRecordStore()
+const record = computed(() => recordStore.record)
 const staticFields = ['item_id', 'reference_id', 'project_id', 'model_name', 'created', '_id']
-const entries = computed(() => Object.entries(props.record).filter(([k, v]) => !staticFields.includes(k)))
+const entries = computed(() => Object.entries(record.value ?? {}).filter(([k, v]) => !staticFields.includes(k)))
 
-const formattedDate = computed(() => new Date(props.record.created.$date).toLocaleDateString("en-US"))
+const formattedDate = computed(() => record.value ? new Date(record.value.created.$date).toLocaleDateString("en-US") : null)
 
 </script>

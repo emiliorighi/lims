@@ -1,3 +1,4 @@
+import { VaDataTable } from 'vuestic-ui/web-components'
 import VaIcon from './components/va-icon'
 import iconsConfig from './icons-config/icons-config'
 

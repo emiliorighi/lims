@@ -1,6 +1,6 @@
 <template>
-  <component :is="chartComponent" ref="chart" class="va-chart" :chart-id="chartId" :chart-options="chartOptions"
-    :chart-data="data" />
+  <component :is="chartComponent" ref="chart" class="va-chart" :chart-id="chartId"
+    :chart-options="(chartOptions as any)" :chart-data="data" :is-date="isDate" />
 </template>
 
 <script setup lang="ts">
@@ -14,6 +14,7 @@ const props = defineProps<{
   options?: TChartOptions<'line' | 'bar' | 'bubble' | 'doughnut' | 'pie'>
   type: keyof typeof chartTypesMap
   chartId?: string
+  isDate?: boolean
 }>()
 
 const chart = ref()

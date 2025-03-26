@@ -26,14 +26,19 @@
             </VaInnerLoading>
         </div>
     </div>
+    <div class="row justify-end">
+        <div class="flex">
+            <VaButton @click="deleteRows" preset="secondary" color="danger" :disabled="selectedRows.length === 0">Delete
+                selected rows: {{ selectedRows.length }}</VaButton>
+        </div>
+    </div>
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
             <!-- <VaCard>
                 <VaCardContent> -->
-            <VaDataTable :items="attributes" :columns="['toggle', 'key', 'type', 'description', 'required', 'actions']">
+            <VaDataTable selectable v-model="selectedRows" :items="attributes"
+                :columns="['toggle', 'key', 'type', 'description', 'required']">
                 <template #header(toggle)>
-                </template>
-                <template #header(actions)>
                 </template>
                 <template #cell(toggle)="{ row, isExpanded }">
                     <VaButton :icon="isExpanded ? 'va-arrow-up' : 'va-arrow-down'" preset="secondary" class="w-full"
@@ -57,10 +62,6 @@
                             </VaChip>
                         </template>
                     </VaSelect>
-                </template>
-                <template #cell(actions)="{ rowIndex }">
-                    <VaIcon name="fa-trash" color="danger" @click="deleteAttribute(rowIndex)">
-                    </VaIcon>
                 </template>
                 <template #cell(required)="{ rowData }">
                     <VaCheckbox size="small" v-model="rowData.required"></VaCheckbox>
@@ -139,12 +140,26 @@ const isTsvLoading = ref(false)
 const attributes = ref<ResearchFilter[]>([])
 const emits = defineEmits(['update:modelAttributes'])
 
+const selectedRows = ref<Record<string, any>[]>([])
+
 onMounted(() => attributes.value = [...props.modelAttributes])
 
 
+function deleteRows() {
+    const keys = selectedRows.value.map(({ key }) => key)
+    attributes.value = [...attributes.value.filter(({ key }) => !keys.includes(key))]
+    selectedRows.value = []
+}
+
 // Watch for changes to the local attributes and emit updates.
 watch(attributes, (newValue) => {
-    emits('update:modelAttributes', newValue)
+    //filter out fromTSV key
+    const mappedValues = newValue.map((attr) => {
+        const { fromTSV, ...otherFields } = attr
+        return otherFields
+    })
+    
+    emits('update:modelAttributes', mappedValues)
 }, { deep: true })
 
 

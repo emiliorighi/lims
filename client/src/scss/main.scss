@@ -1,2 +1,8 @@
 @import 'vuestic-sass/index';
 @import 'icon-fonts/index';
+
+
+.va-data-table{
+    --va-data-table-thead-text-transform: inherit;
+    --va-data-table-thead-font-size: inherit
+}

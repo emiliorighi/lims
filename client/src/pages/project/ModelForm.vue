@@ -26,7 +26,6 @@
                             <VaCard>
                                 <VaCardContent>
                                     <ModelAttributes v-model:model-attributes="modelStore.modelForm.fields" />
-
                                 </VaCardContent>
                             </VaCard>
                         </div>

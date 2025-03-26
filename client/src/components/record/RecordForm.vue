@@ -24,7 +24,7 @@
                             <VaInput clearable style="width: 100%;" :label="field.key" v-else-if="field.type === 'date'"
                                 v-model="recordStore.recordForm[field.key]" :rules="[
                                     (v: any) => fieldRule(v, field.required, field.regex),
-                                    (v: string) => isValidDate(v)
+                                    (v: string) => isValidDate(v, field.required)
                                 ]" :messages="[field.description ?? '']" :placeholder="field.key">
                                 <template #appendInner>
                                     <VaIcon color="secondary" name="fa-calendar" />
@@ -154,7 +154,8 @@ function fieldRule(v: any, required: boolean, regex?: string) {
     return true
 }
 
-function isValidDate(date: string): string | boolean {
+function isValidDate(date: string, required: boolean): string | boolean {
+    if (!required && !date) return true //skip validation if field is empty and optional
     // Regular expression for basic MM/DD/YYYY format with valid month and day ranges
     const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d{2}$/;
 

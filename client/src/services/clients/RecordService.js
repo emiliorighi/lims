@@ -11,7 +11,7 @@ class RecordService {
         return base.get(`/projects/${projectId}/models/${model}/records/${itemId}`);
     }
     getTsv(projectId, model, params) {
-        return download.get(`/projects/${projectId}/${model}`, { params });
+        return download.get(`/projects/${projectId}/models/${model}/records`, { params });
     }
     getStats(projectId, model, field) {
         return base.get(`/projects/${projectId}/${model}s/stats/${field}`)

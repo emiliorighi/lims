@@ -19,7 +19,6 @@ def initialize_routes(api):
 
 	##APP STATS
 	api.add_resource(stats_controller.LookupApi, '/api/lookup')
-	api.add_resource(stats_controller.ModelStatsApi, '/api/<model>/stats/<field>')
 
 	##USERS
 	api.add_resource(users_controller.UsersApi, '/api/users', '/api/users/<name>')
@@ -38,6 +37,7 @@ def initialize_routes(api):
 	## PROJECT MODELS
 	api.add_resource(model_controller.ModelsApi, '/api/projects/<project_id>/models')
 	api.add_resource(model_controller.ModelApi, '/api/projects/<project_id>/models/<model_name>')
+	api.add_resource(stats_controller.ModelStatsApi, '/api/projects/<project_id>/models/<model_name>/stats/<field>')
 
 
 	api.add_resource(items_controller.ItemsByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records')

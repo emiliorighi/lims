@@ -4,12 +4,23 @@ export type ColorThemes = {
   [key: string]: string
 }
 
+export type InputType = 'text' | 'date' | 'number' | 'select'
+
+export type QueryFilter = {
+  key: string
+  option?: 'single' | 'range'
+  type: InputType
+  query: Record<string, any>
+}
+
 export type TLineChartData = ChartData<'line'>
 export type TBarChartData = ChartData<'bar'>
 export type TBubbleChartData = ChartData<'bubble'>
 export type TDoughnutChartData = ChartData<'doughnut'>
 export type TPieChartData = ChartData<'pie'>
-
+export interface ErrorResponseData {
+  message?: string; // Optional, because not all error responses may contain a message
+}
 export type TChartData = TLineChartData | TBarChartData | TBubbleChartData | TDoughnutChartData | TPieChartData
 
 export type FieldType = "input" | "select" | "range";
@@ -82,10 +93,7 @@ export type Input = {
   regex?: string
 }
 
-export type InputType = {
-  inputType: 'text' | 'number' | 'date'
-  regex?: string
-}
+
 
 export type Select = {
   multi: false

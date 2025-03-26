@@ -1,5 +1,10 @@
 <template>
-    <VaInput v-model="model" :placeholder="placeholder" :rules="rules" :label="label" />
+    <VaInput v-model="model" @input="emits('input')" :placeholder="placeholder" :rules="rules" :label="label"
+        :clearable="clearable">
+        <template #prependInner>
+            <VaIcon v-if="icon" :name="icon" />
+        </template>
+    </VaInput>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
@@ -9,10 +14,12 @@ const props = defineProps<{
     parentModel: string,
     label?: string,
     placeholder?: string,
+    clearable?: boolean,
+    icon?: string,
     rules?: any[]
 }>()
 
-const emits = defineEmits(['change'])
+const emits = defineEmits(['change', 'input'])
 
 
 const debouncedEmit = debounce((payload: any) => {
