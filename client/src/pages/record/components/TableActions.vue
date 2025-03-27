@@ -1,9 +1,18 @@
 <template>
     <div class="row justify-space-between align-center">
         <div class="flex">
-            <h2 class="va-h6">
-                Results {{ total }}
-            </h2>
+            <div class="row align-center">
+                <div class="flex">
+                    <h2 class="va-h6">
+                        Results
+                    </h2>
+                </div>
+                <div class="flex">
+                    <VaChip outline color="textPrimary">
+                        {{ total }}
+                    </VaChip>
+                </div>
+            </div>
         </div>
         <div class="flex">
             <div class="row">
@@ -14,21 +23,8 @@
                 <div class="flex">
                     <VaButton @click="recordStore.showChartModal = !recordStore.showChartModal" color="textPrimary"
                         preset="secondary" icon="fa-chart-simple" />
-
                 </div>
             </div>
-            <!-- <VaMenu>
-                <template #anchor>
-                    <VaButton color="textPrimary" preset="primary" icon-right="fa-caret-down">
-                        Actions</VaButton>
-                </template>
-<VaMenuItem @selected="" icon="fa-file-export">
-    Export TSV
-</VaMenuItem>
-<VaMenuItem icon="fa-chart-simple">
-    Generate Chart
-</VaMenuItem>
-</VaMenu> -->
         </div>
     </div>
 

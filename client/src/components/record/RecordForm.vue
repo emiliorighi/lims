@@ -24,7 +24,7 @@
                             <VaInput clearable style="width: 100%;" :label="field.key" v-else-if="field.type === 'date'"
                                 v-model="recordStore.recordForm[field.key]" :rules="[
                                     (v: any) => fieldRule(v, field.required, field.regex),
-                                    (v: string) => isValidDate(v, field.required)
+                                    (v: string) => isValidISODate(v, field.required)
                                 ]" :messages="[field.description ?? '']" :placeholder="field.key">
                                 <template #appendInner>
                                     <VaIcon color="secondary" name="fa-calendar" />
@@ -154,32 +154,21 @@ function fieldRule(v: any, required: boolean, regex?: string) {
     return true
 }
 
-function isValidDate(date: string, required: boolean): string | boolean {
-    if (!required && !date) return true //skip validation if field is empty and optional
-    // Regular expression for basic MM/DD/YYYY format with valid month and day ranges
-    const dateRegex = /^(0[1-9]|1[0-2])\/(0[1-9]|[12][0-9]|3[01])\/(19|20)\d{2}$/;
+function isValidISODate(input: string, required: boolean) {
+    if (!required && !input) return true //skip validation if field is empty and optional
 
-    console.log(date)
-    // Check if the format matches
-    if (!dateRegex.test(date)) {
-        return "Date should be of format MM/DD/YYYY and the year should be between 1900 and 2099";
-    }
+    // Strict ISO 8601 date format: YYYY-MM-DD
+    const isoRegex = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+    if (!isoRegex.test(input)) return "Date should be of ISO format YYYY-MM-DD";
 
-    // Extract values
-    const [month, day, year] = date.split('/').map(Number);
+    // Logical date check
+    const date = new Date(input);
+    const isValid = !isNaN(date.getTime());
 
-    // Define the number of days in each month (default for non-leap years)
-    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
-
-    // Check for leap year adjustment in February
-    const isLeapYear = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-    if (isLeapYear) {
-        daysInMonth[1] = 29; // February gets 29 days in a leap year
-    }
-    if (day <= daysInMonth[month - 1]) { return true }
-
-    // Validate the day against the correct max days for the month
-    return `${day} is not in ${month}`
+    // Check that it still matches after re-formatting (handles Feb 30, etc.)
+    const [year, month, day] = input.split('-');
+    const formatted = date.toISOString().substring(0, 10);
+    return formatted === `${year}-${month}-${day}` && isValid ? true : "Invalid date";
 }
 
 watch(() => fields.value, () => {

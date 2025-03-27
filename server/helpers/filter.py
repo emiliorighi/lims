@@ -2,22 +2,19 @@ import re
 from datetime import datetime
 
 def is_valid_date(date: str) -> bool:
-    # Regular expression for MM/DD/YYYY format with valid month and day ranges
-    date_regex = re.compile(r"^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/(19|20)\d{2}$")
+    # Regular expression for strict ISO format YYYY-MM-DD
+    date_regex = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
 
     # Check if the format matches
     if not date_regex.match(date):
         return False
 
-    # Extract values
-    month, day, year = map(int, date.split('/'))
-
     try:
-        # Validate the date using Python's built-in datetime module
-        datetime(year, month, day)
+        # Validate using datetime to catch invalid days (e.g., Feb 30)
+        datetime.strptime(date, "%Y-%m-%d")
         return True
     except ValueError:
-        return False  # Invalid day for the given month
+        return False
 
 def test_regex(pattern, value):
     regex = re.compile(pattern)

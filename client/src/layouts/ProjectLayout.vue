@@ -73,7 +73,7 @@
         </template>
         <template #content>
             <main>
-                <div class="layout va-gutter-5">
+                <div class="layout va-gutter-5 fluid">
                     <div class="row">
                         <div class="flex lg12 md12 sm12 xs12">
                             <router-view v-slot="{ Component }">

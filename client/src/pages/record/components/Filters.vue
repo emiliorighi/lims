@@ -1,41 +1,11 @@
 <template>
-    <VaCollapse v-model="recordStore.showFilters">
-        <template #header>
-            <span></span>
-        </template>
-        <template #body>
-            <VaCardContent>
-                <div class="row align-center justify-space-between">
-                    <div class="flex">
-                        <h2 class="va-h6">
-                            Filters
-                        </h2>
-                    </div>
-                </div>
-                <div class="row">
-                    <div v-for="field in model.fields" :key="field.key" class="flex lg4 md4 sm12 xs12">
-                        <VaButtonDropdown :label="field.key" color="textPrimary"
-                            :preset="activeFiltersKeys.includes(field.key) ? undefined : 'primary'">
-                        
-                        </VaButtonDropdown>
-                        <!-- <FilterField :key="field.key" @update-query="handleUpdate" :field="field"
-                            :project-id="projectId" :model-name="model.name" :query="recordStore.searchForm[field.key]">
-                        </FilterField> -->
-                    </div>
-                </div>
-                <div class="row justify-space-between">
-                    <div class="flex">
-                        <VaButton @click="handleReset" color="danger">Reset Filters</VaButton>
-                    </div>
-                    <div class="flex">
-                        <VaButton :disabled="activeFilters.length === 0" @click="submitFilters" color="textPrimary">
-                            Apply Filters</VaButton>
-                    </div>
-
-                </div>
-            </VaCardContent>
-        </template>
-    </VaCollapse>
+    <div class="row">
+        <div v-for="filter in queryFilters" class="flex lg12 md12 sm12 xs12">
+            <FilterField :key="filter.key" @update-query="handleUpdate" :field="filter" :project-id="projectId"
+                :model-name="model.name">
+            </FilterField>
+        </div>
+    </div>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
@@ -50,26 +20,20 @@ const props = defineProps<{
 
 const recordStore = useRecordStore()
 
-const activeFiltersKeys = computed(() => Object.keys(recordStore.searchForm))
-
-const activeFilters = computed(() => Object.values(recordStore.searchForm).map(value => Object.values(value)).flat().filter(v => v))
-
-function handleUpdate(payload: { key: string, query: Record<string, any> }) {
+async function handleUpdate(payload: { key: string, query: Record<string, any> }) {
     const { key, query } = payload
     recordStore.searchForm[key] = { ...query }
-}
-
-
-async function handleReset() {
-    recordStore.resetSearchForm()
     recordStore.resetPagination()
     await recordStore.fetchRecords(props.projectId, props.model.name)
 }
 
-async function submitFilters() {
-    recordStore.resetPagination()
-    await recordStore.fetchRecords(props.projectId, props.model.name)
-}
+const queryFilters = computed(() => props.model.fields.map(({ key, type }) => {
+    let payload = type === 'date' || type === 'number' ? { [key]: null } : { [`${key}__in`]: null }
+    if (recordStore.searchForm[key]) {
+        payload = recordStore.searchForm[key]
+    }
+    return { key, type, payload }
+}))
 
 
 </script>

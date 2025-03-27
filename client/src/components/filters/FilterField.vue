@@ -4,33 +4,29 @@
             <span class="va-text-bold">{{ field.key }}</span>
         </div>
         <div style="padding-top: 0;padding-bottom: 0;" v-if="rangeEnabled" class="flex">
-            <VaRadio v-model="filterOpt" text-by="text" value-by="value" track-by="value"
-                @update:model-value="handleMode" :options="options" />
+            <VaRadio v-model="filterOpt" text-by="text" value-by="value" track-by="value" :options="options" />
         </div>
     </div>
     <div v-if="field.type === 'select'" class="row">
         <div class="flex lg12 md12 sm12 xs12">
-            <RecordSelectFilter :field="field.key" :model-name="modelName" :project-id="projectId"
-                :value="query[`${field.key}__in`]" v-if="field.type === 'select'"
-                @value-change="(v: string) => handleValue(`${field.key}__in`, v)" />
+            <RecordSelectFilter :field="field.key" :model-name="modelName" :project-id="projectId" :value="queryValue"
+                v-if="field.type === 'select'" @value-change="(v: string) => queryValue = v" />
         </div>
     </div>
     <div class="row" v-else-if="field.type === 'text'">
         <div class="flex lg12 md12 sm12 xs12">
-            <VaInput clearable v-model="query[`${field.key}__in`]"
-                @update:model-value="(v: string) => handleValue(`${field.key}__in`, v)">
+            <VaInput clearable v-model="queryValue" @update:model-value="(v: string) => queryValue = v">
             </VaInput>
         </div>
     </div>
     <div class="row" v-else-if="field.type === 'number'">
         <div class="flex lg12 md12 sm12 xs12">
-            <VaInput v-if="filterOpt === 'single'" v-model="query[field.key]"
-                @update:model-value="(v: string) => handleValue(field.key, v)" />
+            <VaInput v-if="filterOpt === 'single'" v-model="queryValue"
+                @update:model-value="(v: string) => queryValue = v" />
             <div v-else>
                 <div v-if="field.type === 'number'" class="row justify-space-between align-center">
                     <div class="flex lg6 md6">
-                        <VaInput clearable v-model="query[`${field.key}__gte`]"
-                            @update:model-value="(v: string) => handleValue(`${field.key}__gte`, v)">
+                        <VaInput clearable v-model="rangeStart" @update:model-value="(v: string) => rangeStart = v">
                             <template #prepend>
                                 <VaButton preset="secondary" color="textPrimary">
                                     From
@@ -39,8 +35,7 @@
                         </VaInput>
                     </div>
                     <div class="flex lg6 md6">
-                        <VaInput clearable v-model="query[`${field.key}__lte`]"
-                            @update:model-value="(v: string) => handleValue(`${field.key}__lte`, v)">
+                        <VaInput clearable v-model="rangeEnd" @update:model-value="(v: string) => rangeEnd = v">
                             <template #prepend>
                                 <VaButton preset="secondary" color="textPrimary">
                                     To
@@ -64,93 +59,101 @@
 
 </template>
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
-import { ResearchFilter } from '../../data/types';
+import { computed, ref } from 'vue';
+import { InputType } from '../../data/types';
 import RecordSelectFilter from './RecordSelectFilter.vue';
-import { useRecordStore } from '../../stores/record-store';
 
 const props = defineProps<{
-    field: ResearchFilter
-    projectId: string,
-    modelName: string,
-    query: Record<string, any>
-}>()
+    field: { key: string; type: InputType; payload: Record<string, any> };
+    projectId: string;
+    modelName: string;
+}>();
 
-const emits = defineEmits(['updateQuery'])
+const emits = defineEmits(['updateQuery']);
+
+const filterOpt = ref<'single' | 'range'>('single');
+
+const singleDateModel = ref(null);
+const rangeDateModel = ref({ start: null, end: null });
 
 const options = [
-    {
-        text: 'Single Value',
-        value: 'single'
-    },
-    {
-        text: 'Range',
-        value: 'range'
-    },
-]
-
-const filterOpt = ref<'single' | 'range'>('single')
-const singleDateModel = ref(null)
-const rangeDateModel = ref({ start: null, end: null })
-
-// watch(() => filterOpt.value, () => {
-//     emits('updateQuery', {
-//         key: props.field.key, query: initQuery(undefined, filterOpt.value)
-//     })
-// })
+    { text: 'Single Value', value: 'single' },
+    { text: 'Range', value: 'range' }
+];
 
 
-
+// Computed access to payload
 const query = computed({
     get() {
-        console.log('getter')
-        return initQuery(props.query)
+        return props.field.payload;
     },
     set(query: Record<string, any>) {
-        emits('updateQuery', { key: props.field.key, query })
+        emits('updateQuery', { key: props.field.key, query });
     }
-})
+});
 
-const rangeEnabled = computed(() => props.field.type === 'date' || props.field.type === 'number')
+const rangeEnabled = computed(() => ['date', 'number'].includes(props.field.type));
 
-function initQuery(query: Record<string, any> | undefined) {
-    console.log('QUery is')
-    console.log(query)
-    if (query) {
-        //check if keys contains range
-        const hasRange = Object.keys(query).filter(k => k.includes('__lte') || k.includes('__gte')).length > 0
-        filterOpt.value = hasRange ? 'range' : 'single'
-        return query
+// Dynamic query key (non-range)
+const queryKey = computed(() => {
+    if (props.field.type === 'select' || props.field.type === 'text') {
+        return `${props.field.key}__in`;
     }
-    else {
-        // if (range === 'range') return Object.fromEntries([[`${props.field.key}__lte`, null], [`${props.field.key}__gte`, null]])
-        if (props.field.type === 'date' || props.field.type === 'number') return Object.fromEntries([[props.field.key, null]])
-        return Object.fromEntries([[`${props.field.key}__in`, null]])
+    if (props.field.type === 'number' && filterOpt.value === 'single') {
+        return props.field.key;
     }
-}
+    if (props.field.type === 'date' && filterOpt.value === 'single') {
+        return props.field.key;
+    }
+    return null;
+});
 
-function handleMode(v: 'single' | 'range') {
-    console.log('HERe')
-    console.log(v)
-}
-function handleValue(key: string, v: string | undefined) {
-    query.value = { ...query.value, ...Object.fromEntries([[key, v]]) }
-}
+const queryValue = computed({
+    get() {
+        return queryKey.value ? query.value[queryKey.value] : null;
+    },
+    set(v) {
+        if (queryKey.value) {
+            query.value = { ...query.value, [queryKey.value]: v };
+        }
+    }
+});
 
-function handleDate(date: Date) {
-    query.value = { [props.field.key]: date ? formatDate(date) : null }
-}
+// Range keys for number/date
+const gteKey = computed(() => `${props.field.key}__gte`);
+const lteKey = computed(() => `${props.field.key}__lte`);
 
-function handleRangeDate(payload: { start: Date, end: Date }) {
-    console.log(payload)
+const rangeStart = computed({
+    get: () => query.value[gteKey.value],
+    set: (v) => {
+        query.value = { ...query.value, [gteKey.value]: v };
+    }
+});
+
+const rangeEnd = computed({
+    get: () => query.value[lteKey.value],
+    set: (v) => {
+        query.value = { ...query.value, [lteKey.value]: v };
+    }
+});
+
+function handleDate(date: Date | null) {
     query.value = {
-        [`${props.field.key}__gte`]: payload.start ? formatDate(payload.start) : null,
-        [`${props.field.key}__lte`]: payload.end ? formatDate(payload.end) : null
-    }
-    console.log(query.value)
+        [props.field.key]: date ? formatDate(date) : null
+    };
 }
 
-function formatDate(date: Date) {
-    return date.toISOString().substring(0, 10)
+function handleRangeDate(payload: { start: Date | null; end: Date | null }) {
+    query.value = {
+        [gteKey.value]: payload.start ? formatDate(payload.start) : null,
+        [lteKey.value]: payload.end ? formatDate(payload.end) : null
+    };
+}
+
+function formatDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-based
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 </script>

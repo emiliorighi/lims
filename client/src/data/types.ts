@@ -34,6 +34,7 @@ export type ItemModel = {
   metadata: Record<string, any>
 }
 
+
 //PROJECT TO CREATE SCHEMA
 export type ProjectSchema = {
   project_id: string,

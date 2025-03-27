@@ -16,14 +16,6 @@
             </VaDataTable>
         </div>
     </div>
-    <VaDivider style="margin: 0;" />
-    <div class="row justify-center">
-        <div class="flex">
-            <VaPagination color="textPrimary" v-model="offset" @update:modelValue="handlePagination"
-                :page-size="recordStore.pagination.limit" :total="total" :visible-pages="3" buttons-preset="primary"
-                gapped />
-        </div>
-    </div>
 </template>
 <script setup lang="ts">
 import { computed } from 'vue';
@@ -41,7 +33,6 @@ const props = defineProps<{
 const globalStore = useGlobalStore()
 const recordStore = useRecordStore()
 const records = computed(() => recordStore.records)
-const total = computed(() => recordStore.total)
 
 const isAuthorized = computed(() => globalStore.user.role !== 'researcher')
 const canBeEdited = computed(() => props.model.id_format.length < props.model.fields.length)
@@ -53,18 +44,6 @@ const columns = computed(() => {
     if (isAuthorized.value) c.push({ key: 'actions', sortable: false, label: '' })
     return c
 })
-
-const offset = computed({
-    get() {
-        return recordStore.pagination.offset + 1
-    }, set(v: number) {
-        recordStore.pagination.offset = v - 1
-    }
-})
-
-async function handlePagination() {
-    await recordStore.fetchRecords(props.projectId, props.model.name)
-}
 
 async function showRelatedRecord(recordId: string | undefined) {
     if (!recordId || !props.model.reference_model) return
