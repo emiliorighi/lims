@@ -9,7 +9,7 @@ server {
     location / {
         root /usr/share/nginx/html;
         try_files $uri $uri/ /index.html;
-        client_max_body_size 1000M;
+        client_max_body_size 20000M;
 
     }
 
@@ -24,7 +24,7 @@ server {
 
         include uwsgi_params;
         uwsgi_pass ${API_HOST}:${API_PORT};
-        client_max_body_size 1000M;
+        client_max_body_size 20000M;
         uwsgi_read_timeout 600s;
     }
 }

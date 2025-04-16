@@ -1,47 +1,56 @@
 <template>
-    <VaLayout v-if="schema" :top="{ fixed: true, order: 2 }"
+    <VaLayout :top="{ fixed: true, order: 2 }"
         :left="{ fixed: true, absolute: breakpoints.smDown, order: 1, overlay: breakpoints.smDown && isSidebarVisible }">
         <template #top>
-            <VaNavbar>
+            <VaNavbar :color="isArchived ? 'warning' : undefined" shadowed>
                 <template #left>
                     <VaNavbarItem>
                         <VaButton preset="secondary" :icon="isSidebarVisible ? 'menu_open' : 'menu'"
                             @click="isSidebarVisible = !isSidebarVisible" />
                     </VaNavbarItem>
                     <VaNavbarItem>
-                        <span class="va-h6">
-                            {{ schema.name }} {{ schema.version }}
+                        <span class="va-h4">
+                            {{ projectId }} {{ isArchived ? '(archived)' : null }}
                         </span>
                     </VaNavbarItem>
                 </template>
                 <template #right>
-                    <VaButton icon="fa-plus" :to="{ name: 'modelForm' }" preset="primary" color="textPrimary">
-                        Model
-                    </VaButton>
-                    <VaButton :to="{ name: 'uploadData' }" color="textPrimary" preset="secondary" icon="fa-file-upload">
-                        Data
-                    </VaButton>
+                    <VaNavbarItem v-if="!isArchived">
+                        <VaButton preset="primary" :loading="isLoading" icon="fa-plus"
+                            @click="modelStore.showForm = !modelStore.showForm">
+                            Model
+                        </VaButton>
+                    </VaNavbarItem>
+                    <VaNavbarItem>
+                        <ProjectToYAML v-if="projectStore.schema" :file-name="projectId" color="textPrimary"
+                            preset="primary" :project="projectStore.schema" />
+                    </VaNavbarItem>
+                    <VaNavbarItem>
+                        <VaButton :color="archiveAction.color"
+                            @click="projectStore.showArchiveModal = !projectStore.showArchiveModal"
+                            :icon="archiveAction.icon">
+                            {{ archiveAction.label }}
+                        </VaButton>
+                    </VaNavbarItem>
                 </template>
             </VaNavbar>
-            <VaDivider style="margin: 0" />
         </template>
         <template #left>
-            <VaSidebar activeColor="textPrimary" v-model="isSidebarVisible">
-                <VaSidebarItem :active="route.name === 'projectSchema'"
-                    :to="{ name: 'projectSchema', params: { projectId } }">
+            <VaSidebar v-model="isSidebarVisible">
+                <VaSidebarItem :active="route.name === 'project'" :to="{ name: 'project', params: { projectId } }">
                     <VaSidebarItemContent>
-                        <VaIcon name="dashboard" />
+                        <VaIcon name="fa-book-open" />
                         <VaSidebarItemTitle>
-                            Project Dashboard
+                            Project Details
                         </VaSidebarItemTitle>
                     </VaSidebarItemContent>
                 </VaSidebarItem>
                 <VaAccordion>
                     <VaCollapse>
                         <template #header="{ value: isCollapsed }">
-                            <VaSidebarItem :active="route.name === 'projectModel'">
+                            <VaSidebarItem>
                                 <VaSidebarItemContent>
-                                    <VaIcon name="fa-note-sticky" />
+                                    <VaIcon name="fa-cube" />
                                     <VaSidebarItemTitle>Models</VaSidebarItemTitle>
                                     <VaSpacer />
                                     <VaIcon :name="isCollapsed ? 'va-arrow-up' : 'va-arrow-down'" />
@@ -49,12 +58,15 @@
                             </VaSidebarItem>
                         </template>
                         <template #body>
-                            <VaSidebarItem :active="isRouteActive(name)" v-for="{ name } in models" :key="name"
-                                :to="{ name: 'projectModel', params: { modelName: name } }">
+                            <VaSidebarItem :to="{ name: 'details', params: { modelName: name, projectId } }"
+                                :active="isRouteActive(name)" v-for="{ name, reference_model } in models" :key="name">
                                 <VaSidebarItemContent>
                                     <VaSidebarItemTitle class="va-text-capitalize">
                                         {{ name }}
                                     </VaSidebarItemTitle>
+                                    <VaChip color="backgroundElement" size="small" icon="fa-link"
+                                        v-if="reference_model">{{
+                                            reference_model }}</VaChip>
                                 </VaSidebarItemContent>
                             </VaSidebarItem>
                         </template>
@@ -76,48 +88,93 @@
                 <div class="layout va-gutter-5 fluid">
                     <div class="row">
                         <div class="flex lg12 md12 sm12 xs12">
-                            <router-view v-slot="{ Component }">
-
+                            <router-view v-if="projectStore.schema" v-slot="{ Component }">
                                 <Transition name="fade">
                                     <component :is="Component" />
                                 </Transition>
-
-
                             </router-view>
                         </div>
                     </div>
                 </div>
             </main>
+            <ArchiveProjectModal :archive="archiveAction.value" :project-id="projectId" />
+            <ModelFormModal :existing-models="modelNames" @submit="submitModel" />
         </template>
     </VaLayout>
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useBreakpoint, VaSidebar } from 'vuestic-ui'
-import { useSchemaStore } from '../stores/schema-store';
-import { useRoute } from 'vue-router';
-
-const breakpoints = useBreakpoint()
-const isSidebarVisible = ref(breakpoints.smUp)
+import { useBreakpoint, useToast, VaSidebar } from 'vuestic-ui'
+import { useRoute, useRouter } from 'vue-router';
+import { useProjectStore } from '../stores/project-store';
+import ModelFormModal from '../components/modals/ModelFormModal.vue';
+import { useModelStore } from '../stores/model-store';
+import { ResearchModel } from '../data/types';
+import AuthService from '../services/clients/AuthService';
+import { catchError } from '../composables/toastMessages';
+import ProjectToYAML from '../components/buttons/ProjectToYAML.vue';
+import ArchiveProjectModal from '../components/modals/ArchiveProjectModal.vue';
 
 const props = defineProps<{
     projectId: string
 }>()
 
 const route = useRoute()
+const router = useRouter()
+const { init } = useToast()
+const breakpoints = useBreakpoint()
+const projectStore = useProjectStore()
+const modelStore = useModelStore()
 
-const schemaStore = useSchemaStore()
+const isLoading = ref(false)
+const isSidebarVisible = ref(breakpoints.smUp)
 
-const schema = computed(() => schemaStore.schema)
-const models = computed(() => schema.value?.models ?? [])
+const models = computed(() => projectStore.models)
+const modelNames = computed(() => models.value.map(({ name }) => name))
+const isArchived = computed(() => projectStore.isArchived)
+const archiveAction = computed(() => isArchived.value ?
+    {
+        icon: 'fa-unlock',
+        label: 'Reactivate',
+        value: false,
+        color: 'success'
+    } :
+    {
+        icon: 'fa-lock',
+        label: 'Archive',
+        value: true,
+        color: 'warning'
+    })
 
 watch(() => props.projectId, async () => {
-    await schemaStore.getProjectSchema(props.projectId)
+    await projectStore.getProjectSchema(props.projectId)
+    await projectStore.getProjectStatus(props.projectId)
+    isSidebarVisible.value = true
 }, { immediate: true })
 
 function isRouteActive(name: string) {
     return route.params.modelName === name
 }
 
+async function submitModel(model: ResearchModel) {
+    let success = false
+    try {
+        isLoading.value = true
+        await AuthService.createModel(props.projectId, { ...model })
+        init({ color: 'success', message: `${model.name} created` })
+        success = true
+    } catch (error) {
+        success = false
+        catchError(error)
+    } finally {
+        isLoading.value = false
+        if (success) {
+            //fecth updated project
+            await projectStore.getProjectSchema(props.projectId)
+            router.push({ name: 'project', params: { projectId: props.projectId } })
+        }
+    }
+
+}
 
 </script>

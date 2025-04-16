@@ -28,13 +28,13 @@ auth.interceptors.request.use(
 
 class AuthService {
     check() {
-        return auth.get('/login')
+        return auth.get('/auth/login')
     }
     login(payload) {
-        return base.post('/login', payload)
+        return base.post('/auth/login', payload)
     }
     logout() {
-        return base.get('/logout')
+        return base.get('/auth/logout')
     }
     getUsers(params) {
         return base.get('/users', { params: params })
@@ -66,6 +66,9 @@ class AuthService {
     createModel(projectId, data) {
         return auth.post(`/projects/${projectId}/models`, data)
     }
+    deleteModel(projectId, modelName) {
+        return auth.delete(`/projects/${projectId}/models/${modelName}`)
+    }
     createItem(projectId, model, data) {
         return auth.post(`/projects/${projectId}/${model}s`, data)
     }
@@ -77,6 +80,18 @@ class AuthService {
     }
     uploadTSV(projectId, data) {
         return auth.post(`/projects/${projectId}/upload`, data)
+    }
+    uploadProtocol(projectId, model, data) {
+        return auth.post(`/projects/${projectId}/models/${model}/protocols`, data);
+    }
+    deleteProtocol(projectId, model, name) {
+        return auth.delete(`/projects/${projectId}/models/${model}/protocols/${name}`);
+    }
+    uploadLinks(projectId, model, data) {
+        return auth.post(`/projects/${projectId}/models/${model}/links`, data);
+    }
+    deleteLink(projectId, model, name, type) {
+        return auth.delete(`/projects/${projectId}/models/${model}/links/${type}/${name}`);
     }
 }
 

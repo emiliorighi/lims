@@ -24,9 +24,11 @@ export const useRecordStore = defineStore('record', {
             showChartModal: false,
             showDeleteConfirmation: false,
             showFilters: false,
+            showTSVImportModal: false,
             idToDelete: null as null | string,
             relatedRecordCount: 0,
             tableLoading: false,
+            recordStats: [] as [string, number][],
             isTSVLoading: false,
             idToUpdate: null as null | string,
             recordForm: {} as Record<string, any>,
@@ -106,8 +108,16 @@ export const useRecordStore = defineStore('record', {
                 this.catchError(error)
             }
         },
+        async getRecordStats(field: string, query: Record<string, any>) {
+            try {
+                const { data } = await StatsService.getRecordStats(field, query)
+                this.recordStats = Object.entries(data)
+            } catch (error) {
+                this.catchError(error)
+            }
+        },
         async downloadData(projectId: string, modelName: string, fields: string[], applyFilters: boolean) {
-            const downloadRequest = { format: "tsv", fields }
+            const downloadRequest = { format: "tsv", fields: fields.join(',') }
             try {
                 this.isTSVLoading = true
                 const requestData = applyFilters ? { ...this.searchForm, ...downloadRequest } : { ...downloadRequest }

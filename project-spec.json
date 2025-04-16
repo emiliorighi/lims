@@ -10,23 +10,30 @@
     "version": {
       "type": "string"
     },
-    "sample": {
-      "$ref": "#/definitions/model"
-    },
-    "experiment": {
-      "$ref": "#/definitions/model"
+    "models": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/model"
+      }
     }
   },
   "required": [
     "name",
-    "description",
-    "version",
-    "sample"
+    "version"
   ],
   "definitions": {
     "model": {
       "type": "object",
       "properties": {
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "reference_model": {
+          "type": "string"
+        },
         "fields": {
           "type": "array",
           "items": {
@@ -38,94 +45,17 @@
           "items": {
             "type": "string"
           }
-        },
-        "protocols": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "images": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
+        "name",
         "fields",
         "id_format"
       ]
     },
-    "input": {
-      "type": "object",
-      "properties": {
-        "input_type": {
-          "type": "string",
-          "enum": [
-            "text",
-            "number",
-            "date"
-          ]
-        },
-        "regex": {
-          "type": [
-            "string",
-            "null"
-          ],
-          "default": null
-        }
-      },
-      "required": [
-        "input_type"
-      ],
-      "additionalProperties": false
-    },
-    "select": {
-      "type": "object",
-      "properties": {
-        "multi": {
-          "type": "boolean"
-        },
-        "choices": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        }
-      },
-      "required": [
-        "multi",
-        "choices"
-      ],
-      "additionalProperties": false
-    },
-    "range": {
-      "type": "object",
-      "properties": {
-        "min": {
-          "type": "number"
-        },
-        "max": {
-          "type": "number"
-        },
-        "unit": {
-          "type": "string"
-        }
-      },
-      "required": [
-        "min",
-        "max",
-        "unit"
-      ],
-      "additionalProperties": false
-    },
     "filter": {
       "type": "object",
       "properties": {
-        "label": {
-          "type": "string"
-        },
         "description": {
           "type": "string"
         },
@@ -135,26 +65,50 @@
         "required": {
           "type": "boolean"
         },
-        "filter": {
-          "oneOf": [
-            {
-              "$ref": "#/definitions/input"
-            },
-            {
-              "$ref": "#/definitions/select"
-            },
-            {
-              "$ref": "#/definitions/range"
-            }
+        "multi": {
+          "type": "boolean"
+        },
+        "regex": {
+          "type": "string"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text",
+            "number",
+            "date",
+            "select"
           ]
         }
       },
-      "required": [
-        "filter",
-        "label",
-        "key",
-        "required"
-      ]
+      "if": {
+        "properties": {
+          "type": {
+            "const": "select"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "type",
+          "key",
+          "required",
+          "choices"
+        ]
+      },
+      "else": {
+        "required": [
+          "type",
+          "key",
+          "required"
+        ]
+      }
     }
   }
 }

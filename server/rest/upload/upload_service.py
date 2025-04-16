@@ -1,12 +1,12 @@
 from db.models import ResearchProject, ResearchModel,ResearchItem
 from werkzeug.exceptions import BadRequest, NotFound
 from mongoengine.errors import NotUniqueError
-from helpers import filter
+from helpers import filter, user as user_helper
 from helpers.tsv import generate_tsv_dict_reader
 import json
     
 def upload_tsv(project_id, tsv, data):
-
+    user = user_helper.get_current_user()
     project = get_project(project_id)
     if not tsv:
         raise BadRequest(description='file field is mandatory')
@@ -41,7 +41,7 @@ def upload_tsv(project_id, tsv, data):
 
     validate_fields(mapper.keys(), model)
 
-    return process_records(tsv, mapper, model, reference_fields, project_id, behaviour, header)
+    return process_records(tsv, mapper, model, reference_fields, project_id, behaviour, user.name, header)
 
 
 def create_model_id(id_fields, data):
@@ -56,7 +56,7 @@ def get_project(project_id):
     return project
 
 
-def process_records(tsv, map, model, reference_columns, project_id, behaviour, header=0):
+def process_records(tsv, map, model, reference_columns, project_id, behaviour, username,header=0):
     saved_items = []
     skipped_items = set()
     updated_items = set()
@@ -88,6 +88,7 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, h
             "project_id":project_id,
             "model_name":model_name,
             "reference_id":reference_id,
+            "created_by":username,
             "item_id":item_id,
             **item
         }

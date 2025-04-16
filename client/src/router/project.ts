@@ -1,19 +1,53 @@
 import { RouteRecordRaw } from 'vue-router';
 
 
-export const projects: Array<RouteRecordRaw> = [
+export const projectRoutes: Array<RouteRecordRaw> = [
+
   {
-    path: '/projects',
-    name: 'projects',
-    props: {
-      title: 'Projects'
-    },
-    component: () => import('../pages/project/Projects.vue')
+    name: 'project',
+    path: '',
+    props: true,
+    component: () => import('../pages/ProjectDetails.vue'),
   },
   {
-    path: '/projects/:projectId',
+    path: ':modelName',
     props: true,
-    name: 'project',
-    component: () => import('../pages/project/Project.vue'),
-  }
+    component: () => import('../layouts/ModelLayout.vue'),
+    children: [
+      {
+        path: '',
+        name: 'details',
+        props: true,
+        component: () => import('../pages/ModelDetails.vue'),
+      },
+      {
+        name: 'records',
+        path: 'records',
+        props: true,
+        component: () => import('../pages/Records.vue')
+      },
+      {
+        name: 'protocols',
+        path: 'protocols',
+        props: route => ({
+          ...route.params,
+          type: 'protocols'
+        }), component: () => import('../pages/Links.vue')
+      },
+      {
+        name: 'images',
+        path: 'images',
+        props: route => ({
+          ...route.params,
+          type: 'images'
+        }), component: () => import('../pages/Links.vue')
+      }
+    ]
+  },
+  {
+    name: 'modelForm',
+    path: 'model-form',
+    props: true,
+    component: () => import('../pages/ModelForm.vue')
+  },
 ]

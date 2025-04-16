@@ -5,7 +5,16 @@ export type ColorThemes = {
 }
 
 export type InputType = 'text' | 'date' | 'number' | 'select'
-
+export type ChartTypes = "line" | "bar" | "bubble" | "doughnut" | "pie" | "horizontal-bar"
+export type ModelKeys = 'projects' | 'models' | 'protocols' | 'records' | 'images'
+export type LinkType = 'images'|'protocols'|'analysis'
+export type ChartItem = {
+  type: ChartTypes
+  data: any
+  label: string
+  chartId: string
+  chartOptions: any
+}
 export type QueryFilter = {
   key: string
   option?: 'single' | 'range'
@@ -13,6 +22,11 @@ export type QueryFilter = {
   query: Record<string, any>
 }
 
+export type ProtocolForm = {
+  name: string,
+  description: string,
+  files: File[],
+}
 export type TLineChartData = ChartData<'line'>
 export type TBarChartData = ChartData<'bar'>
 export type TBubbleChartData = ChartData<'bubble'>
@@ -41,7 +55,7 @@ export type ProjectSchema = {
   name: string,
   version: string,
   description?: string,
-  models: ReseachModel[],
+  models: ResearchModel[],
   drafted?: boolean,
   archived?: boolean
 }
@@ -141,19 +155,26 @@ export interface ReseachProject {
   name: string,
   version: string,
   description?: string,
-  models: ReseachModel[]
+  models: ResearchModel[]
   drafted?: boolean,
   archived?: boolean
 }
 
-export type ReseachModel = {
+export type ResearchModel = {
   name: string,
   description: string,
   reference_model?: string,
-  protocols: { name: string, description?: string, file: any }[],
-  links: { name: string, link: string, description?: string }[]
+  project_id?: string,
   fields: ResearchFilter[],
   id_format: string[]
+
+}
+
+export type FileModelLink = {
+  name: string,
+  description?: string,
+  hash: string,
+  extension: string
 
 }
 
@@ -167,7 +188,8 @@ export type ResearchFilter = {
   required: boolean
   value?: string
   model?: ModelType
-  fromTSV?: boolean
+  fromTSV?: boolean,
+  tsvKey?: string
 }
 
 export type Filter = {
@@ -196,7 +218,6 @@ export type DashboardCard = {
   count: number | null
 }
 
-export type ChartTypes = "line" | "bar" | "doughnut" | "pie" | "horizontal-bar"
 export type VaChartItem = {
   type: ChartTypes
   data: Record<string, number>

@@ -1,6 +1,6 @@
 <template>
-    <VaSelect multiple @clear="fetchOptions" :loading="isLoading" @open="fetchOptions" clearable v-model="modelValue"
-        :options="optionsKeys">
+    <VaSelect background="backgroundSecondary" :label="field" multiple @clear="fetchOptions" :loading="isLoading" @open="fetchOptions" clearable
+        v-model="modelValue" :options="optionsKeys">
         <template #option="{ option, selectOption }">
             <div :class="['row option align-center justify-space-between', modelValue.includes(option as any) ? 'is-active' : '']"
                 @click="selectOption(option)">
@@ -15,7 +15,7 @@
             </div>
         </template>
         <template #content="{ value }">
-            <VaChip v-for="chip in value.slice(0, 3)" :key="chip" size="small" color="textPrimary">
+            <VaChip v-for="chip in value.slice(0, 3)" :key="chip" size="small" outline color="textPrimary">
                 {{ chip }}
             </VaChip>
         </template>

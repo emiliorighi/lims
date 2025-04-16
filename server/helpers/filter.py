@@ -2,25 +2,20 @@ import re
 from datetime import datetime
 
 def is_valid_date(date: str) -> bool:
-    # Regular expression for strict ISO format YYYY-MM-DD
-    date_regex = re.compile(r"^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$")
-
-    # Check if the format matches
-    if not date_regex.match(date):
-        return False
 
     try:
         # Validate using datetime to catch invalid days (e.g., Feb 30)
         datetime.strptime(date, "%Y-%m-%d")
         return True
-    except ValueError:
+    except ValueError as e:
+        print(e)
         return False
 
 def test_regex(pattern, value):
     regex = re.compile(pattern)
     if validate_number(value):
         return regex.fullmatch(str(value))
-    return regex.search( value)
+    return regex.search(value)
 
     
 def validate_number(number):
@@ -67,7 +62,7 @@ def evaluate_fields(fields, data):
 def evaluate_input(input_type, field, value):
     errors = []
     if input_type == 'date' and not is_valid_date(value):
-        errors.append(f"{field['key']} is not a valid date should be of format MM/DD/YYYY and year between 1900 and 2099")
+        errors.append(f"{field['key']} is not a valid date should be of ISO 8601 Format: YYYY-MM-DD")
     elif input_type == 'number' and not validate_number(value):
         errors.append(f"{field['key']} is not a valid number")
     return errors

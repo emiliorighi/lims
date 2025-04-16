@@ -10,6 +10,12 @@ class ResearchProjectService {
   getProject(id) {
     return base.get(`/projects/${id}`)
   }
+  archiveProject(id){
+    return base.patch(`/projects/${id}/archive`)
+  }
+  unarchiveProject(id){
+    return base.patch(`/projects/${id}/unarchive`)
+  }
   getProjectModels(projectId){
     return base.get(`/projects/${projectId}/models`)
   }

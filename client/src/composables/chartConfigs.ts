@@ -2,7 +2,7 @@ import { defineAsyncComponent } from 'vue';
 import { ChartTypes } from '../data/types';
 
 
-const colors = [
+export const colors = [
     '#2c82e0', '#ef476f', '#ffd166', '#06d6a0', '#8338ec', '#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff',
     '#c9cbcf', '#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#e67e22', '#1abc9c', '#9b59b6', '#34495e', '#95a5a6',
     '#16a085', '#27ae60', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#2c3e50', '#bdc3c7', '#7f8c8d', '#e74c3c',
@@ -20,12 +20,12 @@ export function useDateChart(data: Record<string, number>, label: string, color:
     const submissionDatesByMonth: Record<string, number> = Object.keys(data)
         .filter((key) => key.includes('-'))
         .reduce((acc: Record<string, number>, key: string) => {
-            const [year, month] = key.split('-');
+            const [year, month, _report] = key.split('-');
             const date = `${year}-${month}`;
             acc[date] = acc[date] ? acc[date] + data[key] : data[key];
             return acc;
         }, {});
-
+    console.log(submissionDatesByMonth)
     // Sort the dates
     const sortedDates = Object.keys(submissionDatesByMonth)
         .sort((a, b) => toDate(a).getTime() - toDate(b).getTime());
@@ -98,7 +98,7 @@ export function getChartOptions(type: ChartTypes) {
         }
     }
     let scales
-    if (type === 'pie') {
+    if (type === 'pie' || type == 'doughnut') {
         legend = {
             position: 'bottom',
             labels: {
@@ -137,10 +137,10 @@ export function getChartOptions(type: ChartTypes) {
 
 
 export const chartTypesMap = {
-  pie: defineAsyncComponent(() => import('../components/charts/PieChart.vue')),
-  doughnut: defineAsyncComponent(() => import('../components/charts/DoughnutChart.vue')),
-  bubble: defineAsyncComponent(() => import('../components/charts/BubbleChart.vue')),
-  line: defineAsyncComponent(() => import('../components/charts/LineChart.vue')),
-  bar: defineAsyncComponent(() => import('../components/charts/BarChart.vue')),
-  'horizontal-bar': defineAsyncComponent(() => import('../components/charts/HorizontalBarChart.vue')),
+    pie: defineAsyncComponent(() => import('../components/charts/PieChart.vue')),
+    doughnut: defineAsyncComponent(() => import('../components/charts/DoughnutChart.vue')),
+    bubble: defineAsyncComponent(() => import('../components/charts/BubbleChart.vue')),
+    line: defineAsyncComponent(() => import('../components/charts/LineChart.vue')),
+    bar: defineAsyncComponent(() => import('../components/charts/BarChart.vue')),
+    'horizontal-bar': defineAsyncComponent(() => import('../components/charts/HorizontalBarChart.vue')),
 }

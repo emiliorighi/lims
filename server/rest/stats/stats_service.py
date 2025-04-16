@@ -1,16 +1,45 @@
-from db.models import ResearchItem,ResearchModel,ResearchProject
+from db.models import ResearchItem,ResearchModel,ResearchProject,FileLink
 from helpers import data as data_helper
 from werkzeug.exceptions import BadRequest,NotFound
 from mongoengine.queryset.visitor import Q
 
+"""
+fetch records, models, protocols and projects counts
+"""
+MODELS_MAP = {
+    'projects':ResearchProject,
+    'models':ResearchModel,
+    'records':ResearchItem,
+    'links':FileLink,
+}
 
 def lookup_data():
   lookup_response = dict()
+  for k, v in MODELS_MAP.items():
 #   for k,v in MODEL_MAP.items():
-#       lookup_response[k] = v.objects.count()
+      lookup_response[k] = v.objects.count()
   return lookup_response
 
 NO_VALUE_KEY='No Entry'
+
+def get_link_stats(field, imm_dict):
+    query = {**imm_dict}
+    q_query = None
+
+    parsed_query, q_query = data_helper.create_query(query, q_query)
+    items = FileLink.objects(**parsed_query)
+    if q_query:
+        items = items.filter(q_query)
+    return launch_pipeline(field, items)
+
+def get_records_stats(field, imm_dict):
+    query = {**imm_dict}
+    q_query = None
+    parsed_query, q_query = data_helper.create_query(query, q_query)
+    items = ResearchItem.objects(**parsed_query)
+    if q_query:
+        items = items.filter(q_query)
+    return launch_pipeline(field, items)
 
 def get_stats(project_id, model_name, field, immutable_dict):
     # Check if the model exists in MODEL_LIST
@@ -29,11 +58,13 @@ def get_stats(project_id, model_name, field, immutable_dict):
     query = {'project_id':project_id, 'model_name':model_name, **query}  
 
     parsed_query, q_query = data_helper.create_query(query, q_query)
-    print(parsed_query)
     items = ResearchItem.objects(**parsed_query)
-    print(items.count())
     if q_query:
         items = items.filter(q_query)
+
+    return launch_pipeline(field, items)
+
+def launch_pipeline(field, items):
     try:
         pipeline = [
             {

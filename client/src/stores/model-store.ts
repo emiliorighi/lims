@@ -1,37 +1,47 @@
 import { defineStore } from 'pinia'
-import { Filter, ReseachModel, ResearchFilter } from '../data/types'
+import { Filter, ResearchModel, ResearchFilter } from '../data/types'
+import StatsService from '../services/clients/StatsService'
 
-const modelForm: ReseachModel = {
+const modelForm: ResearchModel = {
     name: '',
     description: '',
-    protocols: [],
-    links: [],
     fields: [],
-    id_format: []
+    id_format: [],
 }
 
 export const useModelStore = defineStore('model', {
     state: () => {
         return {
-            model: null as ReseachModel | null,
-            modelForm: {...modelForm},
-            records: [] as Record<string, any>[],
-            protocols: [] as Record<string, any>[],
+            currentModel: null as ResearchModel | null,
+            modelForm: { ...modelForm },
+            showForm: false,
+            showDeleteConfirmation: false,
             filters: [] as ResearchFilter[],
+            refModel: null as ResearchModel | null,
+            idFormat: [] as string[],
+            records: 0,
+            protocols: 0,
+            images: 0,
         }
     },
     actions: {
         resetModelForm() {
-            this.modelForm = {...modelForm}
+            this.modelForm = { ...modelForm }
         },
-        async fetchRecords(params: Record<string, any>) {
-            try {
-
-            } catch (error) {
-
-            } finally {
-
+        async getStats(projectId: string, modelName: string) {
+            const { data } = await StatsService.getModelStats(projectId, modelName)
+            this.records = data.records
+            this.protocols = data.protocols
+            this.images = data.images
+        },
+        setModel(models: ResearchModel[], modelName: string) {
+            const matchedModel = models.find(({ name }) => name === modelName)
+            if (matchedModel) {
+                this.currentModel = { ...matchedModel }
+                this.filters = [...this.currentModel.fields]
+                this.idFormat = [...this.currentModel.id_format]
             }
+            this.refModel = models.find(({ name }) => name === this.currentModel?.reference_model) ?? null
         }
 
     }

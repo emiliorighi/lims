@@ -1,78 +1,81 @@
 from .stats import stats_controller
-from .project_mapper import project_mapper_controller
 from .upload import upload_controller
 from .lookup import lookup_controller
 from .user import users_controller
-from .item import items_controller
-from .research_project import research_projects_controller
+from .record import records_controller
+from .project import projects_controller
 from .research_models import model_controller
+from .file import file_controller
+from .links import link_controller
 
 def initialize_routes(api):
+    api_prefix = '/api'
 
-	##ADMIN
-	api.add_resource(users_controller.LoginApi, '/api/login')
-	api.add_resource(users_controller.LogoutApi, '/api/logout')
+    ## AUTH
+    auth_routes = [
+        (users_controller.LoginApi, '/auth/login'),
+        (users_controller.LogoutApi, '/auth/logout'),
+    ]
 
-	##PROTOCOLS
-	# api.add_resource(protocol_controller.ProtocolsAPI, '/api/protocols')
-	# api.add_resource(protocol_controller.ProtocolAPI, '/api/protocols/<name>')
+    ## USERS
+    user_routes = [
+        (users_controller.UsersApi, '/users', '/users/<name>'),
+        (users_controller.UserProjectsApi, '/users/<name>/projects'),
+    ]
 
-	##APP STATS
-	api.add_resource(stats_controller.LookupApi, '/api/lookup')
+    ## GLOBAL STATS / LOOKUP
+    global_routes = [
+        (stats_controller.LookupApi, '/lookup'),
+        (file_controller.FileAPI, '/files/<hash>/download')
+    ]
 
-	##USERS
-	api.add_resource(users_controller.UsersApi, '/api/users', '/api/users/<name>')
-	api.add_resource(users_controller.UserProjectsApi, '/api/users/<name>/projects')
+    ## PROJECTS
+    project_routes = [
+        (projects_controller.ResearchProjectsApi, '/projects'),
+        (projects_controller.ResearchProjectApi, '/projects/<project_id>'),
+        (projects_controller.ArchiveResearchProjectApi, '/projects/<project_id>/archive'),
+        (projects_controller.UnarchiveResearchProjectApi, '/projects/<project_id>/unarchive'),
+        (projects_controller.ResearchProjectSchema, '/projects/<project_id>/schema'),
+        (lookup_controller.LookupProjectDataApi, '/projects/<project_id>/lookup'),
+        (upload_controller.TsvUploadApi, '/projects/<project_id>/upload'),
+    ]
 
-	###PROJECTS
-	api.add_resource(research_projects_controller.ResearchProjectsApi, '/api/projects')
-	api.add_resource(research_projects_controller.ResearchProjectApi, '/api/projects/<project_id>')
+    ## MODELS
+    model_routes = [
+        (model_controller.ModelsApi, '/models'),
+        (model_controller.ProjectModelsApi, '/projects/<project_id>/models'),
+        (model_controller.ProjectModelApi, '/projects/<project_id>/models/<model_name>'),
+        (lookup_controller.LookupModelDataApi, '/projects/<project_id>/models/<model_name>/lookup'),
+        (stats_controller.ModelStatsApi, '/projects/<project_id>/models/<model_name>/stats/<field>'),
+        (records_controller.ModelByProjectStatsApi, '/projects/<project_id>/<model>/stats/<field>'),
+    ]
 
-	##PROJECT SCHEMA
-	api.add_resource(research_projects_controller.ResearchProjectSchema, '/api/projects/<project_id>/schema')
-
-	## PROJECT STATS
-	api.add_resource(lookup_controller.LookupProjectDataApi, '/api/projects/<project_id>/lookup')
-
-	## PROJECT MODELS
-	api.add_resource(model_controller.ModelsApi, '/api/projects/<project_id>/models')
-	api.add_resource(model_controller.ModelApi, '/api/projects/<project_id>/models/<model_name>')
-	api.add_resource(stats_controller.ModelStatsApi, '/api/projects/<project_id>/models/<model_name>/stats/<field>')
-
-
-	api.add_resource(items_controller.ItemsByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records')
-	api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records/<record_id>')
-	api.add_resource(items_controller.RelatedItemsByProjectModelApi, '/api/projects/<project_id>/models/<model_name>/records/<record_id>/related_records')
-
-	##PROJECT LOOKUP RELATED DATA
-
-	##PROJECT RELATED PROTOCOLS
-	# api.add_resource(protocol_controller.ProtocolsAPI, '/api/projects/<project_id>/protocols')
-	# api.add_resource(protocol_controller.ProtocolAPI, '/api/projects/<project_id>/protocols/<name>')
-	# api.add_resource(protocol_controller.DownloadProtocolAPI, '/api/projects/<project_id>/protocols/<name>/download')
-
-	#PROJECT ENDPOINT UTILITIES
-	api.add_resource(project_mapper_controller.InferHeaderApi, '/api/projects/<project_id>/map_header')
-	api.add_resource(upload_controller.TsvUploadApi, '/api/projects/<project_id>/upload')
-
-	###ALL ITEMS ENDPOINT
-	api.add_resource(items_controller.ItemsApi, '/api/items')
-
-
-
-	# DO WE NEED THIS ENDPOINT?
-	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/protocols')
-
-	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/images')
-	# api.add_resource(items_controller.ItemByProjectModelApi, '/api/projects/<project_id>/<model>/<item_id>/images/<name>/download')
+    ## RECORDS
+    record_routes = [
+        (records_controller.ItemsApi, '/records'),
+        (stats_controller.RecordStatsApi, '/records/stats/<field>'),
+        (records_controller.ItemsByProjectModelApi, '/projects/<project_id>/models/<model_name>/records'),
+        (records_controller.ItemByProjectModelApi, '/projects/<project_id>/models/<model_name>/records/<record_id>'),
+        (records_controller.RelatedItemsByProjectModelApi, '/projects/<project_id>/models/<model_name>/records/<record_id>/related_records'),
+    ]
+    link_routes = [
+        (link_controller.LinksAPI, '/links'),
+        (stats_controller.LinkStatsApi, '/links/stats/<field>'),
+        (link_controller.ProjectModelLinksAPI, '/projects/<project_id>/models/<model_name>/links'),
+        (link_controller.ProjectModelLinkAPI, '/projects/<project_id>/models/<model_name>/links/<type>/<name>'),
+    ]
 
 
+    # Combine all route groups
+    all_routes = (
+        auth_routes + user_routes + global_routes +
+        project_routes + model_routes + record_routes +
+        link_routes
+    )
 
-	api.add_resource(items_controller.ModelByProjectStatsApi, '/api/projects/<project_id>/<model>/stats/<field>')
-
-	##SAVED CHARTS MANAGEMENT 
-	# api.add_resource(stats_controller.ModelStatsApi, '/api/charts', 'api/charts/<chart_id>')
-
+    # Register all routes with prefix
+    for resource, *paths in all_routes:
+        api.add_resource(resource, *(api_prefix + path for path in paths))
 
 
 

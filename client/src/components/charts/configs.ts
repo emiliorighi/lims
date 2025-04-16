@@ -20,7 +20,7 @@ export function useDateChart(data: Record<string, number>, label: string, color:
     const datasets = [
         {
             label: label,
-            backgroundColor: 'rgba(75,192,192,0.4)',
+            backgroundColor: 'rgba(7, 24, 24, 0.4)',
             data: sortedDates.map((date) => submissionDatesByMonth[date]),
             fill: true,
             pointRadius: 0,

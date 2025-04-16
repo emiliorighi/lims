@@ -1,4 +1,3 @@
-import { VaDataTable } from 'vuestic-ui/web-components'
 import VaIcon from './components/va-icon'
 import iconsConfig from './icons-config/icons-config'
 
@@ -22,21 +21,24 @@ export default {
       fixedLayout: true,
     },
     VaInput: {
-      color: 'textPrimary'
+      color: 'textPrimary',
     },
     VaDateInput: {
-      color: 'textPrimary'
+      color: 'textPrimary',
     },
     VaCounter: {
-      color: 'textPrimary'
+      color: 'textPrimary',
     },
     VaSelect: {
-      color: 'textPrimary'
+      color: 'textPrimary',
     },
     VaFileUpload: {
       color: 'textPrimary'
     },
     VaTextarea: {
+      color: 'textPrimary'
+    },
+    VaCheckbox:{
       color: 'textPrimary'
     }
   }

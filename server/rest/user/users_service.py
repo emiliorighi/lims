@@ -1,4 +1,4 @@
-from db.models import User,Project
+from db.models import User,ResearchProject
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from mongoengine.errors import NotUniqueError
@@ -27,7 +27,7 @@ def create_user(data):
     
     projects = data.get('projects',[])
 
-    existing_projects = Project.objects(project_id__in=projects).scalar('project_id')
+    existing_projects = ResearchProject.objects(project_id__in=projects).scalar('project_id')
     for project in projects:
         if project not in existing_projects:
             raise BadRequest(description=f"{project} not found")
@@ -49,7 +49,7 @@ def update_user(name, data):
         raise NotFound(description=f"{name} not found")
     
     projects = data.get('projects',[])
-    existing_projects = Project.objects(project_id__in=projects).scalar('project_id')
+    existing_projects = ResearchProject.objects(project_id__in=projects).scalar('project_id')
     for project in projects:
         if project not in existing_projects:
             raise BadRequest(description=f"{project} not found")
@@ -100,7 +100,7 @@ def get_related_projects(name, filter=None, offset=0,limit=20,sort_order=None):
     if filter:
         query &= Q(name__icontains=filter) | Q(name__iexact=filter)
 
-    projects = Project.objects(query).exclude('id', 'created')
+    projects = ResearchProject.objects(query).exclude('id', 'created')
     
     if sort_order:
         sort_column = "name"

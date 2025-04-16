@@ -23,6 +23,7 @@
     "@esbuild-plugins/node-modules-polyfill": "^0.1.4",
     "@fortawesome/fontawesome-free": "^6.1.1",
     "@gtm-support/vue-gtm": "^1.6.0",
+    "@types/amcharts": "^3.21.11",
     "axios": "^0.27.2",
     "buffer": "^6.0.3",
     "canvg": "^4.0.1",

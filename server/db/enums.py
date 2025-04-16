@@ -15,6 +15,11 @@ class Roles(Enum):
     PROJECTS_MANAGER = 'project_manager' ##CRUD PROJECT
     ADMIN = 'admin' ##CRUD USERS
 
+class LinkType(Enum):
+    IMAGES = 'images'
+    PROTOCOLS = 'protocols'
+    ANALYSIS = 'analysis'
+
 class SchemaModel(Enum):
     BIOSAMPLE = 'biosample'
     EXPERIMENT = 'experiment'

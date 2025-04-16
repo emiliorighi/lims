@@ -1,7 +1,7 @@
 <template>
     <VaModal v-model="gStore.showDeleteConfirmation" hide-default-actions>
         <template #header>
-            <Header :title="`Deleting ${idToDelete}?`" :icon="icon" />
+            <Header :title="`Deleting ${idToDelete}?`" />
         </template>
         <VaDivider />
         <div class="row align-center justify-space-between">
@@ -24,7 +24,6 @@ import { useGlobalStore } from '../../stores/global-store'
 const gStore = useGlobalStore()
 
 const props = defineProps<{
-    icon: string,
     idToDelete: string,
 }>()
 

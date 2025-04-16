@@ -8,6 +8,9 @@ def dump_json(response_dict):
     json_options.datetime_representation = DatetimeRepresentation.ISO8601
     return dumps(response_dict, indent=4, sort_keys=True, json_options=json_options)
 
+def project_model_query(project_id, model_name):
+    return dict(project_id=project_id,model_name=model_name)
+
 def generate_tsv(cursor, fields, batch_size=1000):
     """
     Generates a TSV string from a MongoDB cursor with the specified fields.
