@@ -54,7 +54,7 @@ export const useLinkStore = defineStore('link', {
         },
         async deleteLink(projectId: string, modelName: string, name: string, type: LinkType) {
             try {
-                const { data } = await AuthService.deleteLink(projectId, modelName, name);
+                const { data } = await LinkService.deleteLink(projectId, modelName, name, type);
                 success(data, 1500)
             } catch (error) {
                 catchError(error)

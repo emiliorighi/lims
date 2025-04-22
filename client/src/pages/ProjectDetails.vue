@@ -9,6 +9,76 @@
             </div>
         </div>
         <div class="row">
+            <div v-for="model in mappedModels" class="flex flex-grow">
+                <VaCard>
+                    <VaCardContent>
+                        <div class="row  align-center">
+                            <div class="flex">
+                                <div class="row align-center">
+                                    <div class="flex">
+                                        <VaIcon color="neutral" name="fa-cube" />
+                                    </div>
+                                    <div class="flex">
+                                        <h2 class="va-h6">{{ model.name }}</h2>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <VaChip color="backgroundElement" size="small" icon="fa-link" v-if="model.refModel">{{
+                                    model.refModel }}
+                                </VaChip>
+                            </div>
+                        </div>
+                    </VaCardContent>
+                    <VaCardContent>
+                        <div class="row align-center justify-space-between">
+                            <div class="flex">
+                                <div class="row align-end">
+                                    <div class="flex">
+                                        <p class="va-text-secondary">Records:</p>
+                                    </div>
+                                    <div class="flex">
+                                        <Counter :duration="1000" :target-value="model.counts" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex">
+                                <VaButton
+                                    :to="{ name: 'records', params: { modelName: model.name, projectId: projectId } }"
+                                    color="textPrimary" preset="secondary" icon="fa-arrow-up-right-from-square">View
+                                </VaButton>
+                            </div>
+                        </div>
+                    </VaCardContent>
+                </VaCard>
+            </div>
+        </div>
+        <div class="row row-equal">
+            <div v-for="chart in charts" class="flex lg6 md6 sm12 xs12">
+                <VaSkeleton variant="squared" v-if="projectStore.isLoading" />
+                <ChartCard :key="chart.chartId" :chart="chart"></ChartCard>
+            </div>
+            <div v-if="roots.length" class="flex lg6 md6 sm12 xs12">
+                <VaSkeleton variant="squared" v-if="projectStore.isLoading" />
+                <VaCard>
+                    <VaCardContent>
+                        <div class="row justify-space-between align-center">
+                            <div class="flex">
+                                <h2 class="va-h4">Models relationship</h2>
+                                <p class="va-text-secondary">
+                                    Relationship between models and records
+                                </p>
+                            </div>
+                        </div>
+                    </VaCardContent>
+                    <VaCardContent>
+                        <HierachyChart :roots="roots" />
+
+                    </VaCardContent>
+                </VaCard>
+            </div>
+        </div>
+        <!-- <div class="row">
             <div class="flex lg8 md6 sm12 xs12">
                 <ProjectDetailsCard v-if="projectStore.schema" :project="projectStore.schema" />
                 <VaSkeleton variant="squared" v-else />
@@ -32,7 +102,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 <script setup lang="ts">
@@ -44,7 +114,7 @@ import { getChartOptions, processChartData } from '../composables/chartConfigs';
 import { ChartTypes } from '../data/types';
 import ChartCard from '../components/cards/ChartCard.vue';
 import ProjectDetailsCard from '../components/cards/ProjectDetailsCard.vue';
-
+import Counter from '../components/ui/Counter.vue';
 const props = defineProps<{
     projectId: string
 }>()
@@ -53,15 +123,14 @@ const queryField = 'model_name'
 const globalStore = useGlobalStore()
 const projectStore = useProjectStore()
 
-const roots = computed(() => transformToTree(projectStore.mappedModels))
+const mappedModels = computed(() => projectStore.mappedModels)
+const roots = computed(() => transformToTree(mappedModels.value))
 const recordStats = computed(() => globalStore.recordStats)
-const protocolStats = computed(() => globalStore.protocolStats)
-const imagesStats = computed(() => globalStore.imageStats)
 const charts = computed(() => {
     const charts = []
-    if (protocolStats.value.length) charts.push(createChart(Object.fromEntries(protocolStats.value), queryField, 'number of protocols by model', 'doughnut'))
-    if (recordStats.value.length) charts.push(createChart(Object.fromEntries(recordStats.value), queryField, 'number of records by model', 'doughnut'))
-    if (imagesStats.value.length) charts.push(createChart(Object.fromEntries(imagesStats.value), queryField, 'number of images by model', 'doughnut'))
+    // if (protocolStats.value.length) charts.push(createChart(Object.fromEntries(protocolStats.value), queryField, 'number of protocols by model', 'doughnut'))
+    if (recordStats.value.length) charts.push(createChart(Object.fromEntries(recordStats.value), queryField, 'Records by model', 'doughnut', 'Number of records across the models'))
+    // if (imagesStats.value.length) charts.push(createChart(Object.fromEntries(imagesStats.value), queryField, 'number of images by model', 'doughnut'))
     return charts
 })
 
@@ -101,7 +170,7 @@ function transformToTree(models: { name: string, refModel: string | undefined, c
 
 
 
-function createChart(frequencies: Record<string, number>, fieldKey: string, label: string, type: ChartTypes) {
+function createChart(frequencies: Record<string, number>, fieldKey: string, label: string, type: ChartTypes, description?: string) {
 
     const data = processChartData(frequencies, fieldKey);
     const chartOptions = getChartOptions(type);
@@ -110,7 +179,8 @@ function createChart(frequencies: Record<string, number>, fieldKey: string, labe
         chartOptions,
         type: type,
         data,
-        label
+        label,
+        description
     }
 }
 

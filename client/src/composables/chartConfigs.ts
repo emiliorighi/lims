@@ -20,9 +20,8 @@ export function useDateChart(data: Record<string, number>, label: string, color:
     const submissionDatesByMonth: Record<string, number> = Object.keys(data)
         .filter((key) => key.includes('-'))
         .reduce((acc: Record<string, number>, key: string) => {
-            const [year, month, _report] = key.split('-');
-            const date = `${year}-${month}`;
-            acc[date] = acc[date] ? acc[date] + data[key] : data[key];
+            const dateOnly = key.split(" ")[0];
+            acc[dateOnly] = acc[dateOnly] ? acc[dateOnly] + data[key] : data[key];
             return acc;
         }, {});
     console.log(submissionDatesByMonth)

@@ -8,55 +8,22 @@
                     </VaInput>
                 </div>
                 <div class="flex">
-                    <VaButton icon="fa-file-upload" :disabled="isArchived" @click="linkStore.toggleModal">
+                    <VaButton color="textPrimary" icon="fa-file-upload" :disabled="isArchived"
+                        @click="linkStore.toggleModal">
                         Upload {{ type }}</VaButton>
                 </div>
             </div>
-            <div class="row row-equal">
-                <div v-for="link in linkStore.links" class="flex lg4 md4 sm12 xs12">
+            <div class="row row-equal justify-center">
+                <div v-for="link in linkStore.links" class="flex lg12 md12 sm12 xs12">
                     <LinkDetailsCard @show="handleShow" @delete="triggerDelete" :link="link" :key="link.name"
                         :type="type" />
                 </div>
-            </div>
-            <div class="row justify-center">
                 <div class="flex">
-                    <VaPagination v-model="offset" @update:modelValue="handlePagination"
+                    <VaPagination color="textPrimary" v-model="offset" @update:modelValue="handlePagination"
                         :page-size="linkStore.pagination.limit" :total="total" :visible-pages="3"
                         buttons-preset="primary" gapped />
                 </div>
             </div>
-            <!-- <VaCard>
-                <VaCardContent>
-                    <div class="row align-center justify-space-between">
-                        <div class="flex">
-                            <VaInput v-model="linkStore.filter" @update:model-value="debouncedSearch"
-                                placeholder="Search" clearable>
-                            </VaInput>
-                        </div>
-                        <div class="flex va-text-capitalize">
-                            <VaButton :disabled="isArchived" @click="linkStore.toggleModal">
-                                Upload {{ type }}</VaButton>
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <div class="row row-equal">
-                        <div v-for="link in linkStore.links" class="flex lg4 md4 sm12 xs12">
-                            <LinkDetailsCard @show="handleShow" @delete="triggerDelete" :link="link" :key="link.name"
-                                :type="type" />
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <div class="row justify-center">
-                        <div class="flex">
-                            <VaPagination v-model="offset" @update:modelValue="handlePagination"
-                                :page-size="linkStore.pagination.limit" :total="total" :visible-pages="3"
-                                buttons-preset="primary" gapped />
-                        </div>
-                    </div>
-                </VaCardContent>
-            </VaCard> -->
         </div>
     </div>
     <VaModal v-model="showDeleteConfirmation" hide-default-actions>

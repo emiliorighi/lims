@@ -37,7 +37,6 @@ def initialize_routes(api):
         (projects_controller.UnarchiveResearchProjectApi, '/projects/<project_id>/unarchive'),
         (projects_controller.ResearchProjectSchema, '/projects/<project_id>/schema'),
         (lookup_controller.LookupProjectDataApi, '/projects/<project_id>/lookup'),
-        (upload_controller.TsvUploadApi, '/projects/<project_id>/upload'),
     ]
 
     ## MODELS
@@ -55,6 +54,7 @@ def initialize_routes(api):
         (records_controller.ItemsApi, '/records'),
         (stats_controller.RecordStatsApi, '/records/stats/<field>'),
         (records_controller.ItemsByProjectModelApi, '/projects/<project_id>/models/<model_name>/records'),
+        (upload_controller.TsvUploadApi, '/projects/<project_id>/models/<model_name>/records/upload'),
         (records_controller.ItemByProjectModelApi, '/projects/<project_id>/models/<model_name>/records/<record_id>'),
         (records_controller.RelatedItemsByProjectModelApi, '/projects/<project_id>/models/<model_name>/records/<record_id>/related_records'),
     ]

@@ -1,41 +1,45 @@
 <template>
-    <VaModal @cancel="resetForm" hide-default-actions max-height="500px" fixed-layout v-model="userStore.showForm">
+    <VaModal hide-default-actions close-button v-model="userStore.showForm">
         <template #header>
-            <Header :title="userStore.user?.name ? `Update ${userStore.user.name}` : 'Create User'" />
+            <h3 class="va-h3">
+                {{ title }}
+            </h3>
         </template>
-        <VaDivider />
-        <VaInnerLoading :loading="userStore.isLoading">
+        <div class="layout va-gutter-5">
             <VaForm ref="userForm">
-                <div v-if="!isUpdate" class="row align-end">
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaInput label="Name" :rules="nameRules" placeholder="Type a name.."
-                            v-model="userStore.userForm.name" />
+                <div class="row align-end">
+                    <div v-if="!nameToUpdate" class="flex lg6 md6 sm12 xs12">
+                        <DebounceInput :loading="isInputLoading" @change="validateUsername"
+                            :parent-model="userStore.userForm.name" label="Name" placeholder="Type a name..."
+                            :rules="nameRules" />
                     </div>
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <div class="flex lg6 md6 sm12 xs12">
                         <VaInput placeholder="Type a password.." :rules="passwordRules"
                             v-model="userStore.userForm.password" label="Password" />
                     </div>
                 </div>
                 <div class="row align-end">
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
+                    <div class="flex lg6 md6 sm12 xs12">
                         <VaSelect v-model="userStore.userForm.role" :options="roles" label="Role">
                         </VaSelect>
                     </div>
-                    <div class="flex lg6 md6 sm12 xs12 p-6">
-                        <VaSelect :rules="projectManagerRules" :disabled="userStore.userForm.role === 'admin'" multiple
-                            @update:search="handleSearch" v-model="userStore.userForm.projects" :options="projects"
-                            placeholder="Search projects" clearable :loading="selectLoading" searchable
-                            highlight-matched-text searchPlaceholderText="Type to search"
+                    <div v-if="userStore.userForm.role !== 'admin'" class="flex lg6 md6 sm12 xs12">
+                        <VaSelect
+                            :rules="[(v: any) => userStore.userForm.projects.length > 0 || 'Select at least one project for the user']"
+                            multiple @update:search="handleSearch" v-model="userStore.userForm.projects"
+                            :options="projects" placeholder="Search projects" clearable :loading="selectLoading"
+                            searchable highlight-matched-text searchPlaceholderText="Type to search"
                             noOptionsText="No project found">
                         </VaSelect>
                     </div>
                 </div>
             </VaForm>
-        </VaInnerLoading>
+        </div>
+
         <template #footer>
             <div class="row justify-end">
                 <div class="flex">
-                    <VaButton @click="submit">Submit</VaButton>
+                    <VaButton :loading="isLoading" @click="submit">Submit</VaButton>
                 </div>
             </div>
         </template>
@@ -43,12 +47,12 @@
 </template>
 <script setup lang="ts">
 import { AxiosError } from 'axios';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref } from 'vue';
 import { useToast, useForm } from 'vuestic-ui/web-components';
 import { useUserStore } from '../../stores/user-store'
 import ProjectService from '../../services/clients/ProjectService'
 import AuthService from '../../services/clients/AuthService'
-import Header from './common/Header.vue'
+import DebounceInput from '../inputs/DebounceInput.vue';
 
 const roles = ['admin', 'project_manager']
 
@@ -56,55 +60,50 @@ const { init } = useToast()
 const userStore = useUserStore()
 const { validate } = useForm('userForm')
 
+const nameToUpdate = computed(() => userStore.nameToUpdate)
+const title = computed(() => userStore.nameToUpdate ? `Updating ${nameToUpdate.value}` : 'User form')
 const projects = ref<string[]>([])
 const selectLoading = ref(false)
 const nameAlreadyExists = ref(false)
+const isLoading = ref(false)
+const isInputLoading = ref(false)
 // Computed Properties
 const nameRules = computed(() => {
-    return [(v: string) => v.length > 0 || 'Name is mandatory',
-    !nameAlreadyExists.value || `User name already exists`]
+    return [(v: string) => v.length > 0 || 'Name is mandatory', (v: string) =>
+        !nameAlreadyExists.value || `User name already exists`]
 })
 
 const passwordRules = computed(() => {
     return [(v: string) => v.length > 0 || 'Password is mandatory']
 })
 
-const projectManagerRules = computed(() => {
-    return [(userStore.userForm.role === 'project_manager'
-        && userStore.userForm.projects.length) || 'Select at least one project for the user']
-})
-const isUpdate = computed(() => {
-    return !!userStore.user
+onMounted(() => {
+    if (nameToUpdate.value) projects.value = [...userStore.userForm.projects]
 })
 
-// Watchers
-watch(() => (userStore.userForm.name), async (v) => {
-    if (isUpdate.value) return
-    if (!v) return
-    await getUser(v)
-})
-// Methods
-
-async function getUser(name: string) {
+async function validateUsername(name: string) {
+    userStore.userForm.name = name
     try {
-        const { data } = await AuthService.getUser(name);
-        if (data) {
-            init({ message: `User with ${name} already exists`, color: 'danger' });
-            nameAlreadyExists.value = true
-        }
+        isInputLoading.value = true
+        const { data } = await AuthService.getUser(name)
+        nameAlreadyExists.value = true
     } catch (error) {
-        if (error instanceof AxiosError && error.response?.status === 404) {
+        const axiosError = error as AxiosError;
+        if (axiosError.response && axiosError.response.status === 404) {
+            // set project id
             nameAlreadyExists.value = false
         } else {
-            handleError(error, 'Error fetching item');
-            nameAlreadyExists.value = true
+            console.error('Error fetching:', error);
+            init({ message: 'Error fetching: ' + error, color: 'danger' })
         }
+    } finally {
+        isInputLoading.value = false
     }
 }
+
 async function handleSearch(query: string) {
     if (query.length < 2) return;
     selectLoading.value = true;
-
     try {
         const { data } = await ProjectService.getProjects({ filter: query });
         projects.value = [...data.data.map((i: any) => i.project_id)]
@@ -121,15 +120,15 @@ async function submit() {
 
     const { projects, role } = userStore.userForm
     try {
-        const response = isUpdate.value
-            ? await AuthService.updateUser(userStore.user?.name, { projects, role })
+        const response = nameToUpdate.value
+            ? await AuthService.updateUser(nameToUpdate.value, { projects, role })
             : await AuthService.createUser(userStore.userForm);
 
         userStore.toast({
             color: 'success',
             message: Array.isArray(response.data)
                 ? response.data.join(', ')
-                : ` ${isUpdate.value ? `${userStore.user?.name} edited` : 'created'} successfully`,
+                : ` ${nameToUpdate.value ? `${nameToUpdate.value} edited` : 'created'} successfully`,
         });
 
         resetForm();
@@ -149,7 +148,7 @@ function handleError(error: any, defaultMessage: string) {
 async function resetForm() {
     userStore.resetUserForm();
     userStore.resetSearchForm()
-    userStore.user = undefined
     userStore.showForm = false;
+    await userStore.fetchUsers({})
 }
 </script>

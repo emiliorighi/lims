@@ -19,17 +19,6 @@
                                 {{ recordStore.showFilters ? 'Hide' : 'Show' }} Filters</VaButton>
                         </div>
                         <div class="flex">
-                            <VaButton :disabled="isArchived"
-                                @click="recordStore.showRecordForm = !recordStore.showRecordForm" icon="fa-plus">New
-                                record</VaButton>
-                        </div>
-                        <div class="flex">
-                            <VaButton :disabled="isArchived"
-                                @click="recordStore.showTSVImportModal = !recordStore.showTSVImportModal"
-                                preset="primary" icon="fa-file-import">Import TSV</VaButton>
-                        </div>
-                        <div class="flex">
-
                             <VaMenu>
                                 <template #anchor>
                                     <VaButton color="textPrimary" preset="primary">Export</VaButton>
@@ -42,15 +31,25 @@
                                     icon="fa-chart-simple">
                                     Export chart
                                 </VaMenuItem>
-
                             </VaMenu>
                         </div>
+                        <div class="flex">
+                            <VaButton color="textPrimary" :disabled="isArchived"
+                                @click="recordStore.showRecordForm = !recordStore.showRecordForm" icon="fa-plus">New
+                                record</VaButton>
+                        </div>
+                        <div class="flex">
+                            <VaButton color="textPrimary" :disabled="isArchived"
+                                @click="recordStore.showTSVImportModal = !recordStore.showTSVImportModal"
+                                preset="primary" icon="fa-file-import">Import TSV</VaButton>
+                        </div>
+
                     </div>
                 </div>
             </div>
             <div v-if="recordStore.showFilters" class="row">
                 <div class="flex lg12 md12 sm12 xs12">
-                    <VaCard color="backgroundElement">
+                    <VaCard>
                         <VaCardContent>
                             <div class="row">
                                 <div class="flex">
@@ -74,10 +73,10 @@
             </div>
             <div v-if="activeFilters.length" class="row">
                 <div class="flex lg12 md12 sm12 xs12">
-                    <VaCard color="backgroundElement">
+                    <VaCard>
                         <VaCardContent>
                             <div class="row justify-space-between">
-                                <div class="flex va-text-bold">
+                                <div class="flex">
                                     <h3 class="va-h6">Active Filters</h3>
                                 </div>
                                 <div class="flex">
@@ -89,8 +88,8 @@
                         <VaCardContent>
                             <div class="row">
                                 <div v-for="[k, v] in activeFilters" class="flex">
-                                    <VaChip outline @click="handleUpdate({ key: k as string, query: {} })"
-                                        icon="fa-close">
+                                    <VaChip color="textPrimary" outline
+                                        @click="handleUpdate({ key: k as string, query: {} })" icon="fa-close">
                                         {{ k }}: {{ v }}
                                     </VaChip>
                                 </div>
@@ -103,7 +102,6 @@
                 <div class="flex lg12 md12 sm12 xs12">
                     <VaCard>
                         <VaCardContent>
-
                             <div class="row">
                                 <div class="flex lg12 md12 sm12 xs12">
                                     <VaDataTable :loading="recordStore.tableLoading" :items="records" :columns="columns"
@@ -115,23 +113,25 @@
                                                 {{ rowData.reference_id }}
                                             </VaButton>
                                         </template>
+                                        <template #header(actions)></template>
                                         <template #cell(actions)="{ rowData }">
                                             <div style="min-width: 300px;" class="row">
                                                 <div class="flex">
-                                                    <VaChip size="small" @click="viewItem(rowData)"
-                                                        color="backgroundElement">
-                                                        View
-                                                    </VaChip>
+                                                    <VaButton size="small" @click="viewItem(rowData)"
+                                                        color="textPrimary" preset="primary" icon="fa-eye">
+                                                    </VaButton>
                                                 </div>
                                                 <div v-if="canBeEdited && !isArchived" class="flex">
-                                                    <VaChip size="small" @click="editItem(rowData)">Edit
-                                                    </VaChip>
+                                                    <VaButton icon="fa-edit" preset="primary" size="small"
+                                                        @click="editItem(rowData)">
+                                                    </VaButton>
                                                 </div>
                                                 <div class="flex">
-                                                    <VaChip v-if="!isArchived" size="small"
-                                                        @click="triggerDeleteItem(rowData)" color="danger">
-                                                        Delete
-                                                    </VaChip>
+                                                    <VaButton v-if="!isArchived" size="small" icon="fa-trash"
+                                                        @click="triggerDeleteItem(rowData)" preset="primary"
+                                                        color="danger">
+
+                                                    </VaButton>
                                                 </div>
                                             </div>
                                         </template>
@@ -143,191 +143,15 @@
                                     Results: {{ total }}
                                 </div>
                                 <div class="flex">
-                                    <div class="row justify-center">
-                                        <div class="flex">
-                                            <VaPagination v-model="offset" @update:modelValue="handlePagination"
-                                                :page-size="recordStore.pagination.limit" :total="total"
-                                                :visible-pages="3" buttons-preset="primary" gapped />
-                                        </div>
-                                    </div>
+                                    <VaPagination color="textPrimary" v-model="offset"
+                                        @update:modelValue="handlePagination" :page-size="recordStore.pagination.limit"
+                                        :total="total" :visible-pages="3" buttons-preset="primary" gapped />
                                 </div>
                             </div>
                         </VaCardContent>
-
                     </VaCard>
                 </div>
             </div>
-            <!-- <VaCard>
-                <VaCardContent>
-                    <div class="row align-center justify-space-between">
-                        <div class="flex">
-                            <VaInput v-model="filter" @update:model-value="debouncedSearch"
-                                placeholder="Search by indentifier" clearable>
-                                <template #appendInner>
-                                    <VaButton style="margin-left: 3px;" preset="secondary" icon="help"
-                                        @click="showQueryInfo = !showQueryInfo" />
-                                </template>
-                            </VaInput>
-                        </div>
-                        <div class="flex">
-                            <div class="row">
-                                <div v-if="hasFilters" class="flex">
-                                    <VaButton icon="fa-filter" color="textPrimary"
-                                        @click="recordStore.showFilters = !recordStore.showFilters" preset="primary">
-                                        {{ recordStore.showFilters ? 'Hide' : 'Show' }} Filters</VaButton>
-                                </div>
-                                <div class="flex">
-                                    <VaMenu>
-                                        <template #anchor>
-                                            <VaButton>Actions</VaButton>
-                                        </template>
-                                        <VaMenuItem :disabled="isArchived"
-                                            @selected="recordStore.showRecordForm = !recordStore.showRecordForm"
-                                            icon="fa-plus">
-                                            Create new record
-                                        </VaMenuItem>
-                                        <VaMenuItem :disabled="isArchived"
-                                            @selected="recordStore.showTSVImportModal = !recordStore.showTSVImportModal"
-                                            icon="fa-file-import">
-                                            Import records from TSV
-                                        </VaMenuItem>
-                                        <VaMenuItem
-                                            @selected="recordStore.showReportModal = !recordStore.showReportModal"
-                                            icon="fa-file-export">
-                                            Export records in TSV
-                                        </VaMenuItem>
-                                        <VaMenuItem @selected="recordStore.showChartModal = !recordStore.showChartModal"
-                                            icon="fa-chart-simple">
-                                            Export chart
-                                        </VaMenuItem>
-
-                                    </VaMenu>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row justify-space-between align-center">
-                        <div class="flex">
-                            Results: {{ total }}
-                        </div>
-                        <div class="flex">
-                            <div class="row justify-center">
-                                <div class="flex">
-                                    <VaPagination v-model="offset" @update:modelValue="handlePagination"
-                                        :page-size="recordStore.pagination.limit" :total="total" :visible-pages="3"
-                                        buttons-preset="primary" gapped />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent v-if="recordStore.showFilters">
-                    <div class="row">
-                        <div class="flex lg12 md12 sm12 xs12">
-                            <VaCard color="backgroundElement">
-                                <VaCardContent>
-                                    <div class="row">
-                                        <div class="flex">
-                                            <h3 class="va-h6">Filters</h3>
-                                        </div>
-                                    </div>
-                                    <div class="row align-center">
-                                        <div v-for="filter in queryFilters" class="flex lg3 md4 sm6 xs6">
-                                            <FilterField :key="filter.key" @update-query="handleUpdate" :field="filter"
-                                                :project-id="projectId" :model-name="modelName">
-                                            </FilterField>
-                                        </div>
-                                        <div v-if="refModelFilter" class="flex lg3 md4 xs6 sm6">
-                                            <FilterField :key="refModelFilter.key" @update-query="handleUpdate"
-                                                :field="refModelFilter" :project-id="projectId"
-                                                :model-name="modelName" />
-                                        </div>
-                                    </div>
-                                </VaCardContent>
-                            </VaCard>
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent v-if="activeFilters.length">
-                    <div class="row">
-                        <div class="flex lg12 md12 sm12 xs12">
-                            <VaCard color="backgroundElement">
-                                <VaCardContent>
-                                    <div class="row justify-space-between">
-                                        <div class="flex va-text-bold">
-                                            <h3 class="va-h6">Active Filters</h3>
-                                        </div>
-                                        <div class="flex">
-                                            <VaButton color="textPrimary" preset="primary" @click="handleReset">Clear
-                                                Filters</VaButton>
-                                        </div>
-                                    </div>
-                                </VaCardContent>
-                                <VaCardContent>
-                                    <div class="row">
-                                        <div v-for="[k, v] in activeFilters" class="flex">
-                                            <VaChip outline @click="handleUpdate({ key: k as string, query: {} })"
-                                                icon="fa-close">
-                                                {{ k }}: {{ v }}
-                                            </VaChip>
-                                        </div>
-                                    </div>
-                                </VaCardContent>
-                            </VaCard>
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <div class="row">
-                        <div class="flex lg12 md12 sm12 xs12">
-                            <VaDataTable :loading="recordStore.tableLoading" :items="records" :columns="columns"
-                                @columnSorted="sortItems" hoverable>
-                                <template #cell(reference_id)="{ rowData }">
-                                    <VaButton @click="showRelatedRecord(rowData.reference_id)" color="textPrimary"
-                                        preset="secondary" icon-right="fa-up-right-from-square">
-                                        {{ rowData.reference_id }}
-                                    </VaButton>
-                                </template>
-                                <template #cell(actions)="{ rowData }">
-                                    <div style="min-width: 300px;" class="row">
-                                        <div class="flex">
-                                            <VaChip size="small" @click="viewItem(rowData)" color="backgroundElement">
-                                                View
-                                            </VaChip>
-                                        </div>
-                                        <div v-if="canBeEdited && !isArchived" class="flex">
-                                            <VaChip size="small" @click="editItem(rowData)">Edit
-                                            </VaChip>
-                                        </div>
-                                        <div class="flex">
-                                            <VaChip v-if="!isArchived" size="small" @click="triggerDeleteItem(rowData)"
-                                                color="danger">
-                                                Delete
-                                            </VaChip>
-                                        </div>
-                                    </div>
-                                </template>
-                            </VaDataTable>
-                        </div>
-                    </div>
-                </VaCardContent>
-                <VaCardContent>
-                    <div class="row justify-space-between align-center">
-                        <div class="flex">
-                            Results: {{ total }}
-                        </div>
-                        <div class="flex">
-                            <div class="row justify-center">
-                                <div class="flex">
-                                    <VaPagination v-model="offset" @update:modelValue="handlePagination"
-                                        :page-size="recordStore.pagination.limit" :total="total" :visible-pages="3"
-                                        buttons-preset="primary" gapped />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </VaCardContent>
-            </VaCard> -->
         </div>
     </div>
     <VaModal v-model="showQueryInfo">
@@ -350,10 +174,10 @@
         </div>
     </VaModal>
     <RecordDeleteModal :project-id="projectId" :model-name="modelName" />
-    <ChartCreationModal :project-id="projectId" :modelName="modelName" :fields="fields" />
+    <ChartCreationModal :project-id="projectId" :modelName="modelName" :fields="fields" :has-reference="!!refModel" />
     <RecordDetailsModal :reference-model="refModel" />
     <RecordFormModal :model-name="modelName" :project-id="projectId" />
-    <TSVExportModal :model-name="modelName" :project-id="projectId" />
+    <TSVExportModal :model-name="modelName" :project-id="projectId" :has-reference="!!refModel" />
     <TSVImportModal :model-name="modelName" :project-id="projectId" :ref-model="refModel" />
 
 </template>
@@ -362,7 +186,7 @@ import { computed, ref, watch } from 'vue';
 import { useRecordStore } from '../stores/record-store';
 import TSVExportModal from '../components/modals/TSVExportModal.vue';
 import RecordFormModal from '../components//modals/RecordFormModal.vue';
-import { InputType, ResearchFilter, ResearchRecord } from '../data/types';
+import { InputType, ResearchRecord } from '../data/types';
 import RecordDetailsModal from '../components/modals/RecordDetailsModal.vue';
 import RecordDeleteModal from '../components/modals/RecordDeleteModal.vue';
 import ChartCreationModal from '../components/modals/ChartCreationModal.vue';
@@ -419,7 +243,7 @@ const records = computed(() => recordStore.records)
 const isAuthorized = computed(() => globalStore.user.role !== 'researcher')
 const fields = computed(() => modelStore.filters)
 const idFormat = computed(() => modelStore.idFormat)
-const canBeEdited = computed(() => idFormat.value.length <= fields.value.length)
+const canBeEdited = computed(() => idFormat.value.length < fields.value.length)
 const mappedKeys = computed(() => fields.value.map(({ key }) => ({ key, sortable: true, label: key })))
 const refModel = computed(() => modelStore.refModel)
 const hasFilters = computed(() => fields.value && idFormat.value && fields.value.length > idFormat.value.length)

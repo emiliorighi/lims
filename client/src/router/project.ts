@@ -43,11 +43,5 @@ export const projectRoutes: Array<RouteRecordRaw> = [
         }), component: () => import('../pages/Links.vue')
       }
     ]
-  },
-  {
-    name: 'modelForm',
-    path: 'model-form',
-    props: true,
-    component: () => import('../pages/ModelForm.vue')
-  },
+  }
 ]

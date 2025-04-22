@@ -17,10 +17,20 @@
                         </VaFileUpload>
                     </div>
                 </div>
-                <div v-for="file in linkStore.files" :key="file.file.name" class="row">
+                <div v-for="file, idx in linkStore.files" :key="file.file.name" class="row">
                     <div class="flex lg12 md12 sm12 xs12">
                         <VaCard outlined>
-                            <VaCardTitle>{{ file.file.name }}</VaCardTitle>
+                            <VaCardTitle>
+                                <div class="row justify-space-between">
+                                    <div class="flex">
+                                        {{ file.file.name }}
+                                    </div>
+                                    <div class="flex">
+                                        <VaButton color="danger" size="small" icon="fa-trash" @click="handleDelete(idx)"></VaButton>
+                                    </div>
+                                </div>
+
+                            </VaCardTitle>
                             <VaImage v-if="type === 'images'" style="height: 200px;" :src="file.preview" />
                             <VaCardContent>
                                 <div class="row">
@@ -56,11 +66,11 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useForm, useToast } from 'vuestic-ui/web-components';
-import AuthService from '../../services/clients/AuthService';
 import { useModelStore } from '../../stores/model-store';
 import { useLinkStore } from '../../stores/link-store';
 import { LinkType } from '../../data/types';
 import { success, catchError } from '../../composables/toastMessages';
+import LinkService from '../../services/clients/LinkService';
 
 const props = defineProps<{
     projectId: string
@@ -99,7 +109,7 @@ async function handleSubmit() {
     let successfull = false
     try {
         loading.value = true
-        const { data } = await AuthService.uploadLinks(props.projectId, props.modelName, payload)
+        const { data } = await LinkService.uploadLinks(props.projectId, props.modelName, payload)
         success('Links correctly created', 1500)
         successfull = true
     } catch (err) {
@@ -116,6 +126,10 @@ async function handleSubmit() {
         }
 
     }
+}
+
+function handleDelete(idx: number) {
+    linkStore.files = [...linkStore.files.slice(0, idx), ...linkStore.files.slice(idx + 1)]
 }
 
 function handleUpdate(files: File[]) {

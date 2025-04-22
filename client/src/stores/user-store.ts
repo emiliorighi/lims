@@ -16,11 +16,13 @@ const initForm: User = {
     role: 'project_manager',
     projects: []
 }
+
 export const useUserStore = defineStore('user', {
     state: () => {
         return {
             user: undefined as User | undefined,
             users: [] as User[],
+            nameToUpdate: null as string | null,
             showForm: false,
             userForm: { ...initForm },
             showDetails: false,
@@ -32,11 +34,10 @@ export const useUserStore = defineStore('user', {
     },
 
     actions: {
-
-        async fetchUsers() {
+        async fetchUsers(query: Record<string, any>) {
             this.isLoading = true
             try {
-                const { data } = await AuthService.getUsers(this.searchForm);
+                const { data } = await AuthService.getUsers(query);
                 this.users = [...data.data];
                 this.total = data.total;
             } catch (e) {

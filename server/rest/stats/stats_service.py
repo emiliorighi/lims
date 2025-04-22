@@ -10,7 +10,6 @@ MODELS_MAP = {
     'projects':ResearchProject,
     'models':ResearchModel,
     'records':ResearchItem,
-    'links':FileLink,
 }
 
 def lookup_data():
@@ -18,6 +17,8 @@ def lookup_data():
   for k, v in MODELS_MAP.items():
 #   for k,v in MODEL_MAP.items():
       lookup_response[k] = v.objects.count()
+  for type in ['images', 'protocols']:
+      lookup_response[type] = FileLink.objects(type=type).count()
   return lookup_response
 
 NO_VALUE_KEY='No Entry'

@@ -14,6 +14,11 @@ def validate_yaml(data):
 
 def validate_model(model):
     errors = []
+    ## check if field is using id 
+    for field in model.get('fields'):
+        key_to_test = field.get('key').lower()
+        if 'id' == key_to_test:
+            errors.append(f"{key_to_test} cannot be used as it is a reserved key")
     for id_field in model.get('id_format'):
         if not any(id_field == f['key'] for f in model['fields']):
             errors.append(f"{id_field} not found")

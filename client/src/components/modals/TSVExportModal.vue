@@ -38,12 +38,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useRecordStore } from '../../stores/record-store';
-import { ResearchModel } from '../../data/types';
 import { useModelStore } from '../../stores/model-store';
 
 const props = defineProps<{
     projectId: string,
-    modelName: string
+    modelName: string,
+    hasReference?: boolean
 }>()
 
 const recordStore = useRecordStore()
@@ -52,7 +52,12 @@ const downloadFields = ref<string[]>([])
 const applyFilters = ref(true)
 const selectAllColumns = ref(false)
 
-const options = computed(() => modelStore.filters.map(({ key }) => key) ?? [])
+const options = computed(() => {
+    const filters = modelStore.filters.map(({ key }) => key)
+    if (props.hasReference) filters.push('reference_id')
+    return filters
+}
+)
 
 watch(() => selectAllColumns.value, () => {
     if (selectAllColumns.value) downloadFields.value = [...options.value]

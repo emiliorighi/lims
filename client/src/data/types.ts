@@ -7,13 +7,14 @@ export type ColorThemes = {
 export type InputType = 'text' | 'date' | 'number' | 'select'
 export type ChartTypes = "line" | "bar" | "bubble" | "doughnut" | "pie" | "horizontal-bar"
 export type ModelKeys = 'projects' | 'models' | 'protocols' | 'records' | 'images'
-export type LinkType = 'images'|'protocols'|'analysis'
+export type LinkType = 'images' | 'protocols' | 'analysis'
 export type ChartItem = {
   type: ChartTypes
   data: any
   label: string
   chartId: string
   chartOptions: any
+  description?: string
 }
 export type QueryFilter = {
   key: string
@@ -174,6 +175,10 @@ export type FileModelLink = {
   name: string,
   description?: string,
   hash: string,
+  created?: {
+    $date: Date
+  },
+  created_by?: string
   extension: string
 
 }

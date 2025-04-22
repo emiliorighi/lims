@@ -9,24 +9,36 @@
                             @click="isSidebarVisible = !isSidebarVisible" />
                     </VaNavbarItem>
                     <VaNavbarItem>
-                        <span class="va-h4">
-                            {{ projectId }} {{ isArchived ? '(archived)' : null }}
-                        </span>
+                        <div class="row align-end">
+                            <div class="flex">
+                                <span class="va-h4">
+                                    {{ projectStore.schema?.name }}
+                                </span>
+                            </div>
+                            <div class="flex">
+                                <span class="va-text-secondary">
+                                    {{ projectStore.schema?.version }}
+                                </span>
+                                <span v-if="isArchived" class="va-text-secondary">
+                                    (archived)
+                                </span>
+                            </div>
+                        </div>
                     </VaNavbarItem>
                 </template>
                 <template #right>
                     <VaNavbarItem v-if="!isArchived">
-                        <VaButton preset="primary" :loading="isLoading" icon="fa-plus"
+                        <VaButton color="textPrimary" preset="secondary" :loading="isLoading" icon="fa-plus"
                             @click="modelStore.showForm = !modelStore.showForm">
                             Model
                         </VaButton>
                     </VaNavbarItem>
+                    <!-- <VaNavbarItem>
+                        <ProjectToYAML v-if="projectStore.schema" preset="secondary" :file-name="projectId"
+                            color="textPrimary" :project="projectStore.schema" />
+                    </VaNavbarItem> -->
                     <VaNavbarItem>
-                        <ProjectToYAML v-if="projectStore.schema" :file-name="projectId" color="textPrimary"
-                            preset="primary" :project="projectStore.schema" />
-                    </VaNavbarItem>
-                    <VaNavbarItem>
-                        <VaButton :color="archiveAction.color"
+                        <VaButton color="textPrimary" preset="secondary"
                             @click="projectStore.showArchiveModal = !projectStore.showArchiveModal"
                             :icon="archiveAction.icon">
                             {{ archiveAction.label }}
@@ -137,13 +149,11 @@ const archiveAction = computed(() => isArchived.value ?
         icon: 'fa-unlock',
         label: 'Reactivate',
         value: false,
-        color: 'success'
     } :
     {
         icon: 'fa-lock',
         label: 'Archive',
         value: true,
-        color: 'warning'
     })
 
 watch(() => props.projectId, async () => {

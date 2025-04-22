@@ -99,14 +99,12 @@ import { readTsvHeader } from '../../composables/tsvUtils'
 import { useForm, useToast, VaCounter, VaInnerLoading, VaInput } from 'vuestic-ui';
 import AuthService from '../../services/clients/AuthService';
 import { AxiosError } from 'axios';
-import { useRouter } from 'vue-router';
 import { ResearchModel } from '../../data/types';
 import { useRecordStore } from '../../stores/record-store';
 import { useModelStore } from '../../stores/model-store';
 
 const { init } = useToast()
 const { validate } = useForm('uploadForm')
-const router = useRouter()
 const props = defineProps<{
     projectId: string
     modelName: string,
@@ -117,7 +115,6 @@ const recordStore = useRecordStore()
 const modelStore = useModelStore()
 const isLoading = ref(false)
 const tsv = ref<undefined | File>()
-const selectedModel = ref(null)
 const header = ref(0)
 const behaviour = ref('SKIP')
 const referencModelFields = ref<string[]>([])
@@ -152,7 +149,7 @@ async function submit() {
     let success = false
     try {
         isLoading.value = true
-        const { data } = await AuthService.uploadTSV(props.projectId, formData)
+        const { data } = await AuthService.uploadTSV(props.projectId, props.modelName, formData)
         init({ color: 'success', message: data })
         success = true
     } catch (error) {

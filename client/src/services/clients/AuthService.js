@@ -78,8 +78,8 @@ class AuthService {
     deleteItem(projectId, itemId, model) {
         return auth.delete(`/projects/${projectId}/models/${model}/${itemId}`)
     }
-    uploadTSV(projectId, data) {
-        return auth.post(`/projects/${projectId}/upload`, data)
+    uploadTSV(projectId,modelName, data) {
+        return auth.post(`/projects/${projectId}/models/${modelName}/records/upload`, data)
     }
     uploadProtocol(projectId, model, data) {
         return auth.post(`/projects/${projectId}/models/${model}/protocols`, data);

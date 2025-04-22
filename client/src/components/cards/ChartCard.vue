@@ -1,11 +1,20 @@
 <template>
     <VaCard>
-        <VaCardActions align="between">
-            
-            <h2 class="va-h6">{{ chart.label }}</h2>
-            <VaButton size="small" color="textPrimary" preset="primary"
-                @click="downloadCanvasAsPNG(chart.chartId, `${chart.chartId}.png`)">Download</VaButton>
-        </VaCardActions>
+        <VaCardContent>
+            <div class="row justify-space-between align-center">
+                <div class="flex">
+                    <h2 class="va-h4">{{ chart.label }}</h2>
+                    <p v-if="chart.description" class="va-text-secondary">
+                        {{ chart.description }}
+                    </p>
+                </div>
+                <div class="flex">
+                    <VaButton color="textPrimary" preset="primary"
+                        @click="downloadCanvasAsPNG(chart.chartId, `${chart.chartId}.png`)">
+                        Download</VaButton>
+                </div>
+            </div>
+        </VaCardContent>
         <VaCardContent style="height: 400px;">
             <component :is="chartComponent" ref="chart" class="va-chart" :chart-id="chart.chartId"
                 :chart-options="chart.chartOptions" :chart-data="chart.data" />

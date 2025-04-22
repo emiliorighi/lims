@@ -44,4 +44,8 @@ body {
     height: 100%;
   }
 }
+
+.flex-grow {
+  flex-grow: 1;
+}
 </style>

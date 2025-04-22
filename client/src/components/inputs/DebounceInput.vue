@@ -1,6 +1,6 @@
 <template>
-    <VaInput v-model="model" @input="emits('input')" :placeholder="placeholder" :rules="rules" :label="label"
-        :clearable="clearable">
+    <VaInput :loading="loading" v-model="model" @input="emits('input')" :placeholder="placeholder" :rules="rules"
+        :label="label" :clearable="clearable">
         <template #prependInner>
             <VaIcon v-if="icon" :name="icon" />
         </template>
@@ -16,6 +16,7 @@ const props = defineProps<{
     placeholder?: string,
     clearable?: boolean,
     icon?: string,
+    loading?: boolean
     rules?: any[]
 }>()
 
@@ -24,7 +25,7 @@ const emits = defineEmits(['change', 'input'])
 
 const debouncedEmit = debounce((payload: any) => {
     emits('change', payload);
-}, 200);
+}, 350);
 
 
 

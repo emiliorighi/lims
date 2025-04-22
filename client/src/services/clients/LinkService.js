@@ -1,6 +1,6 @@
 import http from "../../http";
 
-const { base, download } = http;
+const { base, download, submission } = http;
 
 class LinkService {
 
@@ -10,11 +10,14 @@ class LinkService {
     getProjectModelLinks(projectId, modelName, params) {
         return base.get(`/projects/${projectId}/models/${modelName}/links`, { params });
     }
-    uploadLinks(projectId, model, data){
-        return base.post(`/projects/${projectId}/models/${model}/links`, data);
-    }
     downloadLinks(hash){
         return download.get(`/files/${hash}/download`)
+    }
+    uploadLinks(projectId, model, data) {
+        return submission.post(`/projects/${projectId}/models/${model}/links`, data);
+    }
+    deleteLink(projectId, model, name, type) {
+        return submission.delete(`/projects/${projectId}/models/${model}/links/${type}/${name}`);
     }
 }
 

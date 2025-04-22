@@ -35,7 +35,7 @@ def get_project_schema(project_id):
     project = ResearchProject.objects(project_id=project_id).exclude('id','created').first()
     if not project:
         raise NotFound(description=f"Project: {project_id} not found!")
-    models = ResearchModel.objects(project_id=project_id).only('name','description','id_format','reference_model','fields').as_pymongo()
+    models = ResearchModel.objects(project_id=project_id).exclude('id','created','created_by').as_pymongo()
     return dict(
         name=project.name,
         version=project.version,
@@ -83,7 +83,7 @@ def create_project(data, format):
 
     project_to_save.save()
 
-    user.modify(projects__push=project_id)
+    user.modify(push__projects=project_id)
     return f"Project {project_to_save.project_id} correctly saved"
 
 def convert_id_fields_to_required(data):

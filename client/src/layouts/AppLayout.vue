@@ -20,7 +20,7 @@
             </VaButton>
           </VaNavbarItem>
           <VaNavbarItem>
-            <VaButtonDropdown preset="primary" left-icon icon="fa-user" stick-to-edges :label="globalStore.user.name">
+            <VaButtonDropdown preset="secondary" color="textPrimary" left-icon icon="fa-user" stick-to-edges :label="globalStore.user.name">
               <div class="layout va-gutter-3 fluid">
                 <div class="row align-center">
                   <div class="flex">
@@ -112,7 +112,7 @@ const route = useRoute()
 const router = useRouter()
 
 const adminMenu = [
-  { icon: "fa-plus", title: "Project Form", name: 'project-form' },
+  { icon: "fa-edit", title: "Project Form", name: 'project-form' },
   { icon: "fa-users", title: "Users", name: 'users' },
 ]
 

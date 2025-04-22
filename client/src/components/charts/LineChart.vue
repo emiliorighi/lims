@@ -16,7 +16,7 @@
     CategoryScale,
     Filler,
   } from 'chart.js'
-  import { TLineChartData } from '../../../data/types'
+  import { TLineChartData } from '../../data/types'
   import ChartDataLabels from 'chartjs-plugin-datalabels';
 
   ChartJS.register(Title, Tooltip, Legend, LineElement, LinearScale, PointElement, CategoryScale, Filler,ChartDataLabels)

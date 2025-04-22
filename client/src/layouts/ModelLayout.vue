@@ -9,9 +9,9 @@
             </div>
             <div class="flex">
                 <div class="row">
-                    <div class="flex">
+                    <!-- <div class="flex">
                         <VaButton :disabled="isArchived" preset="primary" icon="fa-edit"></VaButton>
-                    </div>
+                    </div> -->
                     <div class="flex">
                         <VaButton @click="modelStore.showDeleteConfirmation = !modelStore.showDeleteConfirmation"
                             :disabled="isArchived" color="danger" preset="primary" icon="fa-trash"></VaButton>
@@ -19,14 +19,29 @@
                 </div>
             </div>
         </div>
-        <VaTabs color="textPrimary" v-model="viewValue">
+        <div class="row">
+            <div class="flex">
+                <VaButtonGroup>
+                    <VaButton class="va-text-capitalize" :preset="viewValue === opt.value ? undefined : 'primary'"
+                        @click="viewValue = opt.value" color="textPrimary" v-for="opt in options" :key="opt.value">
+                        {{ opt.value }}
+                        <template v-if="opt.count !== undefined" #append>
+                            <VaChip style="margin-left: 3px;" size="small" color="backgroundElement">
+                                {{ opt.count }}
+                            </VaChip>
+                        </template>
+                    </VaButton>
+                </VaButtonGroup>
+            </div>
+        </div>
+        <!-- <VaTabs color="textPrimary" v-model="viewValue">
             <template #tabs>
                 <VaTab v-for="opt in options" :key="opt.value" :name="opt.value" :icon="opt.icon">
                     {{ opt.label }}
                 </VaTab>
             </template>
         </VaTabs>
-        <VaDivider style="margin-top: 0;" />
+        <VaDivider style="margin-top: 0;" /> -->
         <router-view></router-view>
         <ModelDeleteModal :project-id="projectId" :model-name="modelName" />
     </div>
@@ -39,7 +54,7 @@ import { useRoute, useRouter } from 'vue-router';
 import ModelDeleteModal from '../components/modals/ModelDeleteModal.vue';
 
 type ViewType = 'details' | 'records' | 'links' | 'protocols' | 'images'
-type Opt = { label: string, value: ViewType, icon: string }
+type Opt = { value: ViewType, count?: number }
 
 const props = defineProps<{
     projectId: string,
@@ -74,11 +89,10 @@ watch(() => props.modelName, async () => {
 
 const options = computed(() => {
     const opts: Opt[] = []
-    opts.push({ icon: 'fa-book-open', label: 'Details', value: 'details' })
-    opts.push({ icon: 'fa-file-lines', label: `Records (${totalRecords.value})`, value: 'records' })
-    opts.push({ icon: 'fa-scroll', label: `Protocols (${totalProtocols.value})`, value: 'protocols' })
-    opts.push({ icon: 'fa-image', label: `Images (${totalImages.value})`, value: 'images' })
-
+    opts.push({ value: 'details' })
+    opts.push({ count: totalRecords.value, value: 'records' })
+    opts.push({ count: totalProtocols.value, value: 'protocols' })
+    opts.push({ count: totalImages.value, value: 'images' })
     return opts
 })
 

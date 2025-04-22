@@ -33,7 +33,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import { ChartItem, ChartTypes, InputType, ResearchFilter, ResearchModel } from '../../data/types'
+import { ChartItem, ChartTypes, InputType, ResearchFilter } from '../../data/types'
 import { useRecordStore } from '../../stores/record-store';
 import { useDateChart, processChartData, getChartOptions } from '../../composables/chartConfigs';
 import { useColors } from 'vuestic-ui/web-components';
@@ -43,11 +43,16 @@ const props = defineProps<{
     modelName: string,
     fields: ResearchFilter[]
     projectId: string,
+    hasReference: boolean
 }>()
 
 const colors = useColors()
 
-const fields = computed(() => props.fields.map(({ key, type }) => ({ key, type })))
+const fields = computed(() => {
+    const fields = props.fields.map(({ key, type }) => ({ key, type }))
+    if (props.hasReference) fields.push({ key: 'reference_id', type: 'select' })
+    return fields
+})
 
 const selectedField = ref<{ key: string, type: InputType } | null>(null)
 

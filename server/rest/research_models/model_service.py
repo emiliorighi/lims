@@ -77,7 +77,6 @@ def create_model(project_id, data):
     model_to_save = ResearchModel(project_id=project_id,created_by=user.name, **data)
     try:
         model_to_save.save()
-        project.modify(add_to_set__models=name)
     except Exception as error:
         raise BadRequest(description=f"Error saving the research model: {error}")
 
@@ -95,7 +94,7 @@ def delete_model(project_id, model_name):
 
     ref_models.delete()
     model.delete()
-    return dict(message=f"{model_name} deleted, related models {' ,'.join()}")
+    return dict(message=f"{model_name} deleted, related models {' ,'.join(ref_models_names)}")
 
 def delete_model_related_data(project_id, model_name):
     query=data_helper.project_model_query(project_id, model_name)

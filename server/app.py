@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 from config import BaseConfig
 from rest import initialize_api
-from db.models import User,ResearchProject,ResearchModel,ResearchItem,File,FileLink
+from db.models import User,ResearchProject,ResearchModel,ResearchItem,File,FileLink,User
 from db.enums import Roles
 from flask_jwt_extended import JWTManager
 from flask_mongoengine import MongoEngine
@@ -41,7 +41,8 @@ password = os.getenv('DB_PASS')
 # ResearchProject.drop_collection()
 # ResearchModel.drop_collection()
 # ResearchItem.drop_collection()
-##create root user if does not exist
+# User.drop_collection()
+#create root user if does not exist
 try:
     FIRST_START = SingleInstance()
     user = User.objects(name = username).first()

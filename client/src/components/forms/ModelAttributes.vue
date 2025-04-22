@@ -47,7 +47,7 @@
                 </template>
                 <template #cell(key)="{ rowData }">
                     <VaInput placeholder="Attribute name" v-model="rowData.key"
-                        :rules="[(v: string) => v.length > 0, (v: string) => !isDuplicated(v) || 'Name already present']" />
+                        :rules="[(v: string) => v.length > 0 || 'Name is mandatory', (v:string) => v.toLowerCase() !== 'id' || `${v} is a reserved field, change it`, (v: string) => !isDuplicated(v) || 'Name already present']" />
                 </template>
                 <template #cell(description)="{ rowData }">
                     <VaInput placeholder="Attribute description (optional)" v-model="rowData.description" />
@@ -116,8 +116,8 @@
         </h6>
         <ul class="va-unordered">
             <li>Text: a free text field</li>
-            <li>Date: a date field</li>
-            <li>Number: a number field (decimal or integer)</li>
+            <li>Date: a date field of ISO format: YYYY-MM-DD</li>
+            <li>Number: a number field (decimal or integer), english format (decimals separated by .)</li>
             <li>Select: a list of choices</li>
         </ul>
     </VaModal>
@@ -155,7 +155,7 @@ function deleteRows() {
 watch(attributes, (newValue) => {
     //filter out fromTSV key
     const mappedValues = newValue.map((attr) => {
-        const { fromTSV, ...otherFields } = attr
+        const { fromTSV, tsvKey, ...otherFields } = attr
         return otherFields
     })
 

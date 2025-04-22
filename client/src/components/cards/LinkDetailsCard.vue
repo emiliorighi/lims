@@ -1,52 +1,65 @@
 <template>
     <VaCard>
-        <VaCardContent>
-            <div class="row justify-space-between align-center">
-                <div class="flex">
-                    <h3 class="va-h6">
-                        {{ link.name }}
-                    </h3>
-                    <VaChip v-if="link.extension" size="small" outline color="textPrimary">{{ link.extension }}</VaChip>
-                </div>
-                <div class="flex">
-                    <VaButton size="small" preset="primary" :disabled="isArchived" @click="emits('delete', link)"
-                        icon="fa-trash" color="danger" />
-                </div>
-            </div>
-        </VaCardContent>
-        <VaImage v-if="type === 'images'" @click="emits('show', src)" lazy fit="cover" style="height: 200px;"
-            :src="src" />
-        <VaCardContent>
-            <div class="row">
-                <div class="flex lg12 md12 sm12 xs12">
+        <VaCardBlock horizontal class="flex-wrap">
+            <!-- <VaImage class="flex-grow-0 flex-shrink-0 basis-52" src="https://picsum.photos/200" /> -->
+            <VaImage class="flex-grow-0 flex-shrink-0 basis-52" v-if="type === 'images'" @click="emits('show', src)"
+                lazy fit="cover" style="height: 12rem;" :src="src" />
+            <div class="flex-auto">
+                <VaCardContent>
+                    <div class="row justify-space-between align-center">
+                        <div class="flex">
+                            <h3 style="word-break: break-all;" class="va-h6">
+                                {{ link.name }}
+                            </h3>
+                            <VaChip v-if="link.extension" size="small" color="backgroundElement">{{ link.extension }}
+                            </VaChip>
+                        </div>
+                        <div class="flex">
+                            <VaButton preset="primary" :disabled="isArchived" @click="emits('delete', link)"
+                                icon="fa-trash" color="danger" />
+                        </div>
+                    </div>
+                </VaCardContent>
+                <VaCardContent>
                     <p class="va-text-secondary">
                         {{ link.description ? link.description : 'No description available' }}
                     </p>
-                </div>
+                </VaCardContent>
+                <VaCardContent>
+                    <div class="row justify-space-between align-center">
+                        <div class="flex">
+                            <div class="row align-center">
+                                <div class="flex">
+                                    <VaChip size="small" flat color="textPrimary" icon="fa-user"> {{ link.created_by }}
+                                    </VaChip>
+                                </div>
+                                <div class="flex">
+                                    <VaChip size="small" flat color="textPrimary" icon="fa-calendar"> {{ formattedDate
+                                        }}
+                                    </VaChip>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="row">
+                                <div class="flex">
+                                    <VaButton v-if="type === 'images'" icon="fa-eye" color="textPrimary"
+                                        preset="primary" @click="emits('show', src)">
+                                        Preview
+                                    </VaButton>
+                                </div>
+                                <div class="flex">
+                                    <VaButton color="textPrimary" preset="primary" block icon="fa-download"
+                                        @click="linkStore.downloadFile(link.hash, fileName)">
+                                        Download
+                                    </VaButton>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </VaCardContent>
             </div>
-        </VaCardContent>
-        <VaCardActions align="stretch" vertical>
-            <VaButton v-if="type === 'images'" icon="fa-eye" color="textPrimary" preset="primary" block
-                @click="emits('show', src)">
-                Preview
-            </VaButton>
-            <VaButton preset="primary" block icon="fa-download" @click="linkStore.downloadFile(link.hash, fileName)">
-                Download
-            </VaButton>
-        </VaCardActions>
-        <!-- <div class="row justify-end">
-            <div v-if="type === 'images'" class="flex lg6 md6 sm12 xs12">
-                <VaButton icon="fa-eye" color="textPrimary" preset="primary" block @click="emits('show', src)">
-                    Preview
-                </VaButton>
-            </div>
-            <div v-if="fileName" class="flex lg6 md6 sm12 xs12">
-                <VaButton preset="primary" block icon="fa-download"
-                    @click="linkStore.downloadFile(link.hash, fileName)">
-                    Download
-                </VaButton>
-            </div>
-        </div> -->
+        </VaCardBlock>
     </VaCard>
 </template>
 <script setup lang="ts">
@@ -74,5 +87,7 @@ const src = computed(() => `${baseURL}/files/${props.link.hash}/download`)
 const fileName = computed(() => props.link.extension ? `${props.link.name}.${props.link.extension}` : props.link.name)
 const isArchived = computed(() => projectStore.isArchived)
 
+
+const formattedDate = computed(() => props.link.created ? new Date(props.link.created.$date).toLocaleDateString("en-US") : null)
 
 </script>

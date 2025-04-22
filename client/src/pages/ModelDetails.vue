@@ -37,7 +37,7 @@ const fields = computed(() => modelStore.filters)
 const idFormat = computed(() => modelStore.idFormat)
 const stats = computed(() => recordStore.recordStats)
 const query = computed(() => ({ project_id: props.projectId, model_name: props.modelName }))
-const label = 'Records creation trend'
+const label = 'Records by creation date'
 const chart = computed(() => {
     const freqs = Object.fromEntries(stats.value)
 
@@ -47,7 +47,8 @@ const chart = computed(() => {
         label,
         type: 'line' as ChartTypes,
         data: { datasets, labels },
-        chartOptions: options
+        chartOptions: options,
+        description: 'Trend of records by creation date '
     }
 })
 

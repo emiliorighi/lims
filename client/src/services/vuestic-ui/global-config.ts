@@ -3,6 +3,11 @@ import iconsConfig from './icons-config/icons-config'
 
 export default {
   icons: iconsConfig,
+  colors: {
+    variables: {
+      neutral: '#a0a0a6'
+    }
+  },
   breakpoint: {
     enabled: true,
     bodyClass: true,
@@ -38,7 +43,7 @@ export default {
     VaTextarea: {
       color: 'textPrimary'
     },
-    VaCheckbox:{
+    VaCheckbox: {
       color: 'textPrimary'
     }
   }

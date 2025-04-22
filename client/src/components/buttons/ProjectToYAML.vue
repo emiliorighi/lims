@@ -1,7 +1,7 @@
 <template>
-    <VaButton icon="cloud_download" :loading="isLoading" :preset="preset" :color="color"
+    <VaButton icon="fa-file-arrow-down" :loading="isLoading" :preset="preset" :color="color"
         @click.stop.prevent="createAndDownloadYaml">
-        Download YAML
+        Download
     </VaButton>
 </template>
 <script setup lang="ts">

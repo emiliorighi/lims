@@ -5,15 +5,14 @@ from helpers import filter, user as user_helper
 from helpers.tsv import generate_tsv_dict_reader
 import json
     
-def upload_tsv(project_id, tsv, data):
+def upload_tsv(project_id,model_name, tsv, data):
     user = user_helper.get_current_user()
-    project = get_project(project_id)
+    
+    
     if not tsv:
         raise BadRequest(description='file field is mandatory')
-    model_name = data.get('model')
     
-    if not model_name or model_name not in project.models:
-        raise BadRequest(description=f"model field is mandatory, choose between {' ,'.join(project.models)}")
+    get_project(project_id)
 
     model = ResearchModel.objects(project_id=project_id, name=model_name).first()
 
@@ -74,11 +73,15 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
         item = {k: row[v] for k,v in map.items() if row.get(v)}
 
         reference_id = "_".join([row[ref_col] for ref_col in reference_columns]) if reference_columns else None
-        if reference_id and not ResearchItem.objects(project_id=project_id,model_name=ref_model_name, item_id=reference_id).first():
-            raise BadRequest(description=f"Row {current_idx}: reference item {reference_id} not found")
+        if ref_model_name:
+            if not reference_id:
+                raise BadRequest(description=f"Row {current_idx}: reference item id in {', '.join(reference_columns)} not found; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
+            elif not ResearchItem.objects(project_id=project_id,model_name=ref_model_name, item_id=reference_id).first():
+                raise BadRequest(description=f"Row {current_idx}: reference item {reference_id} not found, create it first; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
+            
         item_id = create_model_id(id_fields, item)
         if not item_id:
-            raise BadRequest(description=f"Row {current_idx}: Unable to generate ID")
+            raise BadRequest(description=f"Row {current_idx}: Unable to generate ID; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
 
         if item_id in id_set:
             continue  # Skip repeated objects
