@@ -19,7 +19,7 @@
                                         <VaIcon color="neutral" name="fa-cube" />
                                     </div>
                                     <div class="flex">
-                                        <h2 class="va-h6">{{ model.name }}</h2>
+                                        <h2 class="va-h3">{{ model.name }}</h2>
                                     </div>
                                 </div>
                             </div>
@@ -33,7 +33,7 @@
                     <VaCardContent>
                         <div class="row align-center justify-space-between">
                             <div class="flex">
-                                <div class="row align-end">
+                                <div class="row align-center">
                                     <div class="flex">
                                         <p class="va-text-secondary">Records:</p>
                                     </div>
@@ -54,11 +54,7 @@
             </div>
         </div>
         <div class="row row-equal">
-            <div v-for="chart in charts" class="flex lg6 md6 sm12 xs12">
-                <VaSkeleton variant="squared" v-if="projectStore.isLoading" />
-                <ChartCard :key="chart.chartId" :chart="chart"></ChartCard>
-            </div>
-            <div v-if="roots.length" class="flex lg6 md6 sm12 xs12">
+            <div v-if="roots.length" class="flex flex-grow">
                 <VaSkeleton variant="squared" v-if="projectStore.isLoading" />
                 <VaCard>
                     <VaCardContent>
@@ -73,9 +69,12 @@
                     </VaCardContent>
                     <VaCardContent>
                         <HierachyChart :roots="roots" />
-
                     </VaCardContent>
                 </VaCard>
+            </div>
+            <div v-for="chart in charts" class="flex flex-grow">
+                <VaSkeleton variant="squared" v-if="projectStore.isLoading" />
+                <ChartCard :key="chart.chartId" :chart="chart"></ChartCard>
             </div>
         </div>
         <!-- <div class="row">
@@ -113,7 +112,6 @@ import { useGlobalStore } from '../stores/global-store';
 import { getChartOptions, processChartData } from '../composables/chartConfigs';
 import { ChartTypes } from '../data/types';
 import ChartCard from '../components/cards/ChartCard.vue';
-import ProjectDetailsCard from '../components/cards/ProjectDetailsCard.vue';
 import Counter from '../components/ui/Counter.vue';
 const props = defineProps<{
     projectId: string
@@ -142,9 +140,11 @@ onMounted(async () => {
     await globalStore.getRecordStats(queryField, { project_id: props.projectId })
 });
 
-function transformToTree(models: { name: string, refModel: string | undefined, counts: number }[]) {
+function transformToTree(models: { name: string, refModel?: string, counts: number }[]) {
     const nodes: Record<string, any> = {};
+    const childrenSet = new Set<string>();
 
+    // Step 1: Create all nodes
     models.forEach(m => {
         nodes[m.name] = {
             name: m.name,
@@ -153,20 +153,22 @@ function transformToTree(models: { name: string, refModel: string | undefined, c
         };
     });
 
-    models.forEach((m) => {
+    // Step 2: Link children and record child names
+    models.forEach(m => {
         if (m.refModel && nodes[m.refModel]) {
             nodes[m.refModel].children.push(nodes[m.name]);
+            childrenSet.add(m.name);
         }
     });
-    // Find root nodes (not referenced by any model)
-    const referenced = new Set(models.map(m => m.refModel).filter(Boolean));
-    const roots = models.filter((m: any) => referenced.has(m.name)).map((m: any) => nodes[m.name]);
-    return roots
-    //   return {
-    //     name: 'Models Relationship',
-    //     children: roots
-    //   };
+
+    // Step 3: Only nodes not in childrenSet are roots
+    const roots = models
+        .filter(m => !childrenSet.has(m.name))
+        .map(m => nodes[m.name]);
+
+    return roots;
 }
+
 
 
 

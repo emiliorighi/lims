@@ -60,17 +60,9 @@ def create_item(project_id, model_name, data):
     user = user_helper.get_current_user()
     check_project_exists(project_id)
     model = get_model(project_id, model_name)
+    reference_id = None
+    inherit_from_ref_model = model.inherit_reference_id
     id_fields = model.id_format
-
-    item_id = schema.create_item_id(id_fields, data)
-    ## check if item already exists in the project and model context
-    existing_item = get_item(project_id, model_name, item_id)
-    if existing_item:
-        raise Conflict(description=f"An Item with id: {item_id} already exists in {model_name} of project {project_id}")
-
-    missing_fields = schema.validate_required_fields(model, data)
-    if missing_fields:
-        raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
 
     if model.reference_model:
         ## check reference id field and related record exist
@@ -80,6 +72,19 @@ def create_item(project_id, model_name, data):
         ref_item = get_item(project_id, model.reference_model, reference_id)
         if not ref_item:
             raise NotFound(description=f"Reference item with id: {reference_id} not found. Create it first before referencing to it")    
+    
+    item_id = schema.create_item_id(id_fields, data, reference_id, inherit_from_ref_model)
+    ## check if item already exists in the project and model context
+    existing_item = get_item(project_id, model_name, item_id)
+    
+    if existing_item:
+        raise Conflict(description=f"An Item with id: {item_id} already exists in {model_name} of project {project_id}")
+
+    missing_fields = schema.validate_required_fields(model, data)
+    if missing_fields:
+        raise BadRequest(description=f"{', '.join(missing_fields)} is/are mandatory")
+
+
     # Evaluate the fields and raise an error if there are any issues
     evaluation_errors = filter.evaluate_model_fields(model.fields, data)
     if evaluation_errors:
@@ -113,7 +118,7 @@ def update_item(project_id, model_name, item_id, data):
     if not item:
         raise NotFound(description=f"{model_name}: {item_id} not found")
     
-    new_item_id = schema.create_item_id(model.id_format, data)
+    new_item_id = schema.create_item_id(model.id_format, data, item.reference_id ,model.inherit_reference_id)
     
     if new_item_id and item_id != new_item_id:
         message = f"{model_name} {item_id} has changed into {new_item_id}, the value of the fields {','.join(model.id_fields)} can't be changed"

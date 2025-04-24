@@ -63,6 +63,9 @@ export const useRecordStore = defineStore('record', {
             this.idToUpdate = id
             this.recordForm = { ...recordData }
         },
+        toggleRecordForm(){
+            this.showRecordForm = !this.showRecordForm
+        },
         resetForm() {
             this.recordForm = {}
             this.idToUpdate = null

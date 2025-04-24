@@ -1,5 +1,5 @@
 <template>
-    <VaSelect background="backgroundSecondary" :label="field" multiple @clear="fetchOptions" :loading="isLoading" @open="fetchOptions" clearable
+    <VaSelect :label="field.key" multiple @clear="fetchOptions" :loading="isLoading" @open="fetchOptions" clearable
         v-model="modelValue" :options="optionsKeys">
         <template #option="{ option, selectOption }">
             <div :class="['row option align-center justify-space-between', modelValue.includes(option as any) ? 'is-active' : '']"
@@ -29,13 +29,17 @@ const recordStore = useRecordStore()
 
 const props = defineProps<{
     label?: string,
-    field: string,
+    field: { key: string },
     modelName: string,
     projectId: string,
     value: string | null,
 }>()
 
+const emits = defineEmits(['valueChange'])
+
+
 const isLoading = ref(false)
+
 const modelValue = computed({
     get() {
         if (props.value)
@@ -57,8 +61,6 @@ async function fetchOptions() {
     options.value = { ...opts }
     isLoading.value = false
 }
-
-const emits = defineEmits(['valueChange'])
 
 </script>
 <style scoped>

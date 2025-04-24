@@ -40,6 +40,7 @@ class ResearchModel(db.Document):
     name = db.StringField(required=True)
     fields = db.ListField(db.DictField())
     reference_model = db.StringField()
+    inherit_reference_id = db.BooleanField(default=False)
     description = db.StringField()
     id_format = db.ListField(db.StringField())
     created_by = db.StringField()

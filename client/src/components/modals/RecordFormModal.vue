@@ -68,7 +68,7 @@
                         </VaCard>
                     </div>
                 </div>
-                <div v-if="refModelName" class="row">
+                <div v-if="showSelect" class="row">
                     <div class="flex lg12 md12 sm12 xs12">
                         <VaCard square outlined>
                             <VaCardContent>
@@ -146,7 +146,16 @@ const fields = computed(() => modelStore.filters)
 const modelfields = computed(() => modelStore.idFormat)
 const idToUpdate = computed(() => recordStore.idToUpdate)
 const refModelName = computed(() => modelStore.refModel?.name)
+const inheritRefId = computed(() => modelStore.currentModel?.inherit_reference_id)
 
+const showSelect = computed(() => {
+  const isUpdate = !!idToUpdate.value;
+  if (isUpdate) {
+    return inheritRefId.value === false;
+  } else {
+    return !!refModelName.value;
+  }
+});
 const formInfo = computed(() => idToUpdate.value ? {
     title: 'Update Record',
     description: `Update ${idToUpdate.value}`

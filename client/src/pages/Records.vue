@@ -14,9 +14,11 @@
                 <div class="flex">
                     <div class="row">
                         <div v-if="hasFilters" class="flex">
-                            <VaButton icon="fa-filter" color="textPrimary"
-                                @click="recordStore.showFilters = !recordStore.showFilters" preset="primary">
-                                {{ recordStore.showFilters ? 'Hide' : 'Show' }} Filters</VaButton>
+                            <VaBadge overlap :text="activeFilters.length" color="success">
+                                <VaButton icon="fa-filter" color="textPrimary"
+                                    @click="recordStore.showFilters = !recordStore.showFilters" preset="primary">
+                                    {{ recordStore.showFilters ? 'Hide' : 'Show' }} Filters</VaButton>
+                            </VaBadge>
                         </div>
                         <div class="flex">
                             <VaMenu>
@@ -34,8 +36,8 @@
                             </VaMenu>
                         </div>
                         <div class="flex">
-                            <VaButton color="textPrimary" :disabled="isArchived"
-                                @click="recordStore.showRecordForm = !recordStore.showRecordForm" icon="fa-plus">New
+                            <VaButton color="textPrimary" :disabled="isArchived" @click="handleNewRecord"
+                                icon="fa-plus">New
                                 record</VaButton>
                         </div>
                         <div class="flex">
@@ -49,49 +51,28 @@
             </div>
             <div v-if="recordStore.showFilters" class="row">
                 <div class="flex lg12 md12 sm12 xs12">
-                    <VaCard>
-                        <VaCardContent>
-                            <div class="row">
-                                <div class="flex">
-                                    <h3 class="va-h6">Filters</h3>
-                                </div>
-                            </div>
-                            <div class="row align-center">
-                                <div v-for="filter in queryFilters" class="flex lg3 md4 sm6 xs6">
-                                    <FilterField :key="filter.key" @update-query="handleUpdate" :field="filter"
-                                        :project-id="projectId" :model-name="modelName">
-                                    </FilterField>
-                                </div>
-                                <div v-if="refModelFilter" class="flex lg3 md4 xs6 sm6">
-                                    <FilterField :key="refModelFilter.key" @update-query="handleUpdate"
-                                        :field="refModelFilter" :project-id="projectId" :model-name="modelName" />
-                                </div>
-                            </div>
-                        </VaCardContent>
-                    </VaCard>
-                </div>
-            </div>
-            <div v-if="activeFilters.length" class="row">
-                <div class="flex lg12 md12 sm12 xs12">
-                    <VaCard>
+                    <VaCard color="backgroundPrimary">
                         <VaCardContent>
                             <div class="row justify-space-between">
                                 <div class="flex">
-                                    <h3 class="va-h6">Active Filters</h3>
+                                    <h3 class="va-h6">Filters</h3>
                                 </div>
                                 <div class="flex">
-                                    <VaButton color="textPrimary" preset="primary" @click="handleReset">Clear
+                                    <VaButton color="danger" preset="primary" @click="handleReset">Clear
                                         Filters</VaButton>
                                 </div>
                             </div>
-                        </VaCardContent>
-                        <VaCardContent>
-                            <div class="row">
-                                <div v-for="[k, v] in activeFilters" class="flex">
-                                    <VaChip color="textPrimary" outline
-                                        @click="handleUpdate({ key: k as string, query: {} })" icon="fa-close">
-                                        {{ k }}: {{ v }}
-                                    </VaChip>
+                            <div class="row align-center">
+                                <div v-for="filter in queryFilters" class="flex flex-grow">
+                                    <DynamicFilterField :key="filter.key" :field="filter" :model-name="modelName"
+                                        :project-id="projectId" @update-query="handleUpdate" />
+                                    <!-- <FilterField :key="filter.key" @update-query="handleUpdate" :field="filter"
+                                        :project-id="projectId" :model-name="modelName">
+                                    </FilterField> -->
+                                </div>
+                                <div v-if="refModelFilter" class="flex lg3 md4 xs6 sm6">
+                                    <DynamicFilterField :field="refModelFilter" :model-name="modelName"
+                                        :project-id="projectId" @update-query="handleUpdate" />
                                 </div>
                             </div>
                         </VaCardContent>
@@ -160,7 +141,7 @@
                 Record identifier filter
             </h3>
             <p class="va-text-secondary">This input filters by the formatted identifier of {{ modelName
-            }} that is
+            }},
                 composed by
                 the
                 following fields:</p>
@@ -191,11 +172,11 @@ import RecordDetailsModal from '../components/modals/RecordDetailsModal.vue';
 import RecordDeleteModal from '../components/modals/RecordDeleteModal.vue';
 import ChartCreationModal from '../components/modals/ChartCreationModal.vue';
 import TSVImportModal from '../components/modals/TSVImportModal.vue';
-import FilterField from '../components/filters/FilterField.vue';
 import { useGlobalStore } from '../stores/global-store';
 import { debounce } from '../composables/debounce';
 import { useModelStore } from '../stores/model-store';
 import { useProjectStore } from '../stores/project-store';
+import DynamicFilterField from '../components/filters/DynamicFilterField.vue';
 
 const props = defineProps<{
     projectId: string,
@@ -226,18 +207,26 @@ const filter = computed({
     }
 })
 
+// const activeFilters = computed(() =>
+//     Object.entries(recordStore.searchForm)
+//         .filter(([k, v]) => Object.values(v).filter(Boolean).length)
+//         .map(([k, v]) => {
+
+//             const filteredEntries = Object.entries(v).filter(([k, v]) => Boolean(v))
+//             if (filteredEntries.length > 1) {
+//                 const lte = `${k}__lte`
+//                 const gte = `${k}__gte`
+//                 return [k, `${v[gte]}-${v[lte]}`]
+//             }
+//             return [k, filteredEntries[0][1]]
+//         }
+//         ))
+
 const activeFilters = computed(() =>
     Object.entries(recordStore.searchForm)
-        .filter(([k, v]) => Object.values(v).length)
-        .map(([k, v]) => {
-            if (Object.entries(v).length > 1) {
-                const lte = `${k}__lte`
-                const gte = `${k}__gte`
-                return [k, `${v[gte]}-${v[lte]}`]
-            }
-            return [k, Object.values(v)[0]]
-        }
-        ))
+        .filter(([_, v]) => Object.values(v).some(Boolean))
+
+);
 
 const records = computed(() => recordStore.records)
 const isAuthorized = computed(() => globalStore.user.role !== 'researcher')
@@ -249,8 +238,9 @@ const refModel = computed(() => modelStore.refModel)
 const hasFilters = computed(() => fields.value && idFormat.value && fields.value.length > idFormat.value.length)
 const columns = computed(() => {
     const keys = mappedKeys.value ?? []
-    const c = [...keys]
+    const c = []
     if (refModel.value) c.push({ key: 'reference_id', sortable: true, label: refModel.value.name })
+    c.push(...keys)
     if (isAuthorized.value) c.push({ key: 'actions', sortable: false, label: '' })
     return c
 })
@@ -263,7 +253,6 @@ const refModelFilter = computed(() => {
             payload: recordStore.searchForm.reference_id ? recordStore.searchForm.reference_id : { [`reference_id__in`]: null }
         }
     }
-
 })
 
 const queryFilters = computed(() => fields.value?.map(({ key, type }) => {
@@ -290,7 +279,11 @@ const debouncedSearch = debounce(async (payload: any) => {
     await handleSearch(payload)
 }, 200);
 
+async function handleNewRecord() {
+    recordStore.resetForm()
+    recordStore.toggleRecordForm()
 
+}
 async function handlePagination() {
     await recordStore.fetchRecords(props.projectId, props.modelName)
 }
@@ -301,8 +294,6 @@ async function handleUpdate(payload: { key: string, query: Record<string, any> }
     recordStore.resetPagination()
     await recordStore.fetchRecords(props.projectId, props.modelName)
 }
-
-
 
 async function handleReset() {
     recordStore.resetSearchForm()
@@ -327,7 +318,7 @@ async function sortItems(event: { columnName: string, value: 'asc' | 'desc' | nu
 function editItem(item: ResearchRecord) {
     const filteredEntries = Object.entries(item).filter(([k, v]) => !uneditableFields.includes(k))
     recordStore.setForm(item.item_id, Object.fromEntries(filteredEntries))
-    recordStore.showRecordForm = true
+    recordStore.toggleRecordForm()
 }
 
 async function triggerDeleteItem(item: ResearchRecord) {

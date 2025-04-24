@@ -34,6 +34,11 @@
         "reference_model": {
           "type": "string"
         },
+        "inherit_reference_id": {
+          "type": "boolean",
+          "default": false,
+          "description": "If true, include the identifier of the referenced model (defined by reference_model) as a prefix in this model’s identifier"
+        },
         "fields": {
           "type": "array",
           "items": {

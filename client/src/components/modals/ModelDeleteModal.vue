@@ -14,17 +14,17 @@
                         This will permanently delete also the following data:
                     </p>
                 </div>
-                <div class="flex">
+                <div v-if="totalRecords" class="flex">
                     Records: <VaChip flat size="large">
                         {{ totalRecords }}
                     </VaChip>
                 </div>
-                <div class="flex">
+                <div v-if="totalProtocols" class="flex">
                     Protocols: <VaChip flat size="large">
                         {{ totalProtocols }}
                     </VaChip>
                 </div>
-                <div class="flex">
+                <div v-if="totalImages" class="flex">
                     Images: <VaChip flat size="large">
                         {{ totalImages }}
                     </VaChip>

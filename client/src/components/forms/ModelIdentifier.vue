@@ -37,10 +37,10 @@ import { computed } from 'vue'
 const props = defineProps<{
     attributes: string[],
     modelId: string[],
+    refModel?:string
 }>()
 
 const emits = defineEmits(['change'])
-
 
 const id_format = computed({
     get() {

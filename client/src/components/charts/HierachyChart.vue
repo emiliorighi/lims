@@ -1,5 +1,7 @@
 <template>
-  <div ref="chartDiv" style="width: 100%; height: 400px;"></div>
+  <div class="chart-wrapper">
+    <div ref="chartDiv" class="chart-container"></div>
+  </div>
 </template>
 <script lang="ts" setup>
 import * as am5 from "@amcharts/amcharts5";
@@ -22,7 +24,6 @@ function disposeChart() {
     root.value = null;
   }
 }
-
 // React to changes in mappedModels
 watch(() => props.roots, () => {
   // Dispose existing chart if needed
@@ -33,7 +34,6 @@ watch(() => props.roots, () => {
   }
   createChart(treeData);
 });
-
 
 onMounted(() => {
   const treeData = {
@@ -55,25 +55,44 @@ function createChart(data: any) {
   root.value = am5.Root.new(chartDiv.value);
   root.value.setThemes([am5themes_Animated.default.new(root.value)]);
 
-  const series = root.value.container.children.push(
-    am5hierarchy.ForceDirected.new(root.value, {
+  const container = root.value.container.children.push(
+    am5.Container.new(root.value, {
+      width: am5.percent(100),
+      height: am5.percent(100),
+      paddingRight: 15,
+      paddingLeft: 15,
+      layout: root.value.verticalLayout
+    })
+  )
+  const series = container.children.push(
+    am5hierarchy.Tree.new(root.value, {
       singleBranchOnly: false,
       downDepth: 1,
       topDepth: 1,
-      initialDepth: 2,
+      initialDepth: 10,
       valueField: "value",
       categoryField: "name",
       childDataField: "children",
       idField: "name",
-      linkWithField: "linkWith",
-      minRadius: 30,
-      maxRadius: am5.percent(20),
+      orientation: "vertical"
     })
   )
+  series.circles.template.setAll({
+    radius: 40
+  });
+
+  series.outerCircles.template.setAll({
+    radius: 40
+  });
 
   series.data.setAll([data]);
   series.set("selectedDataItem", series.dataItems[0]);
 }
 
 </script>
-<style scoped></style>
+<style scoped>
+.chart-container {
+  width: 100%;
+  min-height: 400px;
+}
+</style>

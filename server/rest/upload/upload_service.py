@@ -1,7 +1,7 @@
 from db.models import ResearchProject, ResearchModel,ResearchItem
 from werkzeug.exceptions import BadRequest, NotFound
 from mongoengine.errors import NotUniqueError
-from helpers import filter, user as user_helper
+from helpers import filter, user as user_helper, schema as schema_helper
 from helpers.tsv import generate_tsv_dict_reader
 import json
     
@@ -62,6 +62,7 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
     id_fields = model.id_format
     model_fields = model.fields
     ref_model_name = model.reference_model
+    inherit_reference_id = model.inherit_reference_id
     model_name = model.name
     id_set = set()
     tsvreader = generate_tsv_dict_reader(tsv)
@@ -79,7 +80,7 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
             elif not ResearchItem.objects(project_id=project_id,model_name=ref_model_name, item_id=reference_id).first():
                 raise BadRequest(description=f"Row {current_idx}: reference item {reference_id} not found, create it first; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
             
-        item_id = create_model_id(id_fields, item)
+        item_id = schema_helper.create_item_id(id_fields, item, reference_id, inherit_reference_id)
         if not item_id:
             raise BadRequest(description=f"Row {current_idx}: Unable to generate ID; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
 

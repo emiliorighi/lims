@@ -9,9 +9,6 @@
             </div>
             <div class="flex">
                 <div class="row">
-                    <!-- <div class="flex">
-                        <VaButton :disabled="isArchived" preset="primary" icon="fa-edit"></VaButton>
-                    </div> -->
                     <div class="flex">
                         <VaButton @click="modelStore.showDeleteConfirmation = !modelStore.showDeleteConfirmation"
                             :disabled="isArchived" color="danger" preset="primary" icon="fa-trash"></VaButton>
@@ -34,14 +31,6 @@
                 </VaButtonGroup>
             </div>
         </div>
-        <!-- <VaTabs color="textPrimary" v-model="viewValue">
-            <template #tabs>
-                <VaTab v-for="opt in options" :key="opt.value" :name="opt.value" :icon="opt.icon">
-                    {{ opt.label }}
-                </VaTab>
-            </template>
-        </VaTabs>
-        <VaDivider style="margin-top: 0;" /> -->
         <router-view></router-view>
         <ModelDeleteModal :project-id="projectId" :model-name="modelName" />
     </div>

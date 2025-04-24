@@ -8,49 +8,49 @@
                 </p>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <div class="flex lg12 md12 sm12 xs12">
-            <VaCard>
-                <VaCardContent>
-                    <div class="row justify-space-between">
-                        <div class="flex">
-                            <VaInput v-model="searchForm.filter" placeholder="Search User" clearable>
-                            </VaInput>
-                        </div>
-                        <div class="flex">
-                            <VaButton @click="createUser" icon="add">New User</VaButton>
-                        </div>
-                    </div>
-                    <VaDataTable :loading="isLoading" :items="userStore.users"
-                        :columns="['name', 'projects', 'role', 'actions']">
-                        <template #cell(actions)="{ rowData }">
-                            <div v-if="rowData.name !== gStore.user.name">
-                                <VaButton @click="editUser(rowData)" preset="plain" icon="edit" />
-                                <VaButton @click="triggerDelete(rowData)" preset="plain" icon="delete" color="danger"
-                                    class="ml-3" />
+        <div class="row">
+            <div class="flex lg12 md12 sm12 xs12">
+                <VaCard>
+                    <VaCardContent>
+                        <div class="row justify-space-between">
+                            <div class="flex">
+                                <VaInput v-model="searchForm.filter" placeholder="Search User" clearable>
+                                </VaInput>
                             </div>
-                        </template>
-                        <template #cell(role)="{ rowData }">
-                            <VaChip size="small" color="backgroundElement">
-                                {{ rowData.role }}
-                            </VaChip>
-                        </template>
-                    </VaDataTable>
-                </VaCardContent>
-                <VaCardContent>
-                    <div class="row justify-center">
-                        <div class="flex">
-                            <VaPagination v-model="offset" :page-size="searchForm.limit" :total="total"
-                                :visible-pages="3" buttons-preset="primary" gapped />
+                            <div class="flex">
+                                <VaButton @click="createUser" icon="add">New User</VaButton>
+                            </div>
                         </div>
-                    </div>
-                </VaCardContent>
-            </VaCard>
+                        <VaDataTable :loading="isLoading" :items="userStore.users"
+                            :columns="['name', 'projects', 'role', 'actions']">
+                            <template #cell(actions)="{ rowData }">
+                                <div v-if="rowData.name !== gStore.user.name">
+                                    <VaButton @click="editUser(rowData)" preset="plain" icon="edit" />
+                                    <VaButton @click="triggerDelete(rowData)" preset="plain" icon="delete"
+                                        color="danger" class="ml-3" />
+                                </div>
+                            </template>
+                            <template #cell(role)="{ rowData }">
+                                <VaChip size="small" color="backgroundElement">
+                                    {{ rowData.role }}
+                                </VaChip>
+                            </template>
+                        </VaDataTable>
+                    </VaCardContent>
+                    <VaCardContent>
+                        <div class="row justify-center">
+                            <div class="flex">
+                                <VaPagination v-model="offset" :page-size="searchForm.limit" :total="total"
+                                    :visible-pages="3" buttons-preset="primary" gapped />
+                            </div>
+                        </div>
+                    </VaCardContent>
+                </VaCard>
+            </div>
         </div>
+        <UserFormModal />
+        <ConfirmDeleteModal @confirmDelete="deleteUser" :idToDelete="idToDelete" icon="person" />
     </div>
-    <UserFormModal />
-    <ConfirmDeleteModal @confirmDelete="deleteUser" :idToDelete="idToDelete" icon="person" />
 </template>
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from 'vue';

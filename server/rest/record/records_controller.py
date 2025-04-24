@@ -30,7 +30,7 @@ class ItemsByProjectModelApi(Resource):
 class RelatedItemsByProjectModelApi(Resource):
     @jwt_required()
     def get(self, project_id, model_name, record_id):
-        args = dict(project_id=project_id, reference_id=record_id, **request.args)
+        args = dict(project_id=project_id, model_name=model_name, reference_id=record_id, **request.args)
         response, mimetype = records_service.get_items(args)
         return Response(response, mimetype=mimetype, status=200)
     
@@ -61,7 +61,6 @@ class ItemByProjectModelApi(Resource):
     def delete(self, project_id,model_name, record_id):
         message = records_service.delete_item(project_id,model_name,record_id)
         return Response(json.dumps(message), mimetype="application/json", status=201)
-
 
 
 class ModelByProjectStatsApi(Resource):

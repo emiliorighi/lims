@@ -17,14 +17,20 @@
                 <ModelInfo :description="modelForm.description" :type="modelForm.name"
                     @update-type="(v: string) => modelForm.name = v"
                     @update-description="(v: string) => modelForm.description = v" />
-                <ModelAttributes v-model:model-attributes="modelForm.fields" />
-                <ModelIdentifier :attributes="attributes" @change="(v) => modelForm.id_format = v"
-                    :model-id="modelForm.id_format" />
                 <ModelReference v-if="existingModels.length" :models="existingModels"
                     :reference-model="modelForm.reference_model" :rules="[
                         (v: string) => !v || (v && existingModels.includes(v)) || 'Reference model is not present'
                     ]" @change="(v: string | undefined) => modelForm.reference_model = v">
                 </ModelReference>
+                <div v-if="modelForm.reference_model" class="row">
+                    <div class="flex">
+                        <VaCheckbox v-model="modelForm.inherit_reference_id"
+                            :label="`Inherit identifier from ${modelForm.reference_model}, this will add the identifier of ${modelForm.reference_model} at the beginning of the ${modelForm.name} identifier `" />
+                    </div>
+                </div>
+                <ModelAttributes v-model:model-attributes="modelForm.fields" />
+                <ModelIdentifier :ref-model="modelForm.reference_model" :attributes="attributes"
+                    @change="(v) => modelForm.id_format = v" :model-id="modelForm.id_format" />
                 <VaInput style="visibility: hidden;" :rules="[(v: any) => !duplicatedName || 'Error']">
                 </VaInput>
             </VaForm>
@@ -69,7 +75,6 @@ const duplicatedName = computed(() => props.existingModels.includes(modelForm.va
 const attributes = computed(() => modelForm.value.fields.map(({ key }) => key))
 
 watch(() => props.incomingModel, () => {
-    console.log(props.incomingModel)
     if (props.incomingModel) modelForm.value = { ...props.incomingModel }
     else modelForm.value = { ...initForm }
 }, { immediate: true })

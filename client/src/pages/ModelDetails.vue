@@ -1,6 +1,6 @@
 <template>
-    <div class="row row-equal">
-        <div class="flex lg6 md6 sm12 xs12">
+    <div class="row">
+        <div class="flex flex-grow">
             <VaCard>
                 <VaCardActions>
                     <h2 class="va-h6">Model Fields</h2>
@@ -10,7 +10,7 @@
                 </VaCardContent>
             </VaCard>
         </div>
-        <div v-if="stats.length" class="flex lg6 md6 sm12 xs12">
+        <div v-if="stats.length" class="flex flex-grow">
             <ChartCard :chart="chart" />
         </div>
     </div>

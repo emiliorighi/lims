@@ -165,6 +165,7 @@ export type ResearchModel = {
   name: string,
   description: string,
   reference_model?: string,
+  inherit_reference_id?:boolean,
   project_id?: string,
   fields: ResearchFilter[],
   id_format: string[]

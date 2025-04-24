@@ -27,11 +27,15 @@ class ResearchProjectApi(Resource):
         return Response(data_helper.dump_json(project.to_mongo().to_dict()), mimetype="application/json", status=200)
 
 class ArchiveResearchProjectApi(Resource):
+    @jwt_required()
+    @admin.admin_required()
     def patch(self, project_id):
         resp = projects_service.archive_project(project_id)
         return Response(data_helper.dump_json(resp), mimetype="application/json", status=200)
 
 class UnarchiveResearchProjectApi(Resource):
+    @jwt_required()
+    @admin.admin_required()
     def patch(self, project_id):
         resp = projects_service.unarchive_project(project_id)
         return Response(data_helper.dump_json(resp), mimetype="application/json", status=200)

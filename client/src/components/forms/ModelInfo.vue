@@ -2,7 +2,7 @@
     <div class="row justify-space-between align-end">
         <div class="flex lg12 md12 sm12 xs12">
             <VaInput v-model="computedType"
-                :rules="[(v: string) => v.length >= 3 || 'type is mandatory, at least 3 characters']"
+                :rules="[(v: string) => v.length >= 3 || 'name is mandatory, at least 3 characters']"
                 label="Model Name (required)" placeholder="Type here your model name (example: Sample)"
                 :messages="['The name of your model (like sample, experiment etc.)']">
             </VaInput>

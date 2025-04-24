@@ -6,7 +6,9 @@
                     <template #header-content>
                         <div class="row">
                             <div class="flex">
-                                {{ field.key }}
+                                <h3 class="va h6">
+                                    {{ field.key }}
+                                </h3>
                             </div>
                             <div class="flex">
                                 <VaChip color="backgroundElement" size="small">{{ field.type }}</VaChip>

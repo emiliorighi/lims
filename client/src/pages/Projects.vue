@@ -37,6 +37,9 @@
                         </div>
                         <VaDataTable clickable hoverable @row:click="goToProject" :items="projects"
                             :columns="['name', 'description', 'version', 'archived']">
+                            <template #header(archived)>
+                                Status
+                            </template>
                             <template #cell(archived)="{ rowData }">
                                 <VaChip size="small" :color="rowData.archived ? 'warning' : 'success'">
                                     {{ rowData.archived ? 'archived' : 'active' }}

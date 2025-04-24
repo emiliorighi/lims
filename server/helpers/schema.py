@@ -51,10 +51,15 @@ def validate_research_project_schema(content):
         errors.extend(validate_model(model))
     return errors  
 
-def create_item_id(id_fields,data):
-    l = [str(data.get(attr)) for attr in id_fields if data.get(attr)]
-    if l:
-        return '_'.join(l)
+def create_item_id(id_fields,data, reference_id=None, inherit_from_ref_id=False):
+    local_parts = [str(data.get(attr)) for attr in id_fields if data.get(attr)]
+    parts = []
+    if inherit_from_ref_id and reference_id:
+        parts.append(reference_id)
+
+    parts.extend(local_parts)
+
+    return '_'.join(parts)
     
 def validate_required_fields(model, data):
     
