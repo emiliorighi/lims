@@ -66,8 +66,6 @@ def get_links(args):
 
     query_set, q_query = data.create_query(query, q_query)
     cursor = FileLink.objects(**query_set)
-    print(query_set)
-    print(cursor.count())
     if q_query:
         cursor = cursor.filter(q_query)
     

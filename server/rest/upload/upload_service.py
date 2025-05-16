@@ -8,7 +8,6 @@ import json
 def upload_tsv(project_id,model_name, tsv, data):
     user = user_helper.get_current_user()
     
-    
     if not tsv:
         raise BadRequest(description='file field is mandatory')
     
@@ -23,24 +22,20 @@ def upload_tsv(project_id,model_name, tsv, data):
     if not serialized_map:
         raise BadRequest(description=f"map field is mandatory")
 
-    mapper = {k:v for k,v in json.loads(serialized_map).items() if v}
+    mapper = {k.strip():v.strip() for k,v in json.loads(serialized_map).items() if v}
 
     serialized_reference_fields = data.get('referenceFields')
 
     if model.reference_model and not serialized_reference_fields:
         raise BadRequest(description=f"referenceFields field is mandatory for this model")
     
-    reference_fields = json.loads(serialized_reference_fields)
+    reference_fields = [f.strip() for f in json.loads(serialized_reference_fields)]
 
     behaviour = data.get('behaviour', 'SKIP')
-    header = data.get('header')
-    if not filter.validate_number(header):
-        raise BadRequest(description=f"header must be a valid number")
-    header = int(header)
 
     validate_fields(mapper.keys(), model)
 
-    return process_records(tsv, mapper, model, reference_fields, project_id, behaviour, user.name, header)
+    return process_records(tsv, mapper, model, reference_fields, project_id, behaviour, user.name)
 
 
 def create_model_id(id_fields, data):
@@ -55,7 +50,7 @@ def get_project(project_id):
     return project
 
 
-def process_records(tsv, map, model, reference_columns, project_id, behaviour, username,header=0):
+def process_records(tsv, map, model, reference_columns, project_id, behaviour, username):
     saved_items = []
     skipped_items = set()
     updated_items = set()
@@ -68,18 +63,20 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
     tsvreader = generate_tsv_dict_reader(tsv)
 
     for idx, row in enumerate(tsvreader):
-        if idx <= header:
+        #skip empty rows
+        if not any(row.values()):
             continue
-        current_idx = header+idx
-        item = {k: row[v] for k,v in map.items() if row.get(v)}
 
-        reference_id = "_".join([row[ref_col] for ref_col in reference_columns]) if reference_columns else None
+        current_idx = idx + 1
+        item = {k: row[v.strip()] for k,v in map.items() if row.get(v)}
+        
+        reference_id = "_".join([row[ref_col.strip()] for ref_col in reference_columns]) if reference_columns else None
         if ref_model_name:
             if not reference_id:
                 raise BadRequest(description=f"Row {current_idx}: reference item id in {', '.join(reference_columns)} not found; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
             elif not ResearchItem.objects(project_id=project_id,model_name=ref_model_name, item_id=reference_id).first():
                 raise BadRequest(description=f"Row {current_idx}: reference item {reference_id} not found, create it first; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
-            
+        
         item_id = schema_helper.create_item_id(id_fields, item, reference_id, inherit_reference_id)
         if not item_id:
             raise BadRequest(description=f"Row {current_idx}: Unable to generate ID; Saved Items {len(saved_items)}; Skipped Items {len(skipped_items)}; Updated Items {len(updated_items)}")
@@ -87,7 +84,8 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
         if item_id in id_set:
             continue  # Skip repeated objects
 
-        validate_item(item, model_fields, idx)
+        validate_item(item, model_fields, current_idx)
+
         doc_to_save={
             "project_id":project_id,
             "model_name":model_name,
@@ -96,11 +94,13 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
             "item_id":item_id,
             **item
         }
+
         try:
             item_id = doc_to_save.get('item_id')
             saved_item = ResearchItem(**doc_to_save).save()
             saved_items.append(saved_item)
             id_set.add(item_id)
+
         except NotUniqueError:
             if behaviour == 'UPDATE':
                 if item_id not in updated_items:
@@ -108,7 +108,8 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
                     item_to_update.update(**item)
                     updated_items.add(item_id)
             else:
-                skipped_items.add(item_id)        
+                skipped_items.add(item_id)
+
         except Exception as e:
             raise BadRequest(description=f"Row {current_idx}: {e}")
 

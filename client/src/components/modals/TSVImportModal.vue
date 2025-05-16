@@ -24,15 +24,10 @@
                                         dropzone type="single" file-types=".tsv">
                                     </VaFileUpload>
                                 </div>
-                                <div class="flex lg6 md6 sm12 xs12">
+                                <div class="flex lg12 md12 sm12 xs12">
                                     <VaSelect placeholder="Select the behaviour model" v-model="behaviour"
                                         :options="['SKIP', 'UPDATE']"
-                                        :messages="['What to do when encountering an existing record']" />
-                                </div>
-                                <div class="flex lg6 md6 sm12 xs12">
-                                    <VaCounter style="width: 100%;" v-model="header"
-                                        :messages="['The 0-based header row position, records will be processed starting by the next row after the header row']">
-                                    </VaCounter>
+                                        :messages="['Select how existing records should be handled during TSV import: SKIP to ignore them, or UPDATE to overwrite them with new data.']" />
                                 </div>
                             </div>
                             <div v-if="tsv" class="row">
@@ -96,7 +91,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { readTsvHeader } from '../../composables/tsvUtils'
-import { useForm, useToast, VaCounter, VaInnerLoading, VaInput } from 'vuestic-ui';
+import { useForm, useToast, VaInnerLoading, VaInput } from 'vuestic-ui';
 import AuthService from '../../services/clients/AuthService';
 import { AxiosError } from 'axios';
 import { ResearchModel } from '../../data/types';
@@ -115,7 +110,6 @@ const recordStore = useRecordStore()
 const modelStore = useModelStore()
 const isLoading = ref(false)
 const tsv = ref<undefined | File>()
-const header = ref(0)
 const behaviour = ref('SKIP')
 const referencModelFields = ref<string[]>([])
 
@@ -145,7 +139,6 @@ async function submit() {
     formData.append('referenceFields', JSON.stringify(referencModelFields.value))
     formData.append('model', props.modelName)
     formData.append('behaviour', behaviour.value)
-    formData.append('header', header.value.toString())
     let success = false
     try {
         isLoading.value = true

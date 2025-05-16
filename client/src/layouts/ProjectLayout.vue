@@ -2,11 +2,11 @@
     <VaLayout :top="{ fixed: true, order: 2 }"
         :left="{ fixed: true, absolute: breakpoints.smDown, order: 1, overlay: breakpoints.smDown && isSidebarVisible }">
         <template #top>
-            <VaNavbar :color="isArchived ? 'warning' : undefined" shadowed>
+            <VaNavbar shadowed bordered color="backgroundPrimary">
                 <template #left>
                     <VaNavbarItem>
                         <VaButton preset="secondary" :icon="isSidebarVisible ? 'menu_open' : 'menu'"
-                            @click="isSidebarVisible = !isSidebarVisible" />
+                            @click="isSidebarVisible = !isSidebarVisible" />   
                     </VaNavbarItem>
                     <VaNavbarItem>
                         <div class="row align-end">
@@ -24,25 +24,6 @@
                                 </span>
                             </div>
                         </div>
-                    </VaNavbarItem>
-                </template>
-                <template #right>
-                    <VaNavbarItem v-if="!isArchived">
-                        <VaButton color="textPrimary" preset="secondary" :loading="isLoading" icon="fa-plus"
-                            @click="modelStore.showForm = !modelStore.showForm">
-                            Model
-                        </VaButton>
-                    </VaNavbarItem>
-                    <!-- <VaNavbarItem>
-                        <ProjectToYAML v-if="projectStore.schema" preset="secondary" :file-name="projectId"
-                            color="textPrimary" :project="projectStore.schema" />
-                    </VaNavbarItem> -->
-                    <VaNavbarItem>
-                        <VaButton color="textPrimary" preset="secondary"
-                            @click="projectStore.showArchiveModal = !projectStore.showArchiveModal"
-                            :icon="archiveAction.icon">
-                            {{ archiveAction.label }}
-                        </VaButton>
                     </VaNavbarItem>
                 </template>
             </VaNavbar>
@@ -95,6 +76,7 @@
                 </VaSidebarItem>
             </VaSidebar>
         </template>
+
         <template #content>
             <main>
                 <div class="layout va-gutter-5 fluid">
@@ -110,21 +92,22 @@
                 </div>
             </main>
             <ArchiveProjectModal :archive="archiveAction.value" :project-id="projectId" />
-            <ModelFormModal :existing-models="modelNames" @submit="submitModel" />
+            <ModelFormModal v-model="modelStore.showCreateModal" mode="create" :existing-models="models"
+                :is-project-form="false" @submit="submitModel" />
         </template>
     </VaLayout>
 </template>
+
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 import { useBreakpoint, useToast, VaSidebar } from 'vuestic-ui'
-import { useRoute, useRouter } from 'vue-router';
+import {  useRoute, useRouter } from 'vue-router';
 import { useProjectStore } from '../stores/project-store';
 import ModelFormModal from '../components/modals/ModelFormModal.vue';
 import { useModelStore } from '../stores/model-store';
 import { ResearchModel } from '../data/types';
 import AuthService from '../services/clients/AuthService';
 import { catchError } from '../composables/toastMessages';
-import ProjectToYAML from '../components/buttons/ProjectToYAML.vue';
 import ArchiveProjectModal from '../components/modals/ArchiveProjectModal.vue';
 
 const props = defineProps<{
@@ -142,7 +125,6 @@ const isLoading = ref(false)
 const isSidebarVisible = ref(breakpoints.smUp)
 
 const models = computed(() => projectStore.models)
-const modelNames = computed(() => models.value.map(({ name }) => name))
 const isArchived = computed(() => projectStore.isArchived)
 const archiveAction = computed(() => isArchived.value ?
     {
@@ -155,6 +137,8 @@ const archiveAction = computed(() => isArchived.value ?
         label: 'Archive',
         value: true,
     })
+
+
 
 watch(() => props.projectId, async () => {
     await projectStore.getProjectSchema(props.projectId)
@@ -188,3 +172,15 @@ async function submitModel(model: ResearchModel) {
 }
 
 </script>
+
+<style scoped>
+.fade-enter-active,
+.fade-leave-active {
+    transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+    opacity: 0;
+}
+</style>

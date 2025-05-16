@@ -14,6 +14,12 @@ def get_model(project_id, model_name):
         raise NotFound(description=f"Model {model_name} not found for project {project_id}")
     return model
 
+def delete_item(project_id, model_name):
+    items = ResearchItem.objects(project_id=project_id, model_name=model_name)
+    count = items.count()
+    items.delete()
+    return f"A total of {count} records deleted!"
+
 def get_items(args):
     try:
         
@@ -54,11 +60,12 @@ def get_items(args):
 
 def get_item(project_id, model_name, item_id):
     item = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
+    if not item:
+        raise NotFound(description=f"{item_id} not found")
     return item
 
 def create_item(project_id, model_name, data):
     user = user_helper.get_current_user()
-    check_project_exists(project_id)
     model = get_model(project_id, model_name)
     reference_id = None
     inherit_from_ref_model = model.inherit_reference_id
@@ -67,16 +74,17 @@ def create_item(project_id, model_name, data):
     if model.reference_model:
         ## check reference id field and related record exist
         reference_id = data.get('reference_id')
+        print(reference_id, model.reference_model)
         if not reference_id:
             raise BadRequest(description=f"reference_id field is mandatory and must point to an item_id of {model.referce_model}")
-        ref_item = get_item(project_id, model.reference_model, reference_id)
+        ref_item = ResearchItem.objects(project_id=project_id, model_name=model.reference_model, item_id=reference_id).first()
         if not ref_item:
-            raise NotFound(description=f"Reference item with id: {reference_id} not found. Create it first before referencing to it")    
-    
+            raise NotFound(description=f"{item_id} not found")
+
+
     item_id = schema.create_item_id(id_fields, data, reference_id, inherit_from_ref_model)
     ## check if item already exists in the project and model context
-    existing_item = get_item(project_id, model_name, item_id)
-    
+    existing_item =  ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
     if existing_item:
         raise Conflict(description=f"An Item with id: {item_id} already exists in {model_name} of project {project_id}")
 
@@ -118,12 +126,9 @@ def update_item(project_id, model_name, item_id, data):
     if not item:
         raise NotFound(description=f"{model_name}: {item_id} not found")
     
-    new_item_id = schema.create_item_id(model.id_format, data, item.reference_id ,model.inherit_reference_id)
-    
-    if new_item_id and item_id != new_item_id:
-        message = f"{model_name} {item_id} has changed into {new_item_id}, the value of the fields {','.join(model.id_fields)} can't be changed"
-        raise BadRequest(description=message)
-    
+    if any([key for key in data if key in model.id_format]):
+        raise BadRequest(description=f"This fields {','.join(model.id_format)} cannot be changed")
+
     evaluation_errors = filter.evaluate_model_fields(model.fields, data)
     if evaluation_errors:
         raise BadRequest(description=f"{'; '.join(evaluation_errors)}")

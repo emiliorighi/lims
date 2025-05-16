@@ -1,28 +1,92 @@
 <template>
     <div class="row">
         <div class="flex lg12 md12 sm12 xs12">
-            <div class="row align-center justify-space-between">
+            <div class="row align-center justify-space-between mb-4">
                 <div class="flex lg4 md6">
                     <VaInput v-model="linkStore.filter" @update:model-value="debouncedSearch"
                         :placeholder="`Search ${type}...`" clearable>
                     </VaInput>
                 </div>
                 <div class="flex">
-                    <VaButton color="textPrimary" icon="fa-file-upload" :disabled="isArchived"
+                    <VaButton class="mr-2" icon="fa-download" :disabled="!linkStore.links.length"
+                        @click="downloadAllFiles">
+                        Download All
+                    </VaButton>
+                    <VaButton color="success" icon="fa-file-upload" :disabled="isArchived"
                         @click="linkStore.toggleModal">
-                        Upload {{ type }}</VaButton>
+                        Upload {{ type }}
+                    </VaButton>
                 </div>
             </div>
             <div class="row row-equal justify-center">
-                <div v-for="link in linkStore.links" class="flex lg12 md12 sm12 xs12">
-                    <LinkDetailsCard @show="handleShow" @delete="triggerDelete" :link="link" :key="link.name"
-                        :type="type" />
+                <!-- Empty State -->
+                <div v-if="!linkStore.links.length && !linkStore.filter" class="flex lg12 md12 sm12 xs12">
+                    <VaCard class="empty-state-card">
+                        <VaCardContent>
+                            <div class="column align-center text-center">
+                                <VaIcon 
+                                    :name="type === 'images' ? 'fa-image' : 'fa-scroll'"
+                                    size="large"
+                                    color="neutral"
+                                    class="mb-4"
+                                />
+                                <h3 class="va-h3 mb-2">No {{ type }} yet</h3>
+                                <p class="va-text-secondary mb-4">
+                                    {{ type === 'images' ? 
+                                        'Start adding images to your model to visualize your data.' : 
+                                        'Add protocols to document your research methods and procedures.' 
+                                    }}
+                                </p>
+                                <VaButton
+                                    color="primary"
+                                    icon="fa-file-upload"
+                                    :disabled="isArchived"
+                                    @click="linkStore.toggleModal"
+                                >
+                                    Upload your first {{ type === 'images' ? 'image' : 'protocol' }}
+                                </VaButton>
+                            </div>
+                        </VaCardContent>
+                    </VaCard>
                 </div>
-                <div class="flex">
-                    <VaPagination color="textPrimary" v-model="offset" @update:modelValue="handlePagination"
-                        :page-size="linkStore.pagination.limit" :total="total" :visible-pages="3"
-                        buttons-preset="primary" gapped />
+                <!-- No Results from Search -->
+                <div v-else-if="!linkStore.links.length && linkStore.filter" class="flex lg12 md12 sm12 xs12">
+                    <VaCard class="empty-state-card">
+                        <VaCardContent>
+                            <div class="column align-center text-center">
+                                <VaIcon 
+                                    name="fa-search"
+                                    size="large"
+                                    color="neutral"
+                                    class="mb-4"
+                                />
+                                <h3 class="va-h3 mb-2">No results found</h3>
+                                <p class="va-text-secondary mb-4">
+                                    No {{ type }} match your search "{{ linkStore.filter }}". Try adjusting your search terms.
+                                </p>
+                                <VaButton
+                                    color="textPrimary"
+                                    preset="plain"
+                                    @click="clearSearch"
+                                >
+                                    Clear search
+                                </VaButton>
+                            </div>
+                        </VaCardContent>
+                    </VaCard>
                 </div>
+                <!-- Links List -->
+                <template v-else>
+                    <div v-for="link in linkStore.links" class="flex lg12 md12 sm12 xs12">
+                        <LinkDetailsCard @show="handleShow" @delete="triggerDelete" :link="link" :key="link.name"
+                            :type="type" />
+                    </div>
+                    <div v-if="total > linkStore.pagination.limit" class="flex lg12 md12 sm12 xs12 justify-center mt-4">
+                        <VaPagination color="textPrimary" v-model="offset" @update:modelValue="handlePagination"
+                            :page-size="linkStore.pagination.limit" :total="total" :visible-pages="3"
+                            buttons-preset="primary" gapped />
+                    </div>
+                </template>
             </div>
         </div>
     </div>
@@ -31,7 +95,7 @@
             <div class="row align-center justify-space-between">
                 <div class="flex">
                     <h3 class="va-h3">
-                        Deleteting {{ protocolToDelete?.name }}
+                        Deleting {{ protocolToDelete?.name }}
                     </h3>
                 </div>
             </div>
@@ -45,8 +109,18 @@
             </div>
         </div>
         <template #footer>
-            <VaButton @click="deleteImage" color="danger">
-                Confirm </VaButton>
+            <div class="row justify-space-between">
+                <div class="flex">
+                    <VaButton @click="showDeleteConfirmation = false" color="textPrimary" preset="plain">
+                        Cancel
+                    </VaButton>
+                </div>
+                <div class="flex">
+                    <VaButton @click="deleteImage" color="danger">
+                        Delete
+                    </VaButton>
+                </div>
+            </div>
         </template>
     </VaModal>
     <VaModal hide-default-actions close-button v-model="showImage">
@@ -114,6 +188,11 @@ async function handleSearch() {
     await linkStore.fetchProjectModelLinks(props.projectId, props.modelName, props.type)
 }
 
+function clearSearch() {
+    linkStore.filter = ""
+    handleSearch()
+}
+
 async function handlePagination() {
     await linkStore.fetchProjectModelLinks(props.projectId, props.modelName, props.type)
 }
@@ -133,6 +212,48 @@ async function deleteImage() {
     showDeleteConfirmation.value = !showDeleteConfirmation.value
     await handleSearch()
     await modelStore.getStats(props.projectId, props.modelName)
+}
 
+async function downloadAllFiles() {
+    try {
+        await linkStore.downloadAllFiles(props.projectId, props.modelName)
+    } catch (error) {
+        console.error('Error downloading files:', error)
+    }
 }
 </script>
+
+<style scoped>
+.mb-2 {
+    margin-bottom: 0.5rem;
+}
+
+.mb-4 {
+    margin-bottom: 1rem;
+}
+
+.mt-4 {
+    margin-top: 1rem;
+}
+
+.mr-2 {
+    margin-right: 0.5rem;
+}
+
+.empty-state-card {
+    margin: 2rem 0;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.align-center {
+    align-items: center;
+}
+</style>

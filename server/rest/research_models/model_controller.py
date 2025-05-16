@@ -24,6 +24,12 @@ class ProjectModelsApi(Resource):
         message = model_service.create_model(project_id, data)
         return Response(json.dumps(message), mimetype="application/json", status=201)
     
+class EditModelFieldDescriptionApi(Resource):
+    def put(self, project_id, model_name, field_key):
+        data = request.json if request.is_json else request.form
+        resp = model_service.update_field_description(project_id,model_name,field_key, data)
+        return Response(json.dumps(resp), mimetype="application/json", status=201)
+
 class ProjectModelApi(Resource):
     def get(self, project_id, model_name):
         project = model_service.get_project_model(project_id, model_name)
@@ -33,4 +39,17 @@ class ProjectModelApi(Resource):
     @admin.admin_required()
     def delete(self, project_id, model_name):
         resp = model_service.delete_model(project_id, model_name)
+        return Response(json.dumps(resp), mimetype="application/json", status=201)
+
+    @jwt_required()
+    @admin.admin_required()
+    def put(self, project_id, model_name):
+        data = request.json if request.is_json else request.form
+        resp = model_service.update_model(project_id, model_name, data)
+        return Response(json.dumps(resp), mimetype="application/json", status=201)
+
+
+class RelatedModelRecordCount(Resource):
+    def get(self, project_id, model_name):
+        resp = model_service.get_records_count_of_related_models(project_id, model_name)
         return Response(json.dumps(resp), mimetype="application/json", status=201)

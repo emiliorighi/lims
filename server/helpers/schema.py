@@ -16,7 +16,7 @@ def validate_model(model):
     errors = []
     ## check if field is using id 
     for field in model.get('fields'):
-        key_to_test = field.get('key').lower()
+        key_to_test = field.get('key').lower().strip()
         if 'id' == key_to_test:
             errors.append(f"{key_to_test} cannot be used as it is a reserved key")
     for id_field in model.get('id_format'):
@@ -51,7 +51,7 @@ def validate_research_project_schema(content):
         errors.extend(validate_model(model))
     return errors  
 
-def create_item_id(id_fields,data, reference_id=None, inherit_from_ref_id=False):
+def create_item_id(id_fields, data, reference_id=None, inherit_from_ref_id=False):
     local_parts = [str(data.get(attr)) for attr in id_fields if data.get(attr)]
     parts = []
     if inherit_from_ref_id and reference_id:

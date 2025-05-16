@@ -76,6 +76,21 @@ export const useLinkStore = defineStore('link', {
                 catchError(e)
             }
         },
+        async downloadAllFiles(projectId: string, modelName: string) {
+            try {
+                const { data } = await LinkService.downloadAllFiles(projectId, modelName)
+                const href = URL.createObjectURL(data)
+                const link = document.createElement('a');
+                link.href = href;
+                link.setAttribute('download', `${projectId}_${modelName}_files.zip`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(href);
+            } catch (e) {
+                catchError(e)
+            }
+        },
         resetPagination() {
             this.pagination = { ...initPagination }
         },

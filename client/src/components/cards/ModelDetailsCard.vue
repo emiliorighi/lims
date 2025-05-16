@@ -10,8 +10,13 @@
                         model.description ? model.description : 'No description available' }}</p>
                 </div>
                 <div v-if="model.reference_model" class="flex">
-                    <VaChip color="backgroundElement" size="small" icon="fa-link">{{
+                    <VaChip color="backgroundPrimary" size="small" icon="fa-link">{{
                         model.reference_model }}</VaChip>
+                </div>
+                <div class="flex" v-if="model.inherit_reference_id">
+                    <VaChip size="small" color="warning">
+                        Inherti Ids from {{ model.reference_model }}
+                    </VaChip>
                 </div>
             </div>
         </VaCardContent>

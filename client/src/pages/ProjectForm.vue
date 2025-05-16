@@ -115,12 +115,12 @@
                                                             <div class="flex">
                                                                 <div class="row">
                                                                     <div class="flex">
-                                                                        <VaButton @click="editModel(model)" preset="primary" icon="fa-edit">
+                                                                        <VaButton @click="editModel(model)"
+                                                                            preset="primary" icon="fa-edit">
                                                                         </VaButton>
                                                                     </div>
                                                                     <div class="flex">
-                                                                        <VaButton
-                                                                            @click="projectStore.deleteModel(idx)"
+                                                                        <VaButton @click="projectStore.deleteModel(idx)"
                                                                             color="danger" preset="primary"
                                                                             icon="fa-trash"></VaButton>
                                                                     </div>
@@ -150,7 +150,13 @@
                 </VaInnerLoading>
             </div>
         </div>
-        <ModelFormModal @submit="handleModel" :existing-models="filteredModels" :incoming-model="selectedModel" />
+        <ModelFormModal 
+            v-model="showModelForm" 
+            @submit="handleModel" 
+            :existing-models="filteredModels" 
+            :incoming-model="selectedModel" 
+            mode="create"
+        />
         <VaModal v-model="showModal" hide-default-actions closeButton>
             <div class="layout va-gutter-5">
                 <h1 class="va-h3">Incoming Project</h1>
@@ -212,10 +218,11 @@ const currentStep = ref(0)
 const existingProject = ref<ReseachProject | null>(null)
 const templateLoading = ref(false)
 const showModal = ref(false)
+const showModelForm = ref(false)
 
 const refModels = computed(() => projectStore.projectForm.models)
 const refModelNames = computed(() => refModels.value.map(({ name }) => name))
-const filteredModels = computed(() => refModelNames.value.filter(n => n !== selectedModel.value?.name))
+const filteredModels = computed(() => refModels.value.filter(n => n.name !== selectedModel.value?.name))
 const project = computed(() => projectStore.projectForm)
 
 async function handleName(v: string) {
@@ -240,12 +247,12 @@ function handleModel(model: ResearchModel) {
 
 function addModel() {
     selectedModel.value = undefined
-    modelStore.showForm = true
+    showModelForm.value = true
 }
 
 function editModel(model: ResearchModel) {
     selectedModel.value = { ...model }
-    modelStore.showForm = true
+    showModelForm.value = true
 }
 
 async function updateProjectAndValidate(

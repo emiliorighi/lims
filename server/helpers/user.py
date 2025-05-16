@@ -9,6 +9,6 @@ def get_current_user():
     except Exception as e:
         raise Unauthorized(description="Authenticate first")
     user = User.objects(name=username).first()
-    if user:
-        return user
-    raise NotFound(description="User not found")
+    if not user:
+        raise NotFound(description="User not found")
+    return user

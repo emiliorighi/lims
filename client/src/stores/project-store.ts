@@ -22,6 +22,7 @@ export const useProjectStore = defineStore('project', {
   state: () => {
     return {
       projectForm: { ...initForm } as ProjectSchema,
+      showModelForm:false,
       projectIdExists: false,
       projectStats: [] as [string, number][],
       fromTemplate: false,

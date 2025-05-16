@@ -14,11 +14,13 @@ export const useModelStore = defineStore('model', {
         return {
             currentModel: null as ResearchModel | null,
             modelForm: { ...modelForm },
-            showForm: false,
+            showCreateModal: false,
+            showEditModal: false,
             showDeleteConfirmation: false,
             filters: [] as ResearchFilter[],
             refModel: null as ResearchModel | null,
             idFormat: [] as string[],
+            isUpdate: false,
             records: 0,
             protocols: 0,
             images: 0,
@@ -42,7 +44,18 @@ export const useModelStore = defineStore('model', {
                 this.idFormat = [...this.currentModel.id_format]
             }
             this.refModel = models.find(({ name }) => name === this.currentModel?.reference_model) ?? null
+        },
+        toggleCreateModal() {
+            this.showCreateModal = !this.showCreateModal
+            if (!this.showCreateModal) {
+                this.resetModelForm()
+            }
+        },
+        toggleEditModal() {
+            this.showEditModal = !this.showEditModal
+            if (!this.showEditModal) {
+                this.resetModelForm()
+            }
         }
-
     }
 })

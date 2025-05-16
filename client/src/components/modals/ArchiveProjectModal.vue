@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue';
 import { useToast } from 'vuestic-ui/web-components';
-import ProjectService from '../../services/clients/ProjectService';
+import AuthService from '../../services/clients/AuthService';
 import { catchError } from '../../composables/toastMessages';
 import { useProjectStore } from '../../stores/project-store';
 
@@ -39,13 +39,13 @@ const projectStateText = computed(() => {
             header: 'Archiving project',
             btnLabel: 'Archive Project',
             description: 'When a project is archived, it becomes read-only. You can still view all its details and history, but editing, updating, or uploading new content will be disabled until the project is unarchived.',
-            request: ProjectService.archiveProject
+            request: AuthService.archiveProject
         }
         : {
             header: 'Activating project',
             btnLabel: 'Activate Project',
             description: 'When a project is unarchived, it returns to editable mode. You will be able to update its details, upload new content, and make any necessary changes.',
-            request: ProjectService.unarchiveProject
+            request: AuthService.unarchiveProject
         }
 })
 

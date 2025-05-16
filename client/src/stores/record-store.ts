@@ -3,7 +3,7 @@ import { useToast } from 'vuestic-ui/web-components'
 import { AxiosError } from 'axios'
 import AuthService from '../services/clients/AuthService'
 import RecordService from '../services/clients/RecordService'
-import { ErrorResponseData, ResearchFilter, ResearchRecord } from '../data/types'
+import { ErrorResponseData, ResearchRecord } from '../data/types'
 import StatsService from '../services/clients/StatsService'
 
 const staticFilters: Record<string, any> = {
@@ -28,9 +28,10 @@ export const useRecordStore = defineStore('record', {
             idToDelete: null as null | string,
             relatedRecordCount: 0,
             tableLoading: false,
+            refRecords: [] as string[],
             recordStats: [] as [string, number][],
             isTSVLoading: false,
-            idToUpdate: null as null | string,
+            isRefRecord: false,
             recordForm: {} as Record<string, any>,
             sort: { ...staticFilters },
             pagination: { ...initPagination },
@@ -44,31 +45,17 @@ export const useRecordStore = defineStore('record', {
     actions: {
 
         buildQuery() {
-            if (this.searchForm) {
-                const searchFormEntries = Object.values(this.searchForm).map(value => Object.entries(value)).flat()
-                return Object.fromEntries(searchFormEntries);
-            } else {
-                return {}
-            }
+            const mappedEntries = Object.entries(this.searchForm).map(([key, query]) => {
+                //generate query key operator
+                return Object.entries(query).map(([op, value]) => [`${key}__${op}`, value])
+            }).flat()
+            return Object.fromEntries(mappedEntries)
         },
-        initForm(fields: ResearchFilter[]) {
-            const entries = fields.map(({ key, type, multi }) => {
-                let value = "" as any
-                if (type === 'select' && multi) value = []
-                return [key, value]
-            })
-            this.recordForm = { ...Object.fromEntries(entries) }
-        },
-        setForm(id: string, recordData: Record<string, any>) {
-            this.idToUpdate = id
-            this.recordForm = { ...recordData }
-        },
-        toggleRecordForm(){
+        toggleRecordForm() {
             this.showRecordForm = !this.showRecordForm
         },
         resetForm() {
             this.recordForm = {}
-            this.idToUpdate = null
         },
         async fetchRecords(projectId: string, modelName: string) {
             const params = { ...this.buildQuery(), ...this.pagination, ...this.sort }
@@ -86,6 +73,14 @@ export const useRecordStore = defineStore('record', {
         async fetchRelatedRecords(projectId: string, modelName: string, itemId: string, query: Record<string, any>) {
             const { data } = await RecordService.getRelatedRecords(projectId, modelName, itemId, query)
             this.relatedRecordCount = data.total
+        },
+        async fetchRefRecords(projectId: string, modelName: string) {
+            try {
+                const { data } = await StatsService.getStats(projectId, modelName, 'reference_id', {})
+                this.refRecords = Object.keys(data)
+            } catch (err) {
+                this.catchError(err)
+            }
         },
         async getFieldFrequencies(projectId: string, modelName: string, field: string, ignoreQuery?: boolean) {
             try {
@@ -111,6 +106,18 @@ export const useRecordStore = defineStore('record', {
                 this.catchError(error)
             }
         },
+        toggleChartModal() {
+            this.showChartModal = !this.showChartModal
+        },
+        toggleImportModal() {
+            this.showTSVImportModal = !this.showTSVImportModal
+        },
+        toggleDeleteModal() {
+            this.showDeleteConfirmation = !this.showDeleteConfirmation
+        },
+        toggleReportModal() {
+            this.showReportModal = !this.showReportModal
+        },
         async getRecordStats(field: string, query: Record<string, any>) {
             try {
                 const { data } = await StatsService.getRecordStats(field, query)
@@ -123,7 +130,7 @@ export const useRecordStore = defineStore('record', {
             const downloadRequest = { format: "tsv", fields: fields.join(',') }
             try {
                 this.isTSVLoading = true
-                const requestData = applyFilters ? { ...this.searchForm, ...downloadRequest } : { ...downloadRequest }
+                const requestData = applyFilters ? { ...this.buildQuery(), ...downloadRequest } : { ...downloadRequest }
                 const { data } = await RecordService.getTsv(projectId, modelName, requestData)
                 const href = URL.createObjectURL(data)
                 const filename = `${modelName}_report.tsv`
@@ -146,6 +153,22 @@ export const useRecordStore = defineStore('record', {
         },
         resetPagination() {
             this.pagination = { ...initPagination }
+        },
+        async triggerDelete(projectId: string, modelName: string, item: ResearchRecord) {
+            this.idToDelete = item.item_id
+            await this.fetchRelatedRecords(projectId, modelName, item.item_id, {})
+            this.showDeleteConfirmation = true
+        },
+        viewRecord(item: ResearchRecord) {
+            this.isRefRecord = false
+            this.record = { ...item }
+            this.showRecordDetails = !this.showRecordDetails
+        },
+        async viewRelatedRecord(projectId: string, refModelName: string | undefined, id: string | undefined) {
+            if (!id || !refModelName) return
+            await this.fetchItem(projectId, refModelName, id)
+            this.isRefRecord = true
+            this.showRecordDetails = true
         },
         catchError(error: any) {
             console.error(error)

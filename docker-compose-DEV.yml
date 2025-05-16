@@ -9,7 +9,7 @@ services:
       - .env
     volumes:
      - ./mongo-init.sh:/docker-entrypoint-initdb.d/mongo-init.sh
-     - mongodb-data:${MONGODB_DATA_DIR}
+     - mongodb-data:/var/lib/mongodb-data
 
     ports:
       - "27013:${DB_PORT}"
@@ -23,9 +23,7 @@ services:
     volumes:
       - ./server:/server
       - ./project-spec.json:/server/project-spec.json
-      - ./project-spec-v2.json:/server/project-spec-v2.json
-      - ./protocols:/server/protocols # store protocols here (pdf, txt, doc)
-      - ./images:/server/images # store pictures here (jpeg, png)
+      - ./files:/server/files
     env_file:
       - .env
 

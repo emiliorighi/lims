@@ -23,9 +23,10 @@
                     </template>
                     <template #content>
                         <div class="row">
-                            <div v-if="field.description" class="flex lg12 md12 sm12 xs12">
-                                <p class="va-text-secondary"><span class="va-text-bold">Description: </span> {{
-                                    field.description ?? 'No Description available' }}</p>
+                            <div class="flex lg12 md12 sm12 xs12 va-text-secondary">
+                                <span class="va-text-bold">Description: </span> <span>{{
+                                    field.description ?? 'No Description available' }}</span>
+                                <VaButton icon="fa-edit" preset="secondary"></VaButton>
                             </div>
                             <div v-if="field.multi" class="flex lg12 md12 sm12 xs12">
                                 <p class="va-text-secondary"><span class="va-text-bold">Multiple Choice: </span>

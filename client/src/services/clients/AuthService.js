@@ -42,6 +42,12 @@ class AuthService {
     getUser(id) {
         return auth.get(`/users/${id}`)
     }
+    archiveProject(id) {
+        return auth.patch(`/projects/${id}/archive`)
+    }
+    unarchiveProject(id) {
+        return auth.patch(`/projects/${id}/unarchive`)
+    }
     createUser(payload) {
         return auth.post('/users', payload)
     }
@@ -60,11 +66,17 @@ class AuthService {
     updateRecord(projectId, modelName, itemId, data) {
         return auth.put(`/projects/${projectId}/models/${modelName}/records/${itemId}`, data)
     }
+    deleteRecords(projectId, modelName) {
+        return auth.delete(`/projects/${projectId}/models/${modelName}/records`)
+    }
     deleteRecord(projectId, modelName, itemId) {
         return auth.delete(`/projects/${projectId}/models/${modelName}/records/${itemId}`)
     }
     createModel(projectId, data) {
         return auth.post(`/projects/${projectId}/models`, data)
+    }
+    updateModel(projectId, modelName, data) {
+        return auth.put(`/projects/${projectId}/models/${modelName}`, data)
     }
     deleteModel(projectId, modelName) {
         return auth.delete(`/projects/${projectId}/models/${modelName}`)
@@ -78,7 +90,7 @@ class AuthService {
     deleteItem(projectId, itemId, model) {
         return auth.delete(`/projects/${projectId}/models/${model}/${itemId}`)
     }
-    uploadTSV(projectId,modelName, data) {
+    uploadTSV(projectId, modelName, data) {
         return auth.post(`/projects/${projectId}/models/${modelName}/records/upload`, data)
     }
     uploadProtocol(projectId, model, data) {

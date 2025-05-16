@@ -1,5 +1,76 @@
 import type { TChartData as ChartData } from 'vue-chartjs/dist/types'
 
+// ========================
+// String Query Operators
+// ========================
+export type StringQueryOperator =
+  | 'exact'
+  | 'iexact'
+  | 'contains'
+  | 'icontains'
+  | 'startswith'
+  | 'istartswith'
+  | 'endswith'
+  | 'iendswith'
+  | 'wholeword'
+  | 'iwholeword';
+
+export const stringQueryOperators: Record<StringQueryOperator, string> = {
+  exact: "Exact Match",
+  iexact: "Exact Match (Case Insensitive)",
+  contains: "Contains",
+  icontains: "Contains (Case Insensitive)",
+  startswith: "Starts With",
+  istartswith: "Starts With (Case Insensitive)",
+  endswith: "Ends With",
+  iendswith: "Ends With (Case Insensitive)",
+  wholeword: "Contains Whole Word",
+  iwholeword: "Contains Whole Word (Case Insensitive)",
+};
+
+// ========================
+// Number/Date Query Operators
+// ========================
+export type NumberDateQueryOperator =
+  | 'lt'
+  | 'lte'
+  | 'gt'
+  | 'gte'
+  | 'range';
+
+export const numberDateQueryOperators: Record<NumberDateQueryOperator, string> = {
+  lt: "Less Than",
+  lte: "Less Than or Equal To",
+  gt: "Greater Than",
+  gte: "Greater Than or Equal To",
+  range: "Between (Range)",
+};
+
+// ========================
+// List Query Operators
+// ========================
+export type ListQueryOperator = 'in' | 'nin' | 'all';
+
+export const listQueryOperators: Record<ListQueryOperator, string> = {
+  in: "In List",
+  nin: "Not In List",
+  all: "Contains All Items",
+};
+
+// ========================
+// Unified Query Operator Type
+// ========================
+export type QueryOperator =
+  | StringQueryOperator
+  | NumberDateQueryOperator
+  | ListQueryOperator;
+
+export type QueryOperatorMap =
+  | typeof stringQueryOperators
+  | typeof numberDateQueryOperators
+  | typeof listQueryOperators;
+
+
 export type ColorThemes = {
   [key: string]: string
 }
@@ -165,7 +236,7 @@ export type ResearchModel = {
   name: string,
   description: string,
   reference_model?: string,
-  inherit_reference_id?:boolean,
+  inherit_reference_id?: boolean,
   project_id?: string,
   fields: ResearchFilter[],
   id_format: string[]
@@ -233,3 +304,5 @@ export type VaChartItem = {
 }
 
 export type ColumnSizes = '1' | '2' | '3' | '4'
+
+export type EditMode = 'edit-controlled' | 'edit-override' | 'clone'

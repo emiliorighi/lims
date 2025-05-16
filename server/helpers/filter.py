@@ -42,23 +42,6 @@ def evaluate_model_fields(fields, data):
             evaluation_errors.extend(evaluate_input(filter_type, field, value))    
     return evaluation_errors
 
-            
-def evaluate_fields(fields, data):
-    evaluation_errors = []
-    for field in fields:
-        filter = field['filter']
-        value = data.get(field['key'])
-        if value == None:
-            continue
-        if 'input_type' in filter:
-            evaluation_errors.extend(evaluate_input(filter['input_type'], field, value))    
-        elif 'choices' in filter:
-            evaluation_errors.extend(evaluate_choices( filter['choices'], value))
-        elif 'min' in filter and value is not None:
-            min_val, max_val = filter.get('min'), filter.get('max')
-            evaluation_errors.extend(evaluate_range(min_val,max_val,field,value))
-    return evaluation_errors
- 
 def evaluate_input(input_type, field, value):
     errors = []
     if input_type == 'date' and not is_valid_date(value):

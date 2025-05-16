@@ -26,7 +26,8 @@ def initialize_routes(api):
     ## GLOBAL STATS / LOOKUP
     global_routes = [
         (stats_controller.LookupApi, '/lookup'),
-        (file_controller.FileAPI, '/files/<hash>/download')
+        (file_controller.FileAPI, '/files/<hash>/download'),
+        (file_controller.ProjectFilesAPI, '/projects/<project_id>/models/<model_name>/files/download')
     ]
 
     ## PROJECTS
@@ -44,6 +45,9 @@ def initialize_routes(api):
         (model_controller.ModelsApi, '/models'),
         (model_controller.ProjectModelsApi, '/projects/<project_id>/models'),
         (model_controller.ProjectModelApi, '/projects/<project_id>/models/<model_name>'),
+        (model_controller.RelatedModelRecordCount, '/projects/<project_id>/models/<model_name>/related_models_count'),
+
+        (model_controller.EditModelFieldDescriptionApi, '/projects/<project_id>/models/<model_name>/fields/<field_key>/description'),
         (lookup_controller.LookupModelDataApi, '/projects/<project_id>/models/<model_name>/lookup'),
         (stats_controller.ModelStatsApi, '/projects/<project_id>/models/<model_name>/stats/<field>'),
         (records_controller.ModelByProjectStatsApi, '/projects/<project_id>/<model>/stats/<field>'),
