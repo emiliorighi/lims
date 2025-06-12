@@ -7,6 +7,7 @@ def get_current_user():
         claims = get_jwt()
         username = claims.get('username')
     except Exception as e:
+        print(e)
         raise Unauthorized(description="Authenticate first")
     user = User.objects(name=username).first()
     if not user:

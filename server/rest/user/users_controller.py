@@ -3,8 +3,7 @@ from . import users_service
 from flask_restful import Resource
 from flask import Response, request
 from flask_jwt_extended import jwt_required, unset_jwt_cookies, get_jwt_identity
-from helpers import auth
-from wrappers import admin
+from wrappers import project_manager, admin
 
 class LoginApi(Resource):
     @jwt_required()
@@ -26,7 +25,7 @@ class LogoutApi(Resource):
 class UsersApi(Resource):
 
     @jwt_required()
-    @admin.admin_required()
+    @project_manager.project_manager_required()
     def get(self, name=None):
         if name:
             user = users_service.get_user(name)
@@ -37,19 +36,18 @@ class UsersApi(Resource):
         return Response(json.dumps(json_resp), mimetype="application/json", status=200)
 
     @jwt_required()
-    @admin.admin_required()
+    @project_manager.project_manager_required()
     def post(self):
         data = request.json if request.is_json else request.form
         message, status = users_service.create_user(data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
     
     @jwt_required()
-    @admin.admin_required()
+    @project_manager.project_manager_required()
     def put(self,name):
         data = request.json if request.is_json else request.form
         message, status = users_service.update_user(name,data)
         return Response(json.dumps(message), mimetype="application/json", status=status)
-
 
     @jwt_required()
     @admin.admin_required()
@@ -58,6 +56,7 @@ class UsersApi(Resource):
         return Response(json.dumps(message), mimetype="application/json", status=status)
 
 class UserProjectsApi(Resource):
+    @jwt_required()
     def get(self, name):
         total, data = users_service.get_related_projects(name, **request.args)
         json_resp = dict(total=total,data=data)

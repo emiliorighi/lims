@@ -41,6 +41,13 @@ export const projectRoutes: Array<RouteRecordRaw> = [
           ...route.params,
           type: 'images'
         }), component: () => import('../pages/Links.vue')
+      },
+      {
+        name: 'link-upload',
+        path: 'upload/:type',
+        props: route => ({
+          ...route.params,
+        }), component: () => import('../pages/LinkUpload.vue')
       }
     ]
   }

@@ -5,9 +5,12 @@ import { ErrorResponseData } from '../data/types'
 const {init} = useToast()
 
 export function catchError(error: any) {
-    console.error(error)
     const axiosError = error as AxiosError<ErrorResponseData>
     let message
+    if (axiosError.response && axiosError.response.status === 401) {
+        init({ message: 'Your session has expired. Please login again.', color: 'danger', duration: 3000, closeable:true })
+        return //let the interceptor handle it
+    }
     if (axiosError.response && axiosError.response.data && axiosError.response.data.message) {
         message = axiosError.response.data.message
 

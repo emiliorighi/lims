@@ -19,21 +19,16 @@
             <div style="min-width: 200px;" class="row">
                 <div class="flex">
                     <VaChip size="small" @click="recordStore.viewRecord(rowData)">view</VaChip>
-                    <!-- <VaButton size="small" @click="recordStore.viewRecord(rowData)" preset="primary">
-                        view
-                    </VaButton> -->
+
                 </div>
-                <div v-if="deleteEnabled" class="flex">
+                <div v-if="deleteEnabled && (role === 'admin' || role === 'project_manager' || role === 'data_manager')" class="flex">
                     <VaChip size="small" color="danger"
                         @click="recordStore.triggerDelete(projectId, modelName, rowData)">delete</VaChip>
-                    <!-- <VaButton size="small" icon="fa-trash"
-                        @click="recordStore.triggerDelete(projectId, modelName, rowData)" preset="primary"
-                        color="danger">
-                    </VaButton> -->
+
                 </div>
             </div>
         </template>
-
+    
         <template v-for="field in queryFilters" :key="field.key" #[`header(${field.key})`]>
             <RecordHeaderCell :field="field" :project-id="projectId" :model-name="modelName" />
         </template>
@@ -73,6 +68,7 @@ const globalStore = useGlobalStore()
 const recordStore = useRecordStore()
 const projectStore = useProjectStore()
 const modelStore = useModelStore()
+const role = computed(() => globalStore.user.role)
 const deleteEnabled = computed(() => props.editMode && !projectStore.isArchived)
 const refIdOptions = computed(() => recordStore.refRecords)
 const refFieldPayload = computed(() => ({ key: 'reference_id', label: `Reference ${refModel.value?.name}`, type: 'select', choices: refIdOptions.value, payload: recordStore.searchForm?.reference_id ?? { ...operatorMap.select } }))

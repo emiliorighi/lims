@@ -1,5 +1,5 @@
 from datetime import datetime
-from .enums import Roles, Actions,LinkType
+from .enums import Roles, Actions, LinkType, DocumentTypes
 import mongoengine as db
 
 def handler(event):
@@ -127,21 +127,6 @@ class Analysis(db.DynamicDocument):
         'strict': False
     }
 
-class AuditLog(db.Document):
-    user = db.StringField(required=True)  # Store the user's name or ID
-    action = db.EnumField(Actions, required=True)  # Store the action performed (create, update, delete)
-    target = db.StringField(required=True)  # Store the model type (Project, Experiment, etc.)
-    previous_object = db.DictField()
-    new_object = db.DictField()
-    timestamp = db.DateTimeField(default=datetime.now)
-    meta = {
-        'indexes': [
-            'user',
-            'action',
-            'timestamp'
-        ]
-    }
-
 class Chart(db.Document):
     user = db.StringField(required=True)
     project_id = db.StringField(required=True)
@@ -156,5 +141,30 @@ class User(db.Document):
     projects = db.ListField(db.StringField())
     created = db.DateTimeField(default=datetime.now())
     avatar = db.StringField()
+
+class AuditLog(db.Document):
+    user = db.StringField(required=True)  # Store the user's name or ID
+    action = db.EnumField(Actions, required=True)  # Store the action performed
+    document_type = db.EnumField(DocumentTypes, required=True)  # Type of document being modified
+    document_id = db.StringField(required=True)  # ID of the specific document
+    project_id = db.StringField(required=True)  # Project context
+    previous_object = db.DictField()  # Previous state of the document
+    new_object = db.DictField()  # New state of the document
+    changes = db.DictField()  # Specific changes made (for updates)
+    metadata = db.DictField()  # Additional context (e.g., file size for uploads)
+    timestamp = db.DateTimeField(default=datetime.now)
+    
+    meta = {
+        'indexes': [
+            'user',
+            'action',
+            'document_type',
+            'document_id',
+            'project_id',
+            'timestamp',
+            {'fields': ['project_id', 'document_type']},  # Compound index for project-specific queries
+            {'fields': ['document_type', 'document_id']}  # Compound index for document history
+        ]
+    }
 
 

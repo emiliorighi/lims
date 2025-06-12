@@ -19,7 +19,7 @@ export const useLinkStore = defineStore('link', {
             showLinkForm: false,
             linkType: 'protocols' as LinkType,
             isTableLoading: false,
-            files: [] as { file: File; name: string; description: string, type: LinkType, preview?: string }[],
+            files: [] as { file: File; name: string; description: string, type: LinkType, preview: File }[],
             sort: { ...staticFilters },
             filter: "",
             pagination: { ...initPagination },
@@ -76,13 +76,13 @@ export const useLinkStore = defineStore('link', {
                 catchError(e)
             }
         },
-        async downloadAllFiles(projectId: string, modelName: string) {
+        async downloadFiles(projectId: string, modelName: string, type: LinkType) {
             try {
-                const { data } = await LinkService.downloadAllFiles(projectId, modelName)
+                const { data } = await LinkService.downloadFiles(projectId, modelName, type)
                 const href = URL.createObjectURL(data)
                 const link = document.createElement('a');
                 link.href = href;
-                link.setAttribute('download', `${projectId}_${modelName}_files.zip`);
+                link.setAttribute('download', `${projectId}_${modelName}_${type}_files.zip`);
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);

@@ -7,6 +7,7 @@ from .project import projects_controller
 from .research_models import model_controller
 from .file import file_controller
 from .links import link_controller
+from .audit import audit_controller
 
 def initialize_routes(api):
     api_prefix = '/api'
@@ -27,7 +28,10 @@ def initialize_routes(api):
     global_routes = [
         (stats_controller.LookupApi, '/lookup'),
         (file_controller.FileAPI, '/files/<hash>/download'),
-        (file_controller.ProjectFilesAPI, '/projects/<project_id>/models/<model_name>/files/download')
+        (file_controller.ProjectFilesAPI, '/projects/<project_id>/models/<model_name>/files/<type>/download'),
+        (audit_controller.AuditLogsAPI, '/audit-logs'),
+        (audit_controller.ProjectAuditLogsAPI, '/projects/<project_id>/audit-logs'),
+        (audit_controller.DocumentAuditLogsAPI, '/audit-logs/<document_type>/<document_id>')
     ]
 
     ## PROJECTS

@@ -41,6 +41,7 @@ export const useGlobalStore = defineStore('global', {
       isAuthenticated: isAuth,
       recordStats: [] as [string, number][],
       protocolStats: [] as [string, number][],
+      showLoginModal: false,
       imageStats: [] as [string, number][],
       showDeleteConfirmation: false,
       theme: savedTheme,
@@ -49,6 +50,10 @@ export const useGlobalStore = defineStore('global', {
   },
 
   actions: {
+    toggleLoginModal() {
+      this.showLoginModal = !this.showLoginModal
+    },
+
     setTheme(value: Theme) {
       this.theme = value;
       const { applyPreset } = useColors()
@@ -68,10 +73,11 @@ export const useGlobalStore = defineStore('global', {
     changeUserName(name: string) {
       this.user.name = name
     },
-    mapUser(data: Record<string, any>) {
+    setUser(data: Record<string, any>) {
 
       this.user.name = data.name
       this.user.role = data.role
+      this.user.projects = data.projects
       localStorage.setItem(AUTH_KEY, 'true');
       this.isAuthenticated = true
     },
@@ -79,10 +85,10 @@ export const useGlobalStore = defineStore('global', {
     async login(name: string, password: string) {
       try {
         const { data } = await AuthService.login({ name, password })
-        this.mapUser(data)
+        this.setUser(data)
         this.toast({ message: `Welcome ${this.user.name}!`, color: 'success' })
       } catch (error) {
-        console.log(error)
+        console.error(error)
         this.toast({ message: 'Bad user or password', color: 'danger' })
         this.isAuthenticated = false
         localStorage.setItem(AUTH_KEY, 'false');
@@ -98,10 +104,11 @@ export const useGlobalStore = defineStore('global', {
       if (!this.isAuthenticated) return
       try {
         const { data } = await AuthService.check()
-        this.mapUser(data)
+        this.setUser(data)
       } catch (error) {
         console.error(error)
         localStorage.setItem(AUTH_KEY, 'false');
+        this.isAuthenticated = false
       }
     },
     async lookupData() {

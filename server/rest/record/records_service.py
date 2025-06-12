@@ -3,6 +3,8 @@ from werkzeug.exceptions import BadRequest, NotFound, Conflict, Unauthorized
 from mongoengine.queryset.visitor import Q
 from helpers import data,filter,schema, user as user_helper
 from ..project import projects_service
+from ..audit.audit_service import create_audit_log
+from db.enums import Actions, DocumentTypes
 
 def check_project_exists(project_id):
     if not ResearchProject.objects(project_id=project_id).first():
@@ -14,8 +16,18 @@ def get_model(project_id, model_name):
         raise NotFound(description=f"Model {model_name} not found for project {project_id}")
     return model
 
-def delete_item(project_id, model_name):
+def delete_items(project_id, model_name):
+    user = user_helper.get_current_user()
     items = ResearchItem.objects(project_id=project_id, model_name=model_name)
+    for item in items:
+        create_audit_log(
+            user=user.name,
+            action=Actions.DELETE,
+            document_type=DocumentTypes.RECORD,
+            document_id=item.item_id,
+            project_id=project_id,
+            previous_object=item.to_mongo().to_dict()
+        )
     count = items.count()
     items.delete()
     return f"A total of {count} records deleted!"
@@ -108,16 +120,27 @@ def create_item(project_id, model_name, data):
     }
 
     try: 
-        ResearchItem(**item_to_save).save()
+        item = ResearchItem(**item_to_save)
+        item.save()
+        
+        # Create audit log
+        create_audit_log(
+            user=user.name,
+            action=Actions.CREATE,
+            document_type=DocumentTypes.RECORD,
+            document_id=item_id,
+            project_id=project_id,
+            new_object=item.to_mongo().to_dict()
+        )
 
     except Exception as e:
         raise BadRequest(description=e)
     
-    return f"{model_name} {item_id} of {project_id} correctly saved!" # Return the created sample with 201 Created status
+    return f"{model_name} {item_id} of {project_id} correctly saved!"
 
 
 def update_item(project_id, model_name, item_id, data):
-
+    user = user_helper.get_current_user()
     check_project_exists(project_id)
 
     model = get_model(project_id, model_name)
@@ -133,19 +156,53 @@ def update_item(project_id, model_name, item_id, data):
     if evaluation_errors:
         raise BadRequest(description=f"{'; '.join(evaluation_errors)}")
     
+    # Store previous state for audit log
+    previous_state = item.to_mongo().to_dict()
+    
     item.update(**data)
+    
+    # Get updated item for audit log
+    updated_item = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
+    
+    # Create audit log
+    create_audit_log(
+        user=user.name,
+        action=Actions.UPDATE,
+        document_type=DocumentTypes.RECORD,
+        document_id=item_id,
+        project_id=project_id,
+        previous_object=previous_state,
+        new_object=updated_item.to_mongo().to_dict(),
+        changes=data
+    )
+    
     return f"{model}: {item_id} successfully updated"
 
 
 
 def delete_item(project_id, model_name, item_id):
+    user = user_helper.get_current_user()
     item_to_delete = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
     if not item_to_delete:
         raise NotFound(description=f"Item {item_id} in {model_name} of {project_id}, not found")
+    
+    # Store item data for audit log
+    item_data = item_to_delete.to_mongo().to_dict()
+    
     ##delete related records too
     ResearchItem.objects(project_id=project_id, reference_id=item_id).delete()
 
     item_to_delete.delete()
+    
+    # Create audit log
+    create_audit_log(
+        user=user.name,
+        action=Actions.DELETE,
+        document_type=DocumentTypes.RECORD,
+        document_id=item_id,
+        project_id=project_id,
+        previous_object=item_data
+    )
 
     return f"{model_name}: {item_id} successfully deleted"
 

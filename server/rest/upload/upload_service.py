@@ -3,6 +3,8 @@ from werkzeug.exceptions import BadRequest, NotFound
 from mongoengine.errors import NotUniqueError
 from helpers import filter, user as user_helper, schema as schema_helper
 from helpers.tsv import generate_tsv_dict_reader
+from ..audit.audit_service import create_audit_log
+from db.enums import Actions, DocumentTypes
 import json
     
 def upload_tsv(project_id,model_name, tsv, data):
@@ -100,13 +102,43 @@ def process_records(tsv, map, model, reference_columns, project_id, behaviour, u
             saved_item = ResearchItem(**doc_to_save).save()
             saved_items.append(saved_item)
             id_set.add(item_id)
+            
+            # Create audit log for new record
+            create_audit_log(
+                user=username,
+                action=Actions.CREATE,
+                document_type=DocumentTypes.RECORD,
+                document_id=item_id,
+                project_id=project_id,
+                new_object=saved_item.to_mongo().to_dict(),
+                metadata={'source': 'tsv_upload', 'row_index': current_idx}
+            )
 
         except NotUniqueError:
             if behaviour == 'UPDATE':
                 if item_id not in updated_items:
                     item_to_update = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
+                    # Store previous state for audit log
+                    previous_state = item_to_update.to_mongo().to_dict()
+                    
                     item_to_update.update(**item)
                     updated_items.add(item_id)
+                    
+                    # Get updated item for audit log
+                    updated_item = ResearchItem.objects(project_id=project_id, model_name=model_name, item_id=item_id).first()
+                    
+                    # Create audit log for updated record
+                    create_audit_log(
+                        user=username,
+                        action=Actions.UPDATE,
+                        document_type=DocumentTypes.RECORD,
+                        document_id=item_id,
+                        project_id=project_id,
+                        previous_object=previous_state,
+                        new_object=updated_item.to_mongo().to_dict(),
+                        changes=item,
+                        metadata={'source': 'tsv_upload', 'row_index': current_idx}
+                    )
             else:
                 skipped_items.add(item_id)
 

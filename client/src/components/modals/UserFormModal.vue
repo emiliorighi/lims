@@ -10,27 +10,24 @@
                 <div class="row align-end">
                     <div v-if="!nameToUpdate" class="flex lg6 md6 sm12 xs12">
                         <DebounceInput :loading="isInputLoading" @change="validateUsername"
-                            :parent-model="userStore.userForm.name" label="Name" placeholder="Type a name..."
+                            :parent-model="userStore.userForm.name" placeholder="Type a name..."
                             :rules="nameRules" />
                     </div>
                     <div class="flex lg6 md6 sm12 xs12">
                         <VaInput placeholder="Type a password.." :rules="passwordRules"
-                            v-model="userStore.userForm.password" label="Password" />
+                            v-model="userStore.userForm.password"  />
                     </div>
                 </div>
                 <div class="row align-end">
-                    <div class="flex lg6 md6 sm12 xs12">
-                        <VaSelect v-model="userStore.userForm.role" :options="roles" label="Role">
-                        </VaSelect>
+                    <div class="flex lg12 md12 sm12 xs12">
+                        <p class="va-h6 mb-1">Role</p>
+                        <VaRadio v-model="userStore.userForm.role" :options="availableRoles" />
                     </div>
-                    <div v-if="userStore.userForm.role !== 'admin'" class="flex lg6 md6 sm12 xs12">
-                        <VaSelect
-                            :rules="[(v: any) => userStore.userForm.projects.length > 0 || 'Select at least one project for the user']"
-                            multiple @update:search="handleSearch" v-model="userStore.userForm.projects"
-                            :options="projects" placeholder="Search projects" clearable :loading="selectLoading"
-                            searchable highlight-matched-text searchPlaceholderText="Type to search"
-                            noOptionsText="No project found">
-                        </VaSelect>
+                </div>
+                <div v-if="userStore.userForm.role !== 'admin'" class="row">
+                    <p class="va-h6 mb-1">Projects</p>
+                    <div class="flex lg12 md12 sm12 xs12">
+                        <VaOptionList v-model="userStore.userForm.projects" :options="projects" />
                     </div>
                 </div>
             </VaForm>
@@ -53,13 +50,14 @@ import { useUserStore } from '../../stores/user-store'
 import ProjectService from '../../services/clients/ProjectService'
 import AuthService from '../../services/clients/AuthService'
 import DebounceInput from '../inputs/DebounceInput.vue';
-
-const roles = ['admin', 'project_manager']
+import { useGlobalStore } from '../../stores/global-store';
 
 const { init } = useToast()
 const userStore = useUserStore()
 const { validate } = useForm('userForm')
-
+const gStore = useGlobalStore()
+const role = computed(() => gStore.user.role)
+const availableRoles = computed(() => role.value === 'project_manager' ? ['data_manager', 'researcher'] : ['project_manager', 'data_manager', 'researcher', 'admin'])
 const nameToUpdate = computed(() => userStore.nameToUpdate)
 const title = computed(() => userStore.nameToUpdate ? `Updating ${nameToUpdate.value}` : 'User form')
 const projects = ref<string[]>([])
@@ -67,6 +65,8 @@ const selectLoading = ref(false)
 const nameAlreadyExists = ref(false)
 const isLoading = ref(false)
 const isInputLoading = ref(false)
+const projectName = ref('')
+const limit = 10000
 // Computed Properties
 const nameRules = computed(() => {
     return [(v: string) => v.length > 0 || 'Name is mandatory', (v: string) =>
@@ -77,8 +77,9 @@ const passwordRules = computed(() => {
     return [(v: string) => v.length > 0 || 'Password is mandatory']
 })
 
-onMounted(() => {
+onMounted(async () => {
     if (nameToUpdate.value) projects.value = [...userStore.userForm.projects]
+    await handleSearch(projectName.value)
 })
 
 async function validateUsername(name: string) {
@@ -102,10 +103,9 @@ async function validateUsername(name: string) {
 }
 
 async function handleSearch(query: string) {
-    if (query.length < 2) return;
     selectLoading.value = true;
     try {
-        const { data } = await ProjectService.getProjects({ filter: query });
+        const { data } = role.value === 'admin' ? await ProjectService.getProjects({ filter: query, archived: 'false', limit: limit }) : await ProjectService.getUserProjects(gStore.user.name, { filter: query, archived: 'false', limit: limit  });
         projects.value = [...data.data.map((i: any) => i.project_id)]
     } catch (error) {
         handleError(error, 'Error fetching projects');
@@ -152,3 +152,8 @@ async function resetForm() {
     await userStore.fetchUsers({})
 }
 </script>
+<style scoped>
+.mb-1 {
+    margin-bottom: 10px;
+}
+</style>

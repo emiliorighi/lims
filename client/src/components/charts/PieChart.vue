@@ -6,7 +6,7 @@
 import { Pie } from 'vue-chartjs'
 import type { TChartOptions } from 'vue-chartjs/dist/types'
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement, CategoryScale } from 'chart.js'
-import { TPieChartData } from '../../../data/types'
+import { TPieChartData } from '../../data/types'
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 
 ChartJS.register(Title, Tooltip, Legend, ArcElement, CategoryScale, ChartDataLabels)

@@ -21,16 +21,16 @@ class ItemsByProjectModelApi(Resource):
         return Response(response, mimetype=mimetype, status=200)
     
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def post(self, project_id, model_name):
         data = request.json if request.is_json else request.form
         messages = records_service.create_item(project_id, model_name, data)
         return Response(json.dumps(messages), mimetype="application/json", status=201)
     
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def delete(self, project_id, model_name):
-        messages = records_service.delete_item(project_id, model_name)
+        messages = records_service.delete_items(project_id, model_name)
         return Response(json.dumps(messages), mimetype="application/json", status=201)
     
 class RelatedItemsByProjectModelApi(Resource):
@@ -41,7 +41,7 @@ class RelatedItemsByProjectModelApi(Resource):
         return Response(response, mimetype=mimetype, status=200)
     
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def post(self, project_id, model_name):
         data = request.json if request.is_json else request.form
         messages = records_service.create_item(project_id, model_name, data)
@@ -49,21 +49,20 @@ class RelatedItemsByProjectModelApi(Resource):
     
 
 class ItemByProjectModelApi(Resource):
-
     @jwt_required()
     def get(self, project_id, model_name, record_id):
         item = records_service.get_item(project_id, model_name, record_id)
         return Response(item.to_json(), mimetype="application/json", status=200)
 
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def put(self, project_id, model_name, record_id):
         data = request.json if request.is_json else request.form
         message = records_service.update_item(project_id,model_name, record_id, data)
         return Response(json.dumps(message), mimetype="application/json", status=201)
     
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def delete(self, project_id,model_name, record_id):
         message = records_service.delete_item(project_id,model_name,record_id)
         return Response(json.dumps(message), mimetype="application/json", status=201)

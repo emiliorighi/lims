@@ -19,6 +19,24 @@ export function hasProjectAccess(to: RouteLocationNormalized) {
   }
 }
 
+export function isProjectManager() {
+  const { user } = useGlobalStore()
+  if (user.role !== 'project_manager') {
+    return { name: 'unauthorized' }
+  }
+}
+
+export function hasEditAccess(to: RouteLocationNormalized) {
+  const { user } = useGlobalStore()
+  const { role, projects } = user
+  if (role !== 'admin' && role !== 'project_manager') {
+    const projectId = to.params.projectId as string
+    if (!projects.includes(projectId)) {
+      return { name: 'unauthorized' }
+    }
+  }
+}
+
 export async function isAuthenticated() {
   const gStore = useGlobalStore()
   await gStore.checkUserIsLoggedIn()

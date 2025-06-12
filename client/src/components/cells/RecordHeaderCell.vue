@@ -1,8 +1,9 @@
 <template>
     <div class="row align-center">
         <div class="flex flex-grow">
-            {{ field.key }} <VaChip style="margin-left: 3px;" v-if="field.isIdField" size="small" color="warning">ID
-            </VaChip>
+            <VaBadge :text="field.isIdField?'ID':''" color="warning" overlap placement="top-start">
+                <span>{{ field.key }}</span>
+            </VaBadge>
             <VaIcon @click="sortItems(field.key)" style="margin-left: 3px;cursor: pointer;" color="textPrimary"
                 :name="recordStore.sort.sort_column === field.key ? sortIcons[sortStep] : 'swap_vert'"></VaIcon>
             <VaBadge :dot="Object.values(field.payload).filter(Boolean).length > 0" overlap color="info">

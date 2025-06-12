@@ -15,7 +15,7 @@
                 </div>
                 <div class="flex" v-if="model.inherit_reference_id">
                     <VaChip size="small" color="warning">
-                        Inherti Ids from {{ model.reference_model }}
+                        Inherits IDs from {{ model.reference_model }}
                     </VaChip>
                 </div>
             </div>

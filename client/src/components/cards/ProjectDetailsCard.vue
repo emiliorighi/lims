@@ -1,8 +1,8 @@
 <template>
     <VaCard>
         <VaCardActions>
-            <h2 class="va-h6">
-                Project Information
+            <h2 class="va-h3">
+                Project Resume
             </h2>
         </VaCardActions>
         <VaCardContent>

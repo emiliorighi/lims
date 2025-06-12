@@ -1,4 +1,6 @@
 import axios from 'axios'
+import { useGlobalStore } from './stores/global-store'
+import router from './router'
 
 const baseURL = import.meta.env.VITE_API_PATH ?
   import.meta.env.VITE_API_PATH : import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL + 'api' : import.meta.env.BASE_URL + '/api'
@@ -47,6 +49,17 @@ submitInstance.interceptors.request.use(
   },
 )
 
+submitInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      const gStore = useGlobalStore()
+      gStore.isAuthenticated = false
+      router.push('/login')
+    }
+    return Promise.reject(error)
+  }
+)
 
 const download = axios.create({
   baseURL: baseURL, responseType: 'blob'

@@ -11,8 +11,8 @@ ROLES:
 
 class Roles(Enum):
     RESEARCHER = 'researcher' ## READ
-    MODEL_MANAGER = 'model_manager' ##CRUD MODEL
-    PROJECTS_MANAGER = 'project_manager' ##CRUD PROJECT
+    DATA_MANAGER = 'data_manager' ##CRUD DATA
+    PROJECTS_MANAGER = 'project_manager' ##CRUD PROJECT 
     ADMIN = 'admin' ##CRUD USERS
 
 class LinkType(Enum):
@@ -25,9 +25,20 @@ class SchemaModel(Enum):
     EXPERIMENT = 'experiment'
 
 class Actions(Enum):
-    CREATE= 'created'
-    UPDATE='updated'
-    DELETE='deleted'
+    CREATE = 'create'
+    UPDATE = 'update'
+    DELETE = 'delete'
+    ARCHIVE = 'archive'
+    UNARCHIVE = 'unarchive'
+    CLONE = 'clone'
+    UPLOAD = 'upload'
+    DOWNLOAD = 'download'
+
+class DocumentTypes(Enum):
+    PROJECT = 'project'
+    MODEL = 'model'
+    RECORD = 'record'
+    FILE_LINK = 'file_link'
 
 class Model(Enum):
     SAMPLE='sample'

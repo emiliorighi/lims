@@ -16,6 +16,7 @@ import AuthService from '../../services/clients/AuthService';
 import { useToast, VaInput, VaSelect } from 'vuestic-ui';
 import { AxiosError } from 'axios';
 import { debounce } from '../../composables/debounce';
+import { catchError } from '../../composables/toastMessages';
 
 const props = defineProps<{
     projectId: string,
@@ -77,8 +78,7 @@ async function updateItem(itemId: string, payload: Record<string, any>) {
         init({ message: 'Record correctly updated', color: 'success' })
     } catch (err) {
         const axiosError = err as AxiosError
-        const respData = axiosError.response?.data as { message: string }
-        init({ message: respData.message, color: 'danger', duration: 10000 })
+        catchError(axiosError)
     }
 }
 

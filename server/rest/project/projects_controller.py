@@ -3,18 +3,18 @@ from flask_restful import Resource
 from flask import Response, request
 from . import projects_service
 from flask_jwt_extended import jwt_required
-from wrappers import admin
+from wrappers import project_access, project_manager
 from helpers import data as data_helper
 
 class ResearchProjectsApi(Resource):
+    @jwt_required()
     def get(self):
-        
         total, data = projects_service.get_projects(**request.args)
         json_resp = dict(total=total,data=data)
         return Response(data_helper.dump_json(json_resp), mimetype="application/json", status=200)
     
     @jwt_required()
-    @admin.admin_required()
+    @project_manager.project_manager_required()
     def post(self):
         data = request.json if request.is_json else request.form
         format = 'yaml' if request.headers['Content-Type'] == 'application/x-yaml' else 'json'
@@ -22,20 +22,21 @@ class ResearchProjectsApi(Resource):
         return Response(json.dumps(message), mimetype="application/json", status=201)
     
 class ResearchProjectApi(Resource):
+    @jwt_required()
     def get(self, project_id):
         project = projects_service.get_project(project_id)
         return Response(data_helper.dump_json(project.to_mongo().to_dict()), mimetype="application/json", status=200)
 
 class ArchiveResearchProjectApi(Resource):
     @jwt_required()
-    @admin.admin_required()
+    @project_access.project_edit_access_required()
     def patch(self, project_id):
         resp = projects_service.archive_project(project_id)
         return Response(data_helper.dump_json(resp), mimetype="application/json", status=200)
 
 class UnarchiveResearchProjectApi(Resource):
     @jwt_required()
-    @admin.admin_required()
+    @project_access.project_edit_access_required()
     def patch(self, project_id):
         resp = projects_service.unarchive_project(project_id)
         return Response(data_helper.dump_json(resp), mimetype="application/json", status=200)

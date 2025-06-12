@@ -6,17 +6,19 @@ from wrappers import project_access
 import json
 
 class LinksAPI(Resource):
+    @jwt_required()
     def get(self):
         response, mimetype = link_service.get_links(request.args)
         return Response(response, mimetype=mimetype, status=200)
 
 class ProjectModelLinksAPI(Resource):
+    @jwt_required()
     def get(self, project_id, model_name):
         response, mimetype = link_service.get_project_model_links(project_id, model_name, request.args)
         return Response(response, mimetype=mimetype, status=200)
     
     @jwt_required()
-    @project_access.project_access_required()
+    @project_access.project_data_edit_access_required()
     def post(self, project_id, model_name):
         files = request.files.getlist("files")
         metadata = request.form.to_dict(flat=False)        

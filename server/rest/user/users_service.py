@@ -94,9 +94,10 @@ def login_user(data):
     
     return response
 
-def get_related_projects(name, filter=None, offset=0,limit=20,sort_order=None):
+def get_related_projects(name, filter=None, offset=0,limit=20,sort_order=None, archived=None):
+    archived = True if archived and archived == 'true' else False    
     user = get_user(name)
-    query = Q(**{'project_id__in':user.projects})
+    query = Q(**{'project_id__in':user.projects, 'archived':archived})
     if filter:
         query &= Q(name__icontains=filter) | Q(name__iexact=filter)
 

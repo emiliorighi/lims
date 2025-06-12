@@ -3622,6 +3622,11 @@ vue-eslint-parser@^8.0.0, vue-eslint-parser@^8.0.1, vue-eslint-parser@^8.3.0:
     lodash "^4.17.21"
     semver "^7.3.5"
 
+vue-files-preview@^1.0.38:
+  version "1.0.38"
+  resolved "https://registry.npmjs.org/vue-files-preview/-/vue-files-preview-1.0.38.tgz"
+  integrity sha512-PKieGVJyc24r1G46ARRD8Y7iaxJzFw5jx2mdUXS72FepOfR8hU/6SpP0nBQV1gf+ZTDmFFEoWbAzh526T6V2Cg==
+
 vue-router@^4.0.0, vue-router@^4.0.14:
   version "4.0.16"
   resolved "https://registry.npmjs.org/vue-router/-/vue-router-4.0.16.tgz"

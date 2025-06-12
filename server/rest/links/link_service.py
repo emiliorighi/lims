@@ -1,5 +1,7 @@
 from helpers import data, files as file_helper, links as link_helper, user as user_helper
+from db.enums import Actions, DocumentTypes
 from db.models import File, FileLink
+from ..audit.audit_service import create_audit_log
 from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import BadRequest, NotFound, Conflict
 from werkzeug.utils import secure_filename
@@ -26,7 +28,7 @@ def upload_links(project_id, model_name, files, metadata):
 
 #TODO: add file lock to avoid concurrency in tsv writing
 def upload_link(project_id, model_name, file, name, type,username, description=None):
-
+    user = user_helper.get_current_user()
     query = link_helper.create_link_query(project_id, model_name, name, type)
 
     if FileLink.objects(**query).first():
@@ -38,7 +40,7 @@ def upload_link(project_id, model_name, file, name, type,username, description=N
     storage_path, ext = save_link(file, file_hash, filename)
 
     # save link to project/model
-    FileLink(
+    link = FileLink(
         hash=file_hash,
         name=name,
         description=description,
@@ -49,6 +51,14 @@ def upload_link(project_id, model_name, file, name, type,username, description=N
         type=type
     ).save()
 
+    create_audit_log(
+        user=user.name,
+        action=Actions.CREATE,
+        document_type=DocumentTypes.FILE_LINK,
+        document_id=link.hash,
+        project_id=project_id,
+        new_object=link.to_mongo().to_dict()
+    )   
     file_helper.update_file_map(file_hash, name, project_id, model_name, storage_path)
     return f"Protocol {name} created"
 

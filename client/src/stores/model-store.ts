@@ -1,21 +1,11 @@
 import { defineStore } from 'pinia'
-import { Filter, ResearchModel, ResearchFilter } from '../data/types'
+import {  ResearchModel, ResearchFilter } from '../data/types'
 import StatsService from '../services/clients/StatsService'
-
-const modelForm: ResearchModel = {
-    name: '',
-    description: '',
-    fields: [],
-    id_format: [],
-}
 
 export const useModelStore = defineStore('model', {
     state: () => {
         return {
             currentModel: null as ResearchModel | null,
-            modelForm: { ...modelForm },
-            showCreateModal: false,
-            showEditModal: false,
             showDeleteConfirmation: false,
             filters: [] as ResearchFilter[],
             refModel: null as ResearchModel | null,
@@ -27,9 +17,6 @@ export const useModelStore = defineStore('model', {
         }
     },
     actions: {
-        resetModelForm() {
-            this.modelForm = { ...modelForm }
-        },
         async getStats(projectId: string, modelName: string) {
             const { data } = await StatsService.getModelStats(projectId, modelName)
             this.records = data.records
@@ -45,17 +32,5 @@ export const useModelStore = defineStore('model', {
             }
             this.refModel = models.find(({ name }) => name === this.currentModel?.reference_model) ?? null
         },
-        toggleCreateModal() {
-            this.showCreateModal = !this.showCreateModal
-            if (!this.showCreateModal) {
-                this.resetModelForm()
-            }
-        },
-        toggleEditModal() {
-            this.showEditModal = !this.showEditModal
-            if (!this.showEditModal) {
-                this.resetModelForm()
-            }
-        }
     }
 })

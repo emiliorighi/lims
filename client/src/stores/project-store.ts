@@ -27,6 +27,9 @@ export const useProjectStore = defineStore('project', {
       projectStats: [] as [string, number][],
       fromTemplate: false,
       showArchiveModal: false,
+      selectedModel: undefined as ResearchModel | undefined,
+      showUseTemplateModal: false,
+      formStep: 0,
       isLoading: false,
       schema: null as ProjectSchema | null, //used for forms etc
       isArchived: false, //used for project status 
@@ -38,7 +41,14 @@ export const useProjectStore = defineStore('project', {
   },
   actions: {
     resetProjectForm() {
-      this.projectForm = { ...initForm }
+      this.projectForm = {
+        project_id: '',
+        name: '',
+        version: '',
+        description: '',
+        models: []
+      }
+      this.formStep = 0
     },
     async getProjectSchema(projectId: string) {
       if (this.schema && this.schema.project_id === projectId) return
@@ -80,10 +90,12 @@ export const useProjectStore = defineStore('project', {
         this.isLoading = false
       }
     },
-    async getProjects(query: Record<string, any>) {
+    async getProjects(query: Record<string, any>, role:string, name:string) {
       try {
+        
         this.isLoading = true
-        const { data } = await ProjectService.getProjects(query)
+        const { data } = role !== 'admin' ? await ProjectService.getUserProjects(name, query) : await ProjectService.getProjects(query)
+
         this.projects = [...data.data]
         this.total = data.total
       } catch (error) {
@@ -96,6 +108,11 @@ export const useProjectStore = defineStore('project', {
       this.projectForm.models.push({ ...initModel })
     },
     deleteModel(idx: number) {
+      const model = this.projectForm.models[idx]
+      const linkedModels = this.projectForm.models.filter(m => m.reference_model === model.name).map(m => m.name)
+      if (linkedModels.length) {
+        this.projectForm.models = this.projectForm.models.filter(m => !linkedModels.includes(m.name))
+      }
       this.projectForm.models = [...this.projectForm.models.slice(0, idx), ...this.projectForm.models.slice(idx + 1)]
     },
   },

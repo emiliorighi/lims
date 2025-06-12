@@ -29,7 +29,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="flex">
+                            <div v-if="user.role === 'admin' || user.role === 'project_manager'" class="flex">
                                 <VaButton :to="{ name: 'project-form' }" icon="add">
                                     New Project
                                 </VaButton>
@@ -71,6 +71,7 @@
 import { computed, reactive, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useProjectStore } from '../stores/project-store';
+import { useGlobalStore } from '../stores/global-store';
 
 const options = [
     { label: 'Active', value: false },
@@ -79,6 +80,8 @@ const options = [
 
 const router = useRouter()
 const projectStore = useProjectStore()
+const globalStore = useGlobalStore()
+const user = computed(() => globalStore.user)
 const limit = 10
 const searchForm = reactive({
     offset: 0,
@@ -106,7 +109,8 @@ async function goToProject(payload: any) {
 }
 
 watch(() => searchForm, async () => {
-    await projectStore.getProjects(searchForm)
+    const {role, name} = user.value
+    await projectStore.getProjects(searchForm, role, name)
 }, { immediate: true, deep: true })
 
 

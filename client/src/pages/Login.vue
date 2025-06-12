@@ -1,7 +1,8 @@
 <template>
-  <div class="row justify-center align-center">
-    <div class="flex lg6 md8 sm12 xs12">
-      <h1 class="va-h1">Login</h1>
+  <div class="layout va-gutter-5">
+    <div class="row justify-center align-center">
+    <div class="flex">
+      <h1 class="va-h1 mb-2">Login</h1>
       <VaCard>
         <VaCardContent>
           <VaInnerLoading :loading="isLoading">
@@ -22,6 +23,8 @@
       </VaCard>
     </div>
   </div>
+  </div>
+
 </template>
 <script setup lang="ts">
 import { useGlobalStore } from '../stores/global-store'
@@ -40,7 +43,15 @@ const isLoading = ref(false)
 async function handleSubmit() {
   isLoading.value = true
   await GlobalStore.login(name.value, password.value)
-  if (GlobalStore.isAuthenticated) router.push({ name: 'projects' })
+  if (GlobalStore.isAuthenticated) router.back()
 }
 
 </script>
+<style scoped>
+.layout {
+    height: 100vh;
+}
+.mb-2 {
+    margin-bottom: 2rem;
+}
+</style>

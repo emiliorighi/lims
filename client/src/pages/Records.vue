@@ -1,7 +1,7 @@
 <template>
     <div>
-        <div class="row justify-space-between mb-4">
-            <div class="flex">
+        <div class="row justify-space-between">
+            <div v-if="role === 'admin' || role === 'project_manager' || role === 'data_manager'" class="flex">
                 <div class="row">
                     <div class="flex">
                         <VaButton color="textPrimary" :disabled="isArchived" @click="recordStore.toggleImportModal"
@@ -78,6 +78,10 @@ import TSVImportModal from '../components/modals/TSVImportModal.vue';
 import { useModelStore } from '../stores/model-store';
 import { useProjectStore } from '../stores/project-store';
 import RecordDataTable from '../components/tables/RecordDataTable.vue';
+import { useGlobalStore } from '../stores/global-store';
+
+const gStore = useGlobalStore()
+const role = computed(() => gStore.user.role)
 
 const props = defineProps<{
     projectId: string,

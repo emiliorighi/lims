@@ -13,14 +13,14 @@
         <template #right>
           <VaNavbarItem>
             <VaButton href="https://github.com/emiliorighi/lims/issues/new" target="_blank" icon="github"
-              color="textPrimary" preset="secondary"></VaButton>
+              preset="secondary"></VaButton>
           </VaNavbarItem>
           <VaNavbarItem>
-            <VaButton :to="{ name: 'docs' }" icon="fa-circle-question" color="textPrimary" preset="secondary">
+            <VaButton :to="{ name: 'docs' }" icon="fa-circle-question" preset="secondary">
             </VaButton>
           </VaNavbarItem>
           <VaNavbarItem>
-            <VaButtonDropdown preset="secondary" color="textPrimary" left-icon icon="fa-user" stick-to-edges :label="globalStore.user.name">
+            <VaButtonDropdown preset="secondary" left-icon icon="fa-user" stick-to-edges :label="globalStore.user.name">
               <div class="layout va-gutter-3 fluid">
                 <div class="row align-center">
                   <div class="flex">
@@ -39,11 +39,11 @@
                 </div>
                 <div class="row">
                   <div class="flex lg12 md12 sm12 xs12">
-                    <VaButton v-if="globalStore.isAuthenticated" block @click="logout" color="textPrimary"
+                    <VaButton v-if="globalStore.isAuthenticated" block @click="logout"
                       preset="secondary" icon="logout">
                       Logout
                     </VaButton>
-                    <VaButton v-else block :to="{ name: 'login' }" color="textPrimary" preset="secondary" icon="login">
+                    <VaButton v-else block :to="{ name: 'login' }" preset="secondary" icon="login">
                       Login
                     </VaButton>
                   </div>
@@ -73,12 +73,20 @@
               </VaSidebarItemTitle>
             </VaSidebarItemContent>
           </VaSidebarItem>
-          <VaSidebarItem v-if="isAdmin" :active="isRouteActive(name)" v-for="{ icon, title, name } in adminMenu"
+          <VaSidebarItem v-if="isAdmin || isProjectManager" :active="isRouteActive(name)" v-for="{ icon, title, name } in adminMenu"
             :key="icon" :to="{ name: name }">
             <VaSidebarItemContent>
               <VaIcon :name="icon" />
               <VaSidebarItemTitle>
                 {{ title }}
+              </VaSidebarItemTitle>
+            </VaSidebarItemContent>
+          </VaSidebarItem>
+          <VaSidebarItem v-if="isAdmin" :active="isRouteActive('audit-logs')" :to="{ name: 'audit-logs' }">
+            <VaSidebarItemContent>
+              <VaIcon name="fa-history" />
+              <VaSidebarItemTitle>
+                Audit Logs
               </VaSidebarItemTitle>
             </VaSidebarItemContent>
           </VaSidebarItem>
@@ -118,11 +126,14 @@ const adminMenu = [
 
 onMounted(async () => {
   globalStore.loadThemeLocalStorage()
-  await globalStore.checkUserIsLoggedIn()
 })
 
 const isAdmin = computed(() => {
   return globalStore.user.role === 'admin'
+})
+
+const isProjectManager = computed(() => {
+  return globalStore.user.role === 'project_manager'
 })
 
 const switchValue = computed({
@@ -142,7 +153,7 @@ function isRouteActive(name: string) {
 
 async function logout() {
   await globalStore.logout()
-  router.push({ name: 'home' })
+  router.push({ name: 'login' })
 }
 
 

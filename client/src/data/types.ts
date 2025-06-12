@@ -306,3 +306,38 @@ export type VaChartItem = {
 export type ColumnSizes = '1' | '2' | '3' | '4'
 
 export type EditMode = 'edit-controlled' | 'edit-override' | 'clone'
+
+// ========================
+// Audit Types
+// ========================
+export enum Actions {
+  CREATE = 'CREATE',
+  UPDATE = 'UPDATE',
+  DELETE = 'DELETE',
+  ARCHIVE = 'ARCHIVE',
+  UNARCHIVE = 'UNARCHIVE',
+  CLONE = 'CLONE',
+  UPLOAD = 'UPLOAD',
+  DOWNLOAD = 'DOWNLOAD'
+}
+
+export enum DocumentTypes {
+  PROJECT = 'PROJECT',
+  MODEL = 'MODEL',
+  RECORD = 'RECORD',
+  FILE_LINK = 'FILE_LINK'
+}
+
+export interface AuditLog {
+  id: string
+  user: string
+  action: Actions
+  document_type: DocumentTypes
+  document_id: string
+  project_id?: string
+  previous_object?: Record<string, any>
+  new_object?: Record<string, any>
+  changes?: Record<string, any>
+  metadata?: Record<string, any>
+  created: string
+}

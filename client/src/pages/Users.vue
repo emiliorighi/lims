@@ -21,17 +21,26 @@
                                 <VaButton @click="createUser" icon="add">New User</VaButton>
                             </div>
                         </div>
-                        <VaDataTable :loading="isLoading" :items="userStore.users"
+                        <VaDataTable hoverable :loading="isLoading" :items="userStore.users"
                             :columns="['name', 'projects', 'role', 'actions']">
                             <template #cell(actions)="{ rowData }">
-                                <div v-if="rowData.name !== gStore.user.name">
-                                    <VaButton @click="editUser(rowData)" preset="plain" icon="edit" />
-                                    <VaButton @click="triggerDelete(rowData)" preset="plain" icon="delete"
-                                        color="danger" class="ml-3" />
+                                <div>
+                                    <VaButton :disabled="rowData.role === 'admin' && gStore.user.role !== 'admin'"
+                                        @click="editUser(rowData)" preset="plain" icon="edit" />
+                                    <VaButton :disabled="gStore.user.role !== 'admin'" @click="triggerDelete(rowData)"
+                                        preset="plain" icon="delete" color="danger" class="ml-3" />
+                                </div>
+                            </template>
+                            <template #cell(projects)="{ rowData }">
+                                <div style="max-width: 250px; display: flex; flex-wrap: wrap; gap: 4px;">
+                                    <VaChip v-for="project in rowData.projects" :key="project" size="small"
+                                        color="backgroundElement">
+                                        {{ project }}
+                                    </VaChip>
                                 </div>
                             </template>
                             <template #cell(role)="{ rowData }">
-                                <VaChip size="small" color="backgroundElement">
+                                <VaChip size="small" color="primary">
                                     {{ rowData.role }}
                                 </VaChip>
                             </template>

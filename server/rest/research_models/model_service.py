@@ -3,6 +3,8 @@ from mongoengine.queryset.visitor import Q
 from werkzeug.exceptions import NotFound,Conflict,BadRequest
 from ..links import link_service
 from helpers import schema, data as data_helper, user as user_helper
+from ..audit.audit_service import create_audit_log
+from db.enums import Actions, DocumentTypes
 
 def get_related_project(project_id):
     project = ResearchProject.objects(project_id=project_id).first()
@@ -43,15 +45,26 @@ def get_records_count_of_related_models(project_id, model_name):
     return counts
 
 def update_field_description(project_id, model_name, field_key, payload):
-
+    user = user_helper.get_current_user()
     model = get_project_model(project_id, model_name)
 
     field = next((f for f in model.fields if f.key == field_key), None)
     if field:
         raise NotFound(description=f"{field_key} is not present in {model_name}")
-    
+    previous_state = model.to_mongo().to_dict()
     field['description'] = payload.get('description')
     model.save()
+    model.reload()
+    create_audit_log(
+        user=user.name,
+        action=Actions.UPDATE,
+        document_type=DocumentTypes.MODEL,
+        document_id=model_name,
+        project_id=project_id,
+        previous_object=previous_state,
+        new_object=model.to_mongo().to_dict(),
+        changes={'description': payload.get('description')}
+    )
     return f"{field_key} description successfully updated"
 
 
@@ -105,11 +118,25 @@ def create_model(project_id, data):
     model_to_save = ResearchModel(project_id=project_id,created_by=user.name, **data)
     try:
         model_to_save.save()
+        # Create audit log
+        create_audit_log(
+            user=user.name,
+            action=Actions.CREATE,
+            document_type=DocumentTypes.MODEL,
+            document_id=name,
+            project_id=project_id,
+            new_object=model_to_save.to_mongo().to_dict()
+        )
     except Exception as error:
         raise BadRequest(description=f"Error saving the research model: {error}")
 
 def delete_model(project_id, model_name):
     model = get_project_model(project_id, model_name)
+    user = user_helper.get_current_user()
+    
+    # Store model data for audit log
+    model_data = model.to_mongo().to_dict()
+    
     ##delete ref_models and related data
     delete_model_related_data(project_id, model_name)
     
@@ -122,12 +149,33 @@ def delete_model(project_id, model_name):
 
     ref_models.delete()
     model.delete()
+    
+    # Create audit log
+    create_audit_log(
+        user=user.name,
+        action=Actions.DELETE,
+        document_type=DocumentTypes.MODEL,
+        document_id=model_name,
+        project_id=project_id,
+        previous_object=model_data,
+        metadata={'deleted_reference_models': ref_models_names}
+    )
+    
     return dict(message=f"{model_name} deleted, related models {' ,'.join(ref_models_names)}")
 
 def delete_model_related_data(project_id, model_name):
+    user = user_helper.get_current_user()
     query=data_helper.project_model_query(project_id, model_name)
     links = FileLink.objects(**query)
-
+    for link in links:
+        create_audit_log(
+            user=user.name,
+            action=Actions.DELETE,
+            document_type=DocumentTypes.FILE_LINK,
+            document_id=link.hash,
+            project_id=project_id,
+            previous_object=link.to_mongo().to_dict()
+        )   
     hashes = links.scalar('hash')
     
     links.delete()
@@ -135,7 +183,17 @@ def delete_model_related_data(project_id, model_name):
     for file in files:
         link_service.delete_unbound_file(file.hash)
 
-    ResearchItem.objects(**query).delete()
+    items = ResearchItem.objects(**query)
+    for item in items:
+        create_audit_log(
+            user=user.name,
+            action=Actions.DELETE,
+            document_type=DocumentTypes.RECORD,
+            document_id=item.item_id,
+            project_id=project_id,
+            previous_object=item.to_mongo().to_dict()
+        )
+    items.delete()
 
 def update_model(project_id, model_name, data):
     """
@@ -143,6 +201,10 @@ def update_model(project_id, model_name, data):
     """
     user = user_helper.get_current_user()
     model = get_project_model(project_id, model_name)
+    
+    # Store previous state for audit log
+    previous_state = model.to_mongo().to_dict()
+    
     new_name = data.get('name', '').strip() if data.get('name') else None
 
     # If name is being updated, check for conflicts
@@ -192,6 +254,18 @@ def update_model(project_id, model_name, data):
             ).update(
                 set__reference_model=new_name,
             )
+        
+        # Create audit log
+        create_audit_log(
+            user=user.name,
+            action=Actions.UPDATE,
+            document_type=DocumentTypes.MODEL,
+            document_id=new_name or model_name,
+            project_id=project_id,
+            previous_object=previous_state,
+            new_object=model.to_mongo().to_dict(),
+            changes=data
+        )
         
         return {'message': f'{model_name} updated successfully'}
     except Exception as error:

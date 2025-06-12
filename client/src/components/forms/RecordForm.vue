@@ -31,6 +31,7 @@ import AuthService from '../../services/clients/AuthService';
 import { useToast, VaInput, VaSelect, useForm } from 'vuestic-ui';
 import { AxiosError } from 'axios';
 import ReferenceSelect from '../inputs/ReferenceSelect.vue';
+import { catchError } from '../../composables/toastMessages';
 
 const props = defineProps<{
     projectId: string,
@@ -127,8 +128,7 @@ async function handleSubmit() {
     } catch (err) {
         success = false
         const axiosError = err as AxiosError
-        const respData = axiosError.response?.data as { message: string }
-        init({ message: respData.message, color: 'danger', duration: 10000 })
+        catchError(axiosError)
     }
     finally {
 

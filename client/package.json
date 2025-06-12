@@ -38,6 +38,7 @@
     "sass": "^1.53.0",
     "vue": "^3.5.13",
     "vue-chartjs": "^4.1.1",
+    "vue-files-preview": "^1.0.38",
     "vue-router": "^4.0.14",
     "vuestic-admin": "^0.0.1-security",
     "vuestic-ui": "^1.10.0",

@@ -13,8 +13,8 @@ class LinkService {
     downloadLinks(hash){
         return download.get(`/files/${hash}/download`)
     }
-    downloadAllFiles(projectId, modelName) {
-        return download.get(`/projects/${projectId}/models/${modelName}/files/download`)
+    downloadFiles(projectId, modelName, type) {
+        return download.get(`/projects/${projectId}/models/${modelName}/files/${type}/download`)
     }
     uploadLinks(projectId, model, data) {
         return submission.post(`/projects/${projectId}/models/${model}/links`, data);

@@ -4,28 +4,6 @@ const base = http.base
 
 const auth = http.submission
 
-function getCookie(name) {
-    const value = `; ${document.cookie}`
-    const parts = value.split(`; ${name}=`)
-    if (parts.length === 2) return parts.pop().split(';').shift()
-}
-
-auth.interceptors.request.use(
-    (config) => {
-        config.headers = {
-            'X-CSRF-TOKEN': getCookie('csrf_access_token'),
-            'Content-Type': 'application/json',
-        }
-        config.xsrfCookieName = 'csrf_access_token'
-        config.xsrfHeaderName = 'X-CSRF-TOKEN'
-        return config
-    },
-    (error) => {
-        return Promise.reject(error)
-    },
-)
-
-
 class AuthService {
     check() {
         return auth.get('/auth/login')
@@ -37,7 +15,7 @@ class AuthService {
         return base.get('/auth/logout')
     }
     getUsers(params) {
-        return base.get('/users', { params: params })
+        return auth.get('/users', { params: params })
     }
     getUser(id) {
         return auth.get(`/users/${id}`)

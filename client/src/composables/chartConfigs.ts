@@ -24,7 +24,6 @@ export function useDateChart(data: Record<string, number>, label: string, color:
             acc[dateOnly] = acc[dateOnly] ? acc[dateOnly] + data[key] : data[key];
             return acc;
         }, {});
-    console.log(submissionDatesByMonth)
     // Sort the dates
     const sortedDates = Object.keys(submissionDatesByMonth)
         .sort((a, b) => toDate(a).getTime() - toDate(b).getTime());

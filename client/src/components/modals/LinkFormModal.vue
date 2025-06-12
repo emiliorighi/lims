@@ -13,7 +13,7 @@
                             Upload at least one file
                         </p>
                         <VaFileUpload :color="files.length ? 'textPrimary' : 'danger'" dropzone
-                            :label="`Upload ${type}`" v-model="files" @update:model-value="handleUpdate" type="gallery">
+                            :label="`Upload ${type}`" v-model="files" @update:model-value="handleUpdate">
                         </VaFileUpload>
                     </div>
                 </div>
@@ -31,7 +31,7 @@
                                 </div>
 
                             </VaCardTitle>
-                            <VaImage v-if="type === 'images'" style="height: 200px;" :src="file.preview" />
+                            <VueFilesPreview :file="file.preview" height="200px" />
                             <VaCardContent>
                                 <div class="row">
                                     <div class="flex lg12 md12 sm12 xs12">
@@ -71,6 +71,7 @@ import { useLinkStore } from '../../stores/link-store';
 import { LinkType } from '../../data/types';
 import { success, catchError } from '../../composables/toastMessages';
 import LinkService from '../../services/clients/LinkService';
+import { VueFilesPreview } from 'vue-files-preview';
 
 const props = defineProps<{
     projectId: string
@@ -133,6 +134,6 @@ function handleDelete(idx: number) {
 }
 
 function handleUpdate(files: File[]) {
-    linkStore.files = [...files.map(file => ({ name: file.name, file, description: '', type: props.type, preview: isImage.value ? URL.createObjectURL(file) : undefined }))]
+    linkStore.files = [...files.map(file => ({ name: file.name, file, description: '', type: props.type, preview: file }))]
 }
 </script>

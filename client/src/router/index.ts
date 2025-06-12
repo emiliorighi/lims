@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from 'vue-router'
-import { isAuthenticated, isAdmin } from './nav-guards'
+import { isAuthenticated, isAdmin, hasProjectAccess, hasEditAccess } from './nav-guards'
 import { projectRoutes } from './project'
 import { authRoutes } from './auth'
 
@@ -8,15 +8,21 @@ const routes: Array<RouteRecordRaw> = [
     path: '/:catchAll(.*)',
     redirect: { name: 'home' },
   },
-  
   {
     path: '/',
     component: () => import('../layouts/AppLayout.vue'),
-    children:[
+    beforeEnter: [isAuthenticated],
+    children: [
       {
         path: '',
         name: 'home',
         component: () => import('../pages/Dashboard.vue'),
+      },
+      {
+        path: '/audit-logs',
+        name: 'audit-logs',
+        beforeEnter: [isAdmin],
+        component: () => import('../pages/AuditLogs.vue')
       },
       {
         path: '/docs',
@@ -26,13 +32,13 @@ const routes: Array<RouteRecordRaw> = [
       {
         name: 'users',
         path: '/users',
-        beforeEnter: [isAuthenticated, isAdmin],
+        beforeEnter: [hasEditAccess],
         component: () => import('../pages/Users.vue')
       },
       {
         path: '/project-form',
         name: 'project-form',
-        beforeEnter: [isAuthenticated, isAdmin],
+        beforeEnter: [hasEditAccess],
         component: () => import('../pages/ProjectForm.vue')
       },
       {
@@ -40,17 +46,19 @@ const routes: Array<RouteRecordRaw> = [
         name: 'projects',
         component: () => import('../pages/Projects.vue')
       },
-      ...authRoutes,
     ]
   },
+  ...authRoutes,
   {
     path: '/projects/:projectId',
-    props:true,
+    props: true,
     component: () => import('../layouts/ProjectLayout.vue'),
-    children:[
+    beforeEnter: [isAuthenticated, hasProjectAccess],
+    children: [
       ...projectRoutes
     ]
   },
+
 
 ]
 
