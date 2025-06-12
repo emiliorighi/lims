@@ -143,20 +143,23 @@ const selectedChanges = ref<{ previous_object: Record<string, any> | null; new_o
 const users = ref<string[]>([])
 const projects = ref<string[]>([])
 const searchForm = reactive({
-  offset: 0,
-  limit: 10,
   document_type: null as string | null,
   document_id: '',
   project_id: '',
   user: '',
 })
 
+const pagination = reactive({
+  offset: 0,
+  limit: 10,
+})
+
 const offset = computed({
   get() {
-    return searchForm.offset + 1
+    return pagination.offset + 1
   },
   set(v: number) {
-    searchForm.offset = v - 1
+    pagination.offset = v - 1
   }
 })
 
@@ -204,15 +207,25 @@ function showChanges(changes: Record<string, any>) {
 
 watch(() => searchForm, async () => {
   const params = {
-    limit: searchForm.limit,
-    offset: searchForm.offset,
-    document_type: searchForm.document_type?.toString() || undefined,
+    document_type: searchForm.document_type || undefined,
     document_id: searchForm.document_id || undefined,
     project_id: searchForm.project_id || undefined,
     user: searchForm.user || undefined
   }
-  await auditStore.fetchAuditLogs(params)
+  pagination.offset = 0
+  await auditStore.fetchAuditLogs({...params, ...pagination})
 }, { immediate: true, deep: true })
+
+watch(() => offset.value, async () => {
+  const params = {
+    document_type: searchForm.document_type || undefined,
+    document_id: searchForm.document_id || undefined,
+    project_id: searchForm.project_id || undefined,
+    user: searchForm.user || undefined
+  }
+  await auditStore.fetchAuditLogs({...params, ...pagination})
+})
+
 
 async function getUsers() {
   const {data} = await AuthService.getUsers({limit: 10000})

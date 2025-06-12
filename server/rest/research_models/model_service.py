@@ -146,6 +146,14 @@ def delete_model(project_id, model_name):
         name = ref_model.name
         ref_models_names.append(name)
         delete_model_related_data(project_id, name)
+        create_audit_log(
+            user=user.name,
+            action=Actions.DELETE,
+            document_type=DocumentTypes.MODEL,
+            previous_object=ref_model.to_mongo().to_dict(),
+            document_id=name,
+            project_id=project_id,
+        )
 
     ref_models.delete()
     model.delete()
