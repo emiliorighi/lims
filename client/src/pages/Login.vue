@@ -43,7 +43,7 @@ const isLoading = ref(false)
 async function handleSubmit() {
   isLoading.value = true
   await GlobalStore.login(name.value, password.value)
-  if (GlobalStore.isAuthenticated) router.back()
+  if (GlobalStore.isAuthenticated) router.push({name: 'home'})
 }
 
 </script>

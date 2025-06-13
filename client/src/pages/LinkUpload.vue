@@ -8,7 +8,7 @@
                     </h3>
                 </div>
                 <div class="flex">
-                    <VaButton @click="router.back()" color="textPrimary" preset="primary">Back</VaButton>
+                    <VaButton @click="goBack()" color="textPrimary" preset="primary">Back</VaButton>
                 </div>
             </div>
             <div class="layout fluid va-gutter-5">
@@ -37,8 +37,8 @@
                                                         v-model="file.name" placeholder="Name" />
                                                 </div>
                                                 <div class="flex">
-                                                    <VaButton preset="primary" @click="handleDelete(idx)" icon="fa-trash"
-                                                        color="danger" />
+                                                    <VaButton preset="primary" @click="handleDelete(idx)"
+                                                        icon="fa-trash" color="danger" />
                                                 </div>
                                             </div>
                                         </VaCardContent>
@@ -155,7 +155,7 @@ async function handleSubmit() {
             await modelStore.getStats(props.projectId, props.modelName)
             linkStore.resetFilters()
             await linkStore.fetchProjectModelLinks(props.projectId, props.modelName, props.type)
-            router.back()
+            goBack()
         }
     }
 }
@@ -168,11 +168,10 @@ function handleUpdate(files: File[]) {
     linkStore.files = [...files.map(file => ({ name: file.name, file, description: '', type: props.type, preview: file }))]
 }
 
-function handlePreview(file: File) {
-    imageSrc.value = file
-    showImage.value = true
-}
+function goBack() {
+    router.push({ name: props.type, params: { modelName: props.modelName, projectId: props.projectId } })
 
+}
 
 </script>
 
